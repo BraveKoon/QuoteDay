@@ -1,4 +1,19 @@
-wordwall_solver/build/
-wordwall_solver/dist/
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+.DS_Store
+
+QuoteDay.xcodeproj/project.xcworkspace/xcuserdata/
+QuoteDay.xcodeproj/xcuserdata/
+
+# Python (tools/)
 __pycache__/
 *.pyc
+
+# 이 저장소는 QuoteDay 앱 전용이다.
+# wordwall_solver 는 별도 프로젝트라 로컬에만 남겨 두고 추적하지 않는다.
+wordwall_solver/

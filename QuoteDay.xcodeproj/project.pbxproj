@@ -1,0 +1,1321 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		04CF373CAA31F6A3444EADED = {
+			isa = PBXBuildFile;
+			fileRef = E0E18626C493AE5C0EE77817 /* WidgetSnapshot.swift */;
+		};
+		0CD5478196C468A0AEF8791A = {
+			isa = PBXBuildFile;
+			fileRef = 91081FCE4FC5571EA6F0ABA6 /* AuthorPortrait.swift */;
+		};
+		120B5E867FA3107D92C71FE5 = {
+			isa = PBXBuildFile;
+			fileRef = 55F17BFD846695A20D9D29C0 /* SettingsView.swift */;
+		};
+		1314A0A9DED7C01BB9141B24 = {
+			isa = PBXBuildFile;
+			fileRef = 107C8CACD0B1D80133241EEA /* AppCategory.swift */;
+		};
+		134479D26EC3823B9CA59EA5 = {
+			isa = PBXBuildFile;
+			fileRef = F5735AE0F57BF45DE8DC20D3 /* QuoteWidgetViews.swift */;
+		};
+		1636DA45079004ACF7CDFD69 = {
+			isa = PBXBuildFile;
+			fileRef = A44C4AFF27C954A27365D8DC /* StableIdentifier.swift */;
+		};
+		1A57FEA2BCB63A0691680521 = {
+			isa = PBXBuildFile;
+			fileRef = 22C5EB5933AD18B1128F4542 /* CategoryChip.swift */;
+		};
+		1CBE485ACA40E29F814B9188 = {
+			isa = PBXBuildFile;
+			fileRef = EE249BE91E4B13A46667234E /* Quote.swift */;
+		};
+		274FC7CEDF1B1B6D57664751 = {
+			isa = PBXBuildFile;
+			fileRef = C7334277AFD709E5C8CED783 /* ClayTheme.swift */;
+		};
+		30DC1167F132F2A4C3EC3DD3 = {
+			isa = PBXBuildFile;
+			fileRef = 86384655A61BDA1B3BA39930 /* AuthorDetailView.swift */;
+		};
+		33EF386FCA0634210F790544 = {
+			isa = PBXBuildFile;
+			fileRef = F073D177DF22CDE733B3CE27 /* Formatters.swift */;
+		};
+		3B4F33BFA3D0EB1D44B7D95E = {
+			isa = PBXBuildFile;
+			fileRef = 1E5C87233090C8CFDB8B803C /* AuthorLibrary.swift */;
+		};
+		3E6A55054D28D9F84F8933A7 = {
+			isa = PBXBuildFile;
+			fileRef = EE249BE91E4B13A46667234E /* Quote.swift */;
+		};
+		3E9ACAD08D64C3B230BE8CC3 = {
+			isa = PBXBuildFile;
+			fileRef = A891BF38ED152A6472BE1E46 /* DeepLink.swift */;
+		};
+		4730F9757A07E3B91A3A7686 = {
+			isa = PBXBuildFile;
+			fileRef = C7334277AFD709E5C8CED783 /* ClayTheme.swift */;
+		};
+		4AE0697B1039CE2285796789 = {
+			isa = PBXBuildFile;
+			fileRef = 648ADB8AEFB7172F5548AA76 /* CalendarViewModel.swift */;
+		};
+		4D3473BCA45CD1A27F8F1AD3 = {
+			isa = PBXBuildFile;
+			fileRef = E0E18626C493AE5C0EE77817 /* WidgetSnapshot.swift */;
+		};
+		56A6E646A60B69B5B93458BA = {
+			isa = PBXBuildFile;
+			fileRef = 2ADAAC0D312F05E8DD5464E4 /* QuoteDetailView.swift */;
+		};
+		590A70C51E3A0296F2295B81 = {
+			isa = PBXBuildFile;
+			fileRef = D550BB8FC789EF2AFF6F4056 /* CalendarDayCell.swift */;
+		};
+		5DEF99A272929AD81056A110 = {
+			isa = PBXBuildFile;
+			fileRef = 29751952A88730ACE801F76E /* HomeView.swift */;
+		};
+		67F88D13F3EA196CC8254AE4 = {
+			isa = PBXBuildFile;
+			fileRef = 107C8CACD0B1D80133241EEA /* AppCategory.swift */;
+		};
+		685D1738D98794E66BA4C7C9 = {
+			isa = PBXBuildFile;
+			fileRef = 0D23819310177CB1F080C484 /* QuoteBrowserView.swift */;
+		};
+		6BA74517C8C86817A974F8A0 = {
+			isa = PBXBuildFile;
+			fileRef = 4A21180D8A8F60CCF2AE357A /* ScheduleRow.swift */;
+		};
+		6D56CF4744B33D26DDD34FBE = {
+			isa = PBXBuildFile;
+			fileRef = 7BD832EF2A49D54A9CDC3E86 /* Assets.xcassets */;
+		};
+		6D8EDE4283D15012ADD3E8BE = {
+			isa = PBXBuildFile;
+			fileRef = BF890B30F2265448B3C2B2C1 /* ClayStyle.swift */;
+		};
+		6E0CA61B847417D4E9B3AD25 = {
+			isa = PBXBuildFile;
+			fileRef = 3876A7BBD91A09B40EA3E1E9 /* EmptyStateView.swift */;
+		};
+		6FB94A170979DC02460FEDF1 = {
+			isa = PBXBuildFile;
+			fileRef = C6C0B3EB82F8AB2F6B75C190 /* QuoteCard.swift */;
+		};
+		76BB2F69333B3FCD80F7E683 = {
+			isa = PBXBuildFile;
+			fileRef = 4630106E5179B747C7D7131A /* QuoteDayApp.swift */;
+		};
+		7BB212837B646C2E0BD5F9DD = {
+			isa = PBXBuildFile;
+			fileRef = AE345CFB9A92ECE5CD5EE824 /* Author.swift */;
+		};
+		80FCDC78CD1EC2EDEAC32B8D = {
+			isa = PBXBuildFile;
+			fileRef = 713DE0C004E84D4AFF654912 /* ScheduleStore.swift */;
+		};
+		82EED4E43C9EBCF04F529395 = {
+			isa = PBXBuildFile;
+			fileRef = 28D2AFB82D96A543290BEEEC /* AppEnvironment.swift */;
+		};
+		8403B7B2D91BB070B87ED12B = {
+			isa = PBXBuildFile;
+			fileRef = BF890B30F2265448B3C2B2C1 /* ClayStyle.swift */;
+		};
+		84EE7C5F90BB712DC963D8BC = {
+			isa = PBXBuildFile;
+			fileRef = A44C4AFF27C954A27365D8DC /* StableIdentifier.swift */;
+		};
+		99F344420C5988238B2BBED4 = {
+			isa = PBXBuildFile;
+			fileRef = 5F3B248406F193408C5C8ACD /* AppSettings.swift */;
+		};
+		9A18AB2F56FD7DE300151D28 = {
+			isa = PBXBuildFile;
+			fileRef = AE345CFB9A92ECE5CD5EE824 /* Author.swift */;
+		};
+		9AA3D50A8A3F3B6C7B7FDB41 = {
+			isa = PBXBuildFile;
+			fileRef = 68AF5F4C36CB6BD502ED293B /* CalendarView.swift */;
+		};
+		A611F1A0E3957787978AA87E = {
+			isa = PBXBuildFile;
+			fileRef = ECB8A315BC81E2AB5F7AD82D /* ScheduleAndNavigationTests.swift */;
+		};
+		A978B4F4E853643057590D68 = {
+			isa = PBXBuildFile;
+			fileRef = 580B96EDF2D379725ADB41D0 /* QuoteCategoryOption.swift */;
+		};
+		B2A65AB6AA7F9C3D6377A514 = {
+			isa = PBXBuildFile;
+			fileRef = A891BF38ED152A6472BE1E46 /* DeepLink.swift */;
+		};
+		B36E03D938949E98FEE3A7B3 = {
+			isa = PBXBuildFile;
+			fileRef = 2B5CC22705DFC11BC2CCAF19 /* QuoteLibraryData.swift */;
+		};
+		B61EF751E16F2543F4AA2BD7 = {
+			isa = PBXBuildFile;
+			fileRef = EA6908188FDC58BA5247C0CD /* SharedStore.swift */;
+		};
+		B715E4182750169E35918FE8 = {
+			isa = PBXBuildFile;
+			fileRef = 3B0AEE4BFE3CA06D4D702F72 /* QuoteDayWidgetExtension.appex */;
+			settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); };
+		};
+		BC3E8BCB2ABD0370A9F91A47 = {
+			isa = PBXBuildFile;
+			fileRef = BA227CCFCA532594824638B4 /* CalendarService.swift */;
+		};
+		C0344652D1E0D3C7BE60D901 = {
+			isa = PBXBuildFile;
+			fileRef = EA6908188FDC58BA5247C0CD /* SharedStore.swift */;
+		};
+		C64F40DB2035491678ED700C = {
+			isa = PBXBuildFile;
+			fileRef = C743F8AFE729F3DF80CF247C /* ScheduleEditorView.swift */;
+		};
+		D2668C38DF3F4E13A526C718 = {
+			isa = PBXBuildFile;
+			fileRef = DC88F77730B0A8B227917080 /* QuoteWidget.swift */;
+		};
+		D616B44D16A20DA67A7DFB2A = {
+			isa = PBXBuildFile;
+			fileRef = 466627296E5B80833D7CA5F0 /* AppRouter.swift */;
+		};
+		D8CB689BAD87EF2D5E9469AE = {
+			isa = PBXBuildFile;
+			fileRef = 977166F8078E4665587F2B0B /* QuoteService.swift */;
+		};
+		DAA768F6F31A5C0EBA6294CB = {
+			isa = PBXBuildFile;
+			fileRef = 580B96EDF2D379725ADB41D0 /* QuoteCategoryOption.swift */;
+		};
+		DCA55805BBE9BC0E0FD3F6E8 = {
+			isa = PBXBuildFile;
+			fileRef = 6BDDF94451A76F3514755327 /* ScheduleItem.swift */;
+		};
+		E0F2D8D9B1C678E99C20443E = {
+			isa = PBXBuildFile;
+			fileRef = F073D177DF22CDE733B3CE27 /* Formatters.swift */;
+		};
+		E90E1911D37099FEB85CD56F = {
+			isa = PBXBuildFile;
+			fileRef = 330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */;
+		};
+		EAE6423D6315601DD5B8C259 = {
+			isa = PBXBuildFile;
+			fileRef = 2B5CC22705DFC11BC2CCAF19 /* QuoteLibraryData.swift */;
+		};
+		EE747B0B97D3D751FC62FDC8 = {
+			isa = PBXBuildFile;
+			fileRef = 9C8A02276319E2AD40A5BECB /* HomeViewModel.swift */;
+		};
+		EF1C01EDDF6569CB6FBF05CB = {
+			isa = PBXBuildFile;
+			fileRef = C787DD862E108CE535D42920 /* Persistence.swift */;
+		};
+		EF6732812436183ECC6784B4 = {
+			isa = PBXBuildFile;
+			fileRef = ED45F7F873BBF0B9A13035DC /* Assets.xcassets */;
+		};
+		F0198F0B08D2E24E555D431D = {
+			isa = PBXBuildFile;
+			fileRef = 977166F8078E4665587F2B0B /* QuoteService.swift */;
+		};
+		F01FF9526EF3C15B534C0096 = {
+			isa = PBXBuildFile;
+			fileRef = 53546DADF352DDED4B5495D5 /* RootTabView.swift */;
+		};
+		F312B673E8A7311A0F950A00 = {
+			isa = PBXBuildFile;
+			fileRef = 5FA85081F75F9D3264BF4A88 /* NotificationService.swift */;
+		};
+		F79E7F7801BFA303399230C6 = {
+			isa = PBXBuildFile;
+			fileRef = 78432620EB5EAAD902F01C15 /* QuoteLibrary.swift */;
+		};
+		FA2F2685730524FBA4B64937 = {
+			isa = PBXBuildFile;
+			fileRef = 1E5C87233090C8CFDB8B803C /* AuthorLibrary.swift */;
+		};
+		FD41707ABC8F0F23C40EDD40 = {
+			isa = PBXBuildFile;
+			fileRef = 78432620EB5EAAD902F01C15 /* QuoteLibrary.swift */;
+		};
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2D6EB3A5D0343059761E3FA2 = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 21194D781D59F40FD0894F4C;
+			remoteInfo = QuoteDayWidgetExtension;
+		};
+		2F9CE0B0DFAAE9366D8EBDBF = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A8A861E4F379533FE809128A;
+			remoteInfo = QuoteDay;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		31DA3FE1FCB550FA1EF41388 = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B715E4182750169E35918FE8 /* QuoteDayWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0D23819310177CB1F080C484 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteBrowserView.swift;
+			sourceTree = "<group>";
+		};
+		107C8CACD0B1D80133241EEA = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = AppCategory.swift;
+			sourceTree = "<group>";
+		};
+		1E5C87233090C8CFDB8B803C = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = AuthorLibrary.swift;
+			sourceTree = "<group>";
+		};
+		1F43C13822F50D93E6324989 = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.cfbundle;
+			includeInIndex = 0;
+			path = QuoteDayTests.xctest;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		22C5EB5933AD18B1128F4542 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = CategoryChip.swift;
+			sourceTree = "<group>";
+		};
+		28D2AFB82D96A543290BEEEC = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = AppEnvironment.swift;
+			sourceTree = "<group>";
+		};
+		29751952A88730ACE801F76E = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = HomeView.swift;
+			sourceTree = "<group>";
+		};
+		2ADAAC0D312F05E8DD5464E4 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteDetailView.swift;
+			sourceTree = "<group>";
+		};
+		2B5CC22705DFC11BC2CCAF19 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteLibraryData.swift;
+			sourceTree = "<group>";
+		};
+		330BE87998E53C7D80CFB185 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteEngineTests.swift;
+			sourceTree = "<group>";
+		};
+		34C260F25C15DADD969FA06A = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.application;
+			includeInIndex = 0;
+			path = QuoteDay.app;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3876A7BBD91A09B40EA3E1E9 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = EmptyStateView.swift;
+			sourceTree = "<group>";
+		};
+		3B0AEE4BFE3CA06D4D702F72 = {
+			isa = PBXFileReference;
+			explicitFileType = "wrapper.app-extension";
+			includeInIndex = 0;
+			path = QuoteDayWidgetExtension.appex;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		4630106E5179B747C7D7131A = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteDayApp.swift;
+			sourceTree = "<group>";
+		};
+		466627296E5B80833D7CA5F0 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = AppRouter.swift;
+			sourceTree = "<group>";
+		};
+		4A21180D8A8F60CCF2AE357A = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ScheduleRow.swift;
+			sourceTree = "<group>";
+		};
+		5025F8A7E5D81A0448248F7C = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.entitlements;
+			path = QuoteDay.entitlements;
+			sourceTree = "<group>";
+		};
+		53546DADF352DDED4B5495D5 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = RootTabView.swift;
+			sourceTree = "<group>";
+		};
+		55F17BFD846695A20D9D29C0 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = SettingsView.swift;
+			sourceTree = "<group>";
+		};
+		580B96EDF2D379725ADB41D0 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteCategoryOption.swift;
+			sourceTree = "<group>";
+		};
+		5F3B248406F193408C5C8ACD = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = AppSettings.swift;
+			sourceTree = "<group>";
+		};
+		5FA85081F75F9D3264BF4A88 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = NotificationService.swift;
+			sourceTree = "<group>";
+		};
+		648ADB8AEFB7172F5548AA76 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = CalendarViewModel.swift;
+			sourceTree = "<group>";
+		};
+		68AF5F4C36CB6BD502ED293B = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = CalendarView.swift;
+			sourceTree = "<group>";
+		};
+		6BDDF94451A76F3514755327 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ScheduleItem.swift;
+			sourceTree = "<group>";
+		};
+		713DE0C004E84D4AFF654912 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ScheduleStore.swift;
+			sourceTree = "<group>";
+		};
+		7732596E0B435CDA08567803 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.entitlements;
+			path = QuoteDayWidget.entitlements;
+			sourceTree = "<group>";
+		};
+		78432620EB5EAAD902F01C15 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteLibrary.swift;
+			sourceTree = "<group>";
+		};
+		7BD832EF2A49D54A9CDC3E86 = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder.assetcatalog;
+			path = Assets.xcassets;
+			sourceTree = "<group>";
+		};
+		86384655A61BDA1B3BA39930 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = AuthorDetailView.swift;
+			sourceTree = "<group>";
+		};
+		91081FCE4FC5571EA6F0ABA6 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = AuthorPortrait.swift;
+			sourceTree = "<group>";
+		};
+		977166F8078E4665587F2B0B = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteService.swift;
+			sourceTree = "<group>";
+		};
+		9C8A02276319E2AD40A5BECB = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = HomeViewModel.swift;
+			sourceTree = "<group>";
+		};
+		A44C4AFF27C954A27365D8DC = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = StableIdentifier.swift;
+			sourceTree = "<group>";
+		};
+		A891BF38ED152A6472BE1E46 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = DeepLink.swift;
+			sourceTree = "<group>";
+		};
+		AE345CFB9A92ECE5CD5EE824 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Author.swift;
+			sourceTree = "<group>";
+		};
+		BA227CCFCA532594824638B4 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = CalendarService.swift;
+			sourceTree = "<group>";
+		};
+		BEE634E1756D117ED62F0B83 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = Info.plist;
+			sourceTree = "<group>";
+		};
+		BF890B30F2265448B3C2B2C1 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ClayStyle.swift;
+			sourceTree = "<group>";
+		};
+		C6C0B3EB82F8AB2F6B75C190 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteCard.swift;
+			sourceTree = "<group>";
+		};
+		C7334277AFD709E5C8CED783 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ClayTheme.swift;
+			sourceTree = "<group>";
+		};
+		C743F8AFE729F3DF80CF247C = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ScheduleEditorView.swift;
+			sourceTree = "<group>";
+		};
+		C787DD862E108CE535D42920 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Persistence.swift;
+			sourceTree = "<group>";
+		};
+		D550BB8FC789EF2AFF6F4056 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = CalendarDayCell.swift;
+			sourceTree = "<group>";
+		};
+		DC88F77730B0A8B227917080 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteWidget.swift;
+			sourceTree = "<group>";
+		};
+		E0E18626C493AE5C0EE77817 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = WidgetSnapshot.swift;
+			sourceTree = "<group>";
+		};
+		EA6908188FDC58BA5247C0CD = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = SharedStore.swift;
+			sourceTree = "<group>";
+		};
+		ECB8A315BC81E2AB5F7AD82D = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ScheduleAndNavigationTests.swift;
+			sourceTree = "<group>";
+		};
+		ED45F7F873BBF0B9A13035DC = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder.assetcatalog;
+			path = Assets.xcassets;
+			sourceTree = "<group>";
+		};
+		EE249BE91E4B13A46667234E = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Quote.swift;
+			sourceTree = "<group>";
+		};
+		F073D177DF22CDE733B3CE27 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Formatters.swift;
+			sourceTree = "<group>";
+		};
+		F5735AE0F57BF45DE8DC20D3 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteWidgetViews.swift;
+			sourceTree = "<group>";
+		};
+		F928AB2A3D4698DFC2AA3560 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = Info.plist;
+			sourceTree = "<group>";
+		};
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5057F00245E905B5B6D010BA = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F4A68E27A3F2899A07FD79DF = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FBF4CAED2DE4003730695154 = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0A615C0DFAC147A3F3B7C72B = {
+			isa = PBXGroup;
+			children = (
+				BF890B30F2265448B3C2B2C1 /* ClayStyle.swift */,
+				C7334277AFD709E5C8CED783 /* ClayTheme.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		14CEC3A21E54D2DD5AB31760 = {
+			isa = PBXGroup;
+			children = (
+				6BDDF94451A76F3514755327 /* ScheduleItem.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		46D127C34398A9D7BED9A5E5 = {
+			isa = PBXGroup;
+			children = (
+				68AF5F4C36CB6BD502ED293B /* CalendarView.swift */,
+			);
+			path = Calendar;
+			sourceTree = "<group>";
+		};
+		4886F00048A8C9D93C5757BA = {
+			isa = PBXGroup;
+			children = (
+				86384655A61BDA1B3BA39930 /* AuthorDetailView.swift */,
+				0D23819310177CB1F080C484 /* QuoteBrowserView.swift */,
+				2ADAAC0D312F05E8DD5464E4 /* QuoteDetailView.swift */,
+			);
+			path = Quote;
+			sourceTree = "<group>";
+		};
+		48DFF4CF7937ACCF66A9E558 = {
+			isa = PBXGroup;
+			children = (
+				91081FCE4FC5571EA6F0ABA6 /* AuthorPortrait.swift */,
+				D550BB8FC789EF2AFF6F4056 /* CalendarDayCell.swift */,
+				22C5EB5933AD18B1128F4542 /* CategoryChip.swift */,
+				3876A7BBD91A09B40EA3E1E9 /* EmptyStateView.swift */,
+				C6C0B3EB82F8AB2F6B75C190 /* QuoteCard.swift */,
+				4A21180D8A8F60CCF2AE357A /* ScheduleRow.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		51B141E1E5C40FEE5FD5E5B6 = {
+			isa = PBXGroup;
+			children = (
+				D307EE64FE34E04702D9D08B /* AppIntents */,
+				5D6604AE4EAFF6A18BF9EC82 /* Data */,
+				0A615C0DFAC147A3F3B7C72B /* Design */,
+				E2887F3FBA14E4C8B792B526 /* Models */,
+				54F189CADC997A1CB110AF49 /* Services */,
+				5F626979E65227D6A16C3E76 /* Support */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		53F2A8F553ECE0A714D4DE53 = {
+			isa = PBXGroup;
+			children = (
+				46D127C34398A9D7BED9A5E5 /* Calendar */,
+				9CBBF034CDF457D8B4F1D08F /* Home */,
+				4886F00048A8C9D93C5757BA /* Quote */,
+				53546DADF352DDED4B5495D5 /* RootTabView.swift */,
+				866254788E09566483FCCC3C /* Schedule */,
+				C349A4754A6F9508B3DC24A5 /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		54F189CADC997A1CB110AF49 = {
+			isa = PBXGroup;
+			children = (
+				977166F8078E4665587F2B0B /* QuoteService.swift */,
+				EA6908188FDC58BA5247C0CD /* SharedStore.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		5D6604AE4EAFF6A18BF9EC82 = {
+			isa = PBXGroup;
+			children = (
+				1E5C87233090C8CFDB8B803C /* AuthorLibrary.swift */,
+				78432620EB5EAAD902F01C15 /* QuoteLibrary.swift */,
+				2B5CC22705DFC11BC2CCAF19 /* QuoteLibraryData.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		5F626979E65227D6A16C3E76 = {
+			isa = PBXGroup;
+			children = (
+				F073D177DF22CDE733B3CE27 /* Formatters.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		7B147AC207EDD9DA130D51B2 = {
+			isa = PBXGroup;
+			children = (
+				7BD832EF2A49D54A9CDC3E86 /* Assets.xcassets */,
+				BEE634E1756D117ED62F0B83 /* Info.plist */,
+				7732596E0B435CDA08567803 /* QuoteDayWidget.entitlements */,
+				DC88F77730B0A8B227917080 /* QuoteWidget.swift */,
+				F5735AE0F57BF45DE8DC20D3 /* QuoteWidgetViews.swift */,
+			);
+			path = Widget;
+			sourceTree = "<group>";
+		};
+		7F817A8EDF99EC519ED5B39F = {
+			isa = PBXGroup;
+			children = (
+				ED45F7F873BBF0B9A13035DC /* Assets.xcassets */,
+				F928AB2A3D4698DFC2AA3560 /* Info.plist */,
+				5025F8A7E5D81A0448248F7C /* QuoteDay.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		866254788E09566483FCCC3C = {
+			isa = PBXGroup;
+			children = (
+				C743F8AFE729F3DF80CF247C /* ScheduleEditorView.swift */,
+			);
+			path = Schedule;
+			sourceTree = "<group>";
+		};
+		8AEC345AF92FEBA935540FBF = {
+			isa = PBXGroup;
+			children = (
+				330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */,
+				ECB8A315BC81E2AB5F7AD82D /* ScheduleAndNavigationTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		9CBBF034CDF457D8B4F1D08F = {
+			isa = PBXGroup;
+			children = (
+				29751952A88730ACE801F76E /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		AC6545EDE5A39074A15E6244 = {
+			isa = PBXGroup;
+			children = (
+				28D2AFB82D96A543290BEEEC /* AppEnvironment.swift */,
+				466627296E5B80833D7CA5F0 /* AppRouter.swift */,
+				48DFF4CF7937ACCF66A9E558 /* Components */,
+				14CEC3A21E54D2DD5AB31760 /* Models */,
+				4630106E5179B747C7D7131A /* QuoteDayApp.swift */,
+				7F817A8EDF99EC519ED5B39F /* Resources */,
+				DD50CD5C48F32A982302279A /* Services */,
+				EDF45DAFBC8BF4576D5405B1 /* ViewModels */,
+				53F2A8F553ECE0A714D4DE53 /* Views */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		C349A4754A6F9508B3DC24A5 = {
+			isa = PBXGroup;
+			children = (
+				55F17BFD846695A20D9D29C0 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		C863DA5204F95EC573510473 = {
+			isa = PBXGroup;
+			children = (
+				34C260F25C15DADD969FA06A /* QuoteDay.app */,
+				3B0AEE4BFE3CA06D4D702F72 /* QuoteDayWidgetExtension.appex */,
+				1F43C13822F50D93E6324989 /* QuoteDayTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D307EE64FE34E04702D9D08B = {
+			isa = PBXGroup;
+			children = (
+				580B96EDF2D379725ADB41D0 /* QuoteCategoryOption.swift */,
+			);
+			path = AppIntents;
+			sourceTree = "<group>";
+		};
+		DD50CD5C48F32A982302279A = {
+			isa = PBXGroup;
+			children = (
+				5F3B248406F193408C5C8ACD /* AppSettings.swift */,
+				BA227CCFCA532594824638B4 /* CalendarService.swift */,
+				5FA85081F75F9D3264BF4A88 /* NotificationService.swift */,
+				C787DD862E108CE535D42920 /* Persistence.swift */,
+				713DE0C004E84D4AFF654912 /* ScheduleStore.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		E2887F3FBA14E4C8B792B526 = {
+			isa = PBXGroup;
+			children = (
+				107C8CACD0B1D80133241EEA /* AppCategory.swift */,
+				AE345CFB9A92ECE5CD5EE824 /* Author.swift */,
+				A891BF38ED152A6472BE1E46 /* DeepLink.swift */,
+				EE249BE91E4B13A46667234E /* Quote.swift */,
+				A44C4AFF27C954A27365D8DC /* StableIdentifier.swift */,
+				E0E18626C493AE5C0EE77817 /* WidgetSnapshot.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		ECAC025C821625377FF8A023 = {
+			isa = PBXGroup;
+			children = (
+				AC6545EDE5A39074A15E6244 /* App */,
+				51B141E1E5C40FEE5FD5E5B6 /* Shared */,
+				7B147AC207EDD9DA130D51B2 /* Widget */,
+				8AEC345AF92FEBA935540FBF /* Tests */,
+				C863DA5204F95EC573510473 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EDF45DAFBC8BF4576D5405B1 = {
+			isa = PBXGroup;
+			children = (
+				648ADB8AEFB7172F5548AA76 /* CalendarViewModel.swift */,
+				9C8A02276319E2AD40A5BECB /* HomeViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		21194D781D59F40FD0894F4C = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DE88AB93E5F919A74C880784 /* Build configuration list for PBXNativeTarget "QuoteDayWidgetExtension" */;
+			buildPhases = (
+				FECFCB8C745D68783AB2BA73 /* Sources */,
+				5057F00245E905B5B6D010BA /* Frameworks */,
+				AC0AFBDF2406EABC947D6D49 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = QuoteDayWidgetExtension;
+			productName = QuoteDayWidgetExtension;
+			productReference = 3B0AEE4BFE3CA06D4D702F72 /* QuoteDayWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		A0763EABE8A84EE8C31E07A1 = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7A8EDB02B01945137AD97E91 /* Build configuration list for PBXNativeTarget "QuoteDayTests" */;
+			buildPhases = (
+				5463E729A50438ED7E38C543 /* Sources */,
+				F4A68E27A3F2899A07FD79DF /* Frameworks */,
+				5AF2D035FF8759846E3C0CD3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				69A7BCC06435EED163C18E3F /* PBXTargetDependency QuoteDay */,
+			);
+			name = QuoteDayTests;
+			productName = QuoteDayTests;
+			productReference = 1F43C13822F50D93E6324989 /* QuoteDayTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		A8A861E4F379533FE809128A = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 48596E328BFC1BC1DDDE7313 /* Build configuration list for PBXNativeTarget "QuoteDay" */;
+			buildPhases = (
+				45054F39062721EC3FC7FE42 /* Sources */,
+				FBF4CAED2DE4003730695154 /* Frameworks */,
+				144E724CBB4DC4327758C4B2 /* Resources */,
+				31DA3FE1FCB550FA1EF41388 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA548A59F69E8B0347A2E066 /* PBXTargetDependency QuoteDayWidgetExtension */,
+			);
+			name = QuoteDay;
+			productName = QuoteDay;
+			productReference = 34C260F25C15DADD969FA06A /* QuoteDay.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					A8A861E4F379533FE809128A = {CreatedOnToolsVersion = 16.0; };
+					21194D781D59F40FD0894F4C = {CreatedOnToolsVersion = 16.0; };
+					A0763EABE8A84EE8C31E07A1 = {CreatedOnToolsVersion = 16.0; };
+				};
+			};
+			buildConfigurationList = 887D4B5F61EA6AAAF609F3AC /* Build configuration list for PBXProject "QuoteDay" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = ko;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				ko,
+				en,
+				Base,
+			);
+			mainGroup = ECAC025C821625377FF8A023;
+			productRefGroup = C863DA5204F95EC573510473 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A8A861E4F379533FE809128A /* QuoteDay */,
+				21194D781D59F40FD0894F4C /* QuoteDayWidgetExtension */,
+				A0763EABE8A84EE8C31E07A1 /* QuoteDayTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		144E724CBB4DC4327758C4B2 = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EF6732812436183ECC6784B4 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5AF2D035FF8759846E3C0CD3 = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AC0AFBDF2406EABC947D6D49 = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6D56CF4744B33D26DDD34FBE /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		45054F39062721EC3FC7FE42 = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0CD5478196C468A0AEF8791A /* AuthorPortrait.swift in Sources */,
+				120B5E867FA3107D92C71FE5 /* SettingsView.swift in Sources */,
+				1A57FEA2BCB63A0691680521 /* CategoryChip.swift in Sources */,
+				30DC1167F132F2A4C3EC3DD3 /* AuthorDetailView.swift in Sources */,
+				33EF386FCA0634210F790544 /* Formatters.swift in Sources */,
+				3E6A55054D28D9F84F8933A7 /* Quote.swift in Sources */,
+				4730F9757A07E3B91A3A7686 /* ClayTheme.swift in Sources */,
+				4AE0697B1039CE2285796789 /* CalendarViewModel.swift in Sources */,
+				4D3473BCA45CD1A27F8F1AD3 /* WidgetSnapshot.swift in Sources */,
+				56A6E646A60B69B5B93458BA /* QuoteDetailView.swift in Sources */,
+				590A70C51E3A0296F2295B81 /* CalendarDayCell.swift in Sources */,
+				5DEF99A272929AD81056A110 /* HomeView.swift in Sources */,
+				67F88D13F3EA196CC8254AE4 /* AppCategory.swift in Sources */,
+				685D1738D98794E66BA4C7C9 /* QuoteBrowserView.swift in Sources */,
+				6BA74517C8C86817A974F8A0 /* ScheduleRow.swift in Sources */,
+				6D8EDE4283D15012ADD3E8BE /* ClayStyle.swift in Sources */,
+				6E0CA61B847417D4E9B3AD25 /* EmptyStateView.swift in Sources */,
+				6FB94A170979DC02460FEDF1 /* QuoteCard.swift in Sources */,
+				76BB2F69333B3FCD80F7E683 /* QuoteDayApp.swift in Sources */,
+				80FCDC78CD1EC2EDEAC32B8D /* ScheduleStore.swift in Sources */,
+				82EED4E43C9EBCF04F529395 /* AppEnvironment.swift in Sources */,
+				84EE7C5F90BB712DC963D8BC /* StableIdentifier.swift in Sources */,
+				99F344420C5988238B2BBED4 /* AppSettings.swift in Sources */,
+				9A18AB2F56FD7DE300151D28 /* Author.swift in Sources */,
+				9AA3D50A8A3F3B6C7B7FDB41 /* CalendarView.swift in Sources */,
+				B2A65AB6AA7F9C3D6377A514 /* DeepLink.swift in Sources */,
+				B36E03D938949E98FEE3A7B3 /* QuoteLibraryData.swift in Sources */,
+				BC3E8BCB2ABD0370A9F91A47 /* CalendarService.swift in Sources */,
+				C0344652D1E0D3C7BE60D901 /* SharedStore.swift in Sources */,
+				C64F40DB2035491678ED700C /* ScheduleEditorView.swift in Sources */,
+				D616B44D16A20DA67A7DFB2A /* AppRouter.swift in Sources */,
+				D8CB689BAD87EF2D5E9469AE /* QuoteService.swift in Sources */,
+				DAA768F6F31A5C0EBA6294CB /* QuoteCategoryOption.swift in Sources */,
+				DCA55805BBE9BC0E0FD3F6E8 /* ScheduleItem.swift in Sources */,
+				EE747B0B97D3D751FC62FDC8 /* HomeViewModel.swift in Sources */,
+				EF1C01EDDF6569CB6FBF05CB /* Persistence.swift in Sources */,
+				F01FF9526EF3C15B534C0096 /* RootTabView.swift in Sources */,
+				F312B673E8A7311A0F950A00 /* NotificationService.swift in Sources */,
+				F79E7F7801BFA303399230C6 /* QuoteLibrary.swift in Sources */,
+				FA2F2685730524FBA4B64937 /* AuthorLibrary.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5463E729A50438ED7E38C543 = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A611F1A0E3957787978AA87E /* ScheduleAndNavigationTests.swift in Sources */,
+				E90E1911D37099FEB85CD56F /* QuoteEngineTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FECFCB8C745D68783AB2BA73 = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04CF373CAA31F6A3444EADED /* WidgetSnapshot.swift in Sources */,
+				1314A0A9DED7C01BB9141B24 /* AppCategory.swift in Sources */,
+				134479D26EC3823B9CA59EA5 /* QuoteWidgetViews.swift in Sources */,
+				1636DA45079004ACF7CDFD69 /* StableIdentifier.swift in Sources */,
+				1CBE485ACA40E29F814B9188 /* Quote.swift in Sources */,
+				274FC7CEDF1B1B6D57664751 /* ClayTheme.swift in Sources */,
+				3B4F33BFA3D0EB1D44B7D95E /* AuthorLibrary.swift in Sources */,
+				3E9ACAD08D64C3B230BE8CC3 /* DeepLink.swift in Sources */,
+				7BB212837B646C2E0BD5F9DD /* Author.swift in Sources */,
+				8403B7B2D91BB070B87ED12B /* ClayStyle.swift in Sources */,
+				A978B4F4E853643057590D68 /* QuoteCategoryOption.swift in Sources */,
+				B61EF751E16F2543F4AA2BD7 /* SharedStore.swift in Sources */,
+				D2668C38DF3F4E13A526C718 /* QuoteWidget.swift in Sources */,
+				E0F2D8D9B1C678E99C20443E /* Formatters.swift in Sources */,
+				EAE6423D6315601DD5B8C259 /* QuoteLibraryData.swift in Sources */,
+				F0198F0B08D2E24E555D431D /* QuoteService.swift in Sources */,
+				FD41707ABC8F0F23C40EDD40 /* QuoteLibrary.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		69A7BCC06435EED163C18E3F = {
+			isa = PBXTargetDependency;
+			target = A8A861E4F379533FE809128A /* QuoteDay */;
+			targetProxy = 2F9CE0B0DFAAE9366D8EBDBF /* PBXContainerItemProxy */;
+		};
+		CA548A59F69E8B0347A2E066 = {
+			isa = PBXTargetDependency;
+			target = 21194D781D59F40FD0894F4C /* QuoteDayWidgetExtension */;
+			targetProxy = 2D6EB3A5D0343059761E3FA2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2E5B0B5548923166D8EA9D7B = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/QuoteDay.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/QuoteDay";
+			};
+			name = Release;
+		};
+		39931264D710156A45163BBD = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+				"$(inherited)",
+				"@executable_path/Frameworks",
+			);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4CE22B4DF03378D9D32BCEB2 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+				"$(inherited)",
+				"@executable_path/Frameworks",
+			);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		75B5CD1EA334B895CF6045EC = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+				"DEBUG=1",
+				"$(inherited)",
+			);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		82A3DB6F2D3B03A0BF31BF68 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Widget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = QuoteDay;
+				LD_RUNPATH_SEARCH_PATHS = (
+				"$(inherited)",
+				"@executable_path/Frameworks",
+				"@executable_path/../../Frameworks",
+			);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		91597C8547A974025CD31FD9 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C368428D718437BA9D00F2F4 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/QuoteDay.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/QuoteDay";
+			};
+			name = Debug;
+		};
+		D78BAD22A739FDF8F31D9269 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Widget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = QuoteDay;
+				LD_RUNPATH_SEARCH_PATHS = (
+				"$(inherited)",
+				"@executable_path/Frameworks",
+				"@executable_path/../../Frameworks",
+			);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		48596E328BFC1BC1DDDE7313 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				39931264D710156A45163BBD /* Debug */,
+				4CE22B4DF03378D9D32BCEB2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7A8EDB02B01945137AD97E91 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C368428D718437BA9D00F2F4 /* Debug */,
+				2E5B0B5548923166D8EA9D7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		887D4B5F61EA6AAAF609F3AC = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				75B5CD1EA334B895CF6045EC /* Debug */,
+				91597C8547A974025CD31FD9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DE88AB93E5F919A74C880784 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D78BAD22A739FDF8F31D9269 /* Debug */,
+				82A3DB6F2D3B03A0BF31BF68 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}

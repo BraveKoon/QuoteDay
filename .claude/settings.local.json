@@ -13,7 +13,19 @@
       "Bash(git init *)",
       "Bash(git remote *)",
       "Bash(git branch *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git -c user.name=\"BraveKoon\" -c user.email=\"maflada@gmail.com\" commit -m \"첫 커밋\")",
+      "Bash(git push *)",
+      "Bash(gh repo *)",
+      "Bash(git ls-remote *)",
+      "Bash(git -C \"C:/Users/danie/OneDrive - 잠신중학교/문서/Claude Code\" status --short)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(python tools/generate_xcodeproj.py)",
+      "Bash(python tools/check_project.py)",
+      "Bash(python -c ' *)",
+      "Bash(python -)",
+      "Bash(git rm *)"
     ]
   }
 }

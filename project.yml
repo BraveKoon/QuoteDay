@@ -1,0 +1,93 @@
+# XcodeGen 사양 (선택 사항).
+#
+# QuoteDay.xcodeproj 는 tools/generate_xcodeproj.py 로 이미 생성되어 있어
+# 그냥 열면 된다. 프로젝트 파일이 손상되었거나 macOS 에서 다시 만들고 싶다면:
+#
+#   brew install xcodegen && xcodegen generate
+#
+# 두 방식은 같은 타겟 구성을 만든다.
+
+name: QuoteDay
+
+options:
+  bundleIdPrefix: com.quoteday
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  developmentLanguage: ko
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: "YES"
+    TARGETED_DEVICE_FAMILY: "1,2"
+
+targets:
+  QuoteDay:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.quoteday.QuoteDay
+        INFOPLIST_FILE: App/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: App/Resources/QuoteDay.entitlements
+        GENERATE_INFOPLIST_FILE: "NO"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_PREVIEWS: "YES"
+    dependencies:
+      - target: QuoteDayWidgetExtension
+        embed: true
+
+  QuoteDayWidgetExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Widget
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.quoteday.QuoteDay.Widget
+        INFOPLIST_FILE: Widget/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Widget/QuoteDayWidget.entitlements
+        GENERATE_INFOPLIST_FILE: "NO"
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME: WidgetBackground
+        SKIP_INSTALL: "YES"
+        ENABLE_PREVIEWS: "YES"
+
+  QuoteDayTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.quoteday.QuoteDayTests
+        GENERATE_INFOPLIST_FILE: "YES"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/QuoteDay.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/QuoteDay"
+    dependencies:
+      - target: QuoteDay
+
+schemes:
+  QuoteDay:
+    build:
+      targets:
+        QuoteDay: all
+        QuoteDayWidgetExtension: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - QuoteDayTests
+    archive:
+      config: Release

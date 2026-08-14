@@ -45,7 +45,9 @@ public enum SharedDefaultsKey {
 ///
 /// 쓰기는 앱에서만, 읽기는 양쪽에서 한다. 실패해도 예외를 던지지 않고
 /// 빈 스냅샷으로 대체한다 — 위젯은 어떤 경우에도 화면을 그려야 한다.
-public struct WidgetSnapshotStore: Sendable {
+/// `UserDefaults` 는 스레드 안전하지만 SDK 에서 아직 `Sendable` 로 표시되어 있지 않아
+/// `@unchecked` 로 명시한다.
+public struct WidgetSnapshotStore: @unchecked Sendable {
     private let defaults: UserDefaults
 
     public init(defaults: UserDefaults = AppGroup.defaults) {

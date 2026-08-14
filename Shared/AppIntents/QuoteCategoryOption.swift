@@ -12,18 +12,22 @@ enum QuoteCategoryOption: String, AppEnum, CaseIterable {
         TypeDisplayRepresentation(name: "명언 카테고리")
     }
 
+    /// AppIntents 는 이 값을 **컴파일 타임에 메타데이터로 추출**하므로
+    /// 반드시 모든 케이스를 담은 리터럴이어야 한다. 루프나 계산으로 만들 수 없다.
+    /// 케이스를 추가하면 여기에도 반드시 한 줄 추가해야 한다.
     static var caseDisplayRepresentations: [QuoteCategoryOption: DisplayRepresentation] {
-        var representations: [QuoteCategoryOption: DisplayRepresentation] = [
-            .all: DisplayRepresentation(title: "✨ 전체")
+        [
+            .all: DisplayRepresentation(title: "✨ 전체"),
+            .work: DisplayRepresentation(title: "💼 직장"),
+            .leisure: DisplayRepresentation(title: "🎮 여가"),
+            .meal: DisplayRepresentation(title: "🍽 식사"),
+            .study: DisplayRepresentation(title: "📚 학업"),
+            .exercise: DisplayRepresentation(title: "🏃 운동"),
+            .health: DisplayRepresentation(title: "❤️ 건강"),
+            .relationship: DisplayRepresentation(title: "👥 인간관계"),
+            .growth: DisplayRepresentation(title: "💡 자기계발"),
+            .daily: DisplayRepresentation(title: "🏠 일상")
         ]
-        for option in allCases where option != .all {
-            if let category = option.category {
-                representations[option] = DisplayRepresentation(
-                    title: LocalizedStringResource(stringLiteral: category.displayName)
-                )
-            }
-        }
-        return representations
     }
 
     /// `all` 이면 nil.

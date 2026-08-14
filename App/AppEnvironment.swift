@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 import SwiftUI
 import UserNotifications
+import WidgetKit
 
 /// 앱이 살아 있는 동안 유지되는 객체 그래프.
 ///
@@ -48,6 +49,23 @@ final class AppEnvironment {
     func refresh() async {
         await scheduleStore.refreshOnLaunch()
         calendarService.refreshAuthorizationStatus()
+        await refreshRemoteQuote()
+    }
+
+    /// ZenQuotes 오늘의 명언을 필요할 때만 받아 온다.
+    /// 실패해도 조용히 넘어가고 화면은 내장 명언으로 채워진다.
+    @discardableResult
+    func refreshRemoteQuote(force: Bool = false) async -> Bool {
+        guard settings.usesRemoteQuoteOfTheDay else { return false }
+        let store = RemoteQuoteStore.shared
+        let updated = force ? await store.refresh() : await store.refreshIfNeeded()
+        if updated {
+            // 위젯도 새 명언을 보여 주어야 한다.
+            for kind in AppGroup.allWidgetKinds {
+                WidgetCenter.shared.reloadTimelines(ofKind: kind)
+            }
+        }
+        return updated
     }
 
     /// 프리뷰/테스트용 인메모리 환경.

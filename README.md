@@ -6,7 +6,8 @@
 
 - Swift 5 / SwiftUI / SwiftData / WidgetKit / AppIntents / UserNotifications / EventKit
 - 최소 지원 버전: **iOS 17.0**
-- 외부 서버·네트워크 없이 동작 (명언·인물 데이터는 번들 내장)
+- 명언·인물 데이터가 번들에 내장되어 **네트워크 없이도 모든 기능이 동작**
+- 오늘의 명언은 선택적으로 [ZenQuotes](https://zenquotes.io/) `/today` 에서 갱신 (끄면 완전 오프라인)
 
 ---
 
@@ -55,7 +56,7 @@ QuoteDay/
 ├── Shared/              앱 + 위젯이 함께 쓰는 코드
 │   ├── Models/          AppCategory, Quote, Author, DeepLink, WidgetSnapshot, StableHash
 │   ├── Data/            QuoteLibrary(색인) + QuoteLibraryData(원본 130편) + AuthorLibrary(87명)
-│   ├── Services/        QuoteService(선택 알고리즘), SharedStore(App Group)
+│   ├── Services/        QuoteService(선택 알고리즘), RemoteQuoteService(ZenQuotes), SharedStore
 │   ├── Design/          ClayTheme(토큰) + ClayStyle(.clayCard/.clayButton/.clayBackground)
 │   ├── Support/         Formatters
 │   └── AppIntents/      위젯 구성 인텐트
@@ -66,7 +67,7 @@ QuoteDay/
 │   ├── Components/      QuoteCard, CategoryChip, ScheduleRow, CalendarDayCell, AuthorPortrait, EmptyState
 │   └── Views/           Home / Calendar / Schedule / Quote / Settings / RootTabView
 ├── Widget/              홈 화면(Small·Medium·Large) + 잠금화면(accessory) 위젯
-├── Tests/               XCTest 51개
+├── Tests/               XCTest 74개
 └── tools/               프로젝트 생성기 + 정적 검증기
 ```
 
@@ -88,6 +89,20 @@ Swift 의 `Hasher` 는 프로세스마다 시드가 달라 쓸 수 없다.
 ③ 그래도 부족하면 전체 순으로 후보를 모은다. 후보가 6개 미만이면 같은 명언만 반복되므로
 관련 카테고리를 끌어온다. 최종 선택은 `일정 ID + 시작 시각` seed 로 고정되어,
 일정을 수정하기 전까지 예고된 명언이 바뀌지 않는다.
+
+### 오늘의 명언 소스 (ZenQuotes)
+설정에서 켜면(기본값) 오늘의 명언을 ZenQuotes `/today` 에서 받아온다. 다만 **적용 범위를 제한했다.**
+
+- **오늘의 명언에만** 적용된다. 일정 카테고리별 명언 알림은 계속 내장 데이터를 쓴다.
+  API 응답에는 카테고리가 없어 "학업 일정 → 학업 명언" 매칭을 만들 수 없고,
+  14일치를 미리 예약하는 알림은 미래 날짜의 API 응답을 알 수 없기 때문이다.
+- 위젯에서 특정 카테고리를 고른 경우에도 내장 명언을 쓴다(같은 이유).
+- 앱과 위젯이 각각 App Group 캐시를 갱신한다. 하루 한 번만 받아오고,
+  실패하면 15분 안에는 재시도하지 않는다(무료 등급 30초 5회 제한).
+- 저자 이름이 내장 인물과 일치하면 생몰년·소개·업적을 그대로 붙여 준다.
+  일치하지 않으면 이름만 있는 최소 정보로 표시한다.
+- 원격 명언의 UUID 는 문장 내용에서 유도하므로 날짜가 지나도 딥링크가 유효하다.
+- 무료 등급 이용 조건에 따라 명언 상세와 설정 화면에 출처를 표기한다.
 
 ### 알림
 - 권한은 앱 시작 시가 아니라 **사용자가 명언 알림을 켜는 순간** 요청한다.
@@ -117,7 +132,8 @@ Swift 의 `Hasher` 는 프로세스마다 시드가 달라 쓸 수 없다.
 | 저장된 카테고리를 모름 | `.etc` 로 강등 |
 | 명언 slug 가 사라짐 | 카테고리에서 다시 계산 |
 | 오래된 딥링크 | "명언을 찾을 수 없어요" 빈 상태 |
-| 네트워크 없음 | 영향 없음 (전부 번들 데이터) |
+| 네트워크 없음 | ZenQuotes 갱신만 건너뛰고 내장 명언으로 표시. 나머지 기능은 영향 없음 |
+| ZenQuotes 사용량 초과 | 안내 문구를 명언으로 저장하지 않고 거부, 내장 명언 유지 |
 
 ---
 

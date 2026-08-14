@@ -82,6 +82,19 @@ struct QuoteDetailView: View {
                             .italic()
                             .fixedSize(horizontal: false, vertical: true)
                     }
+
+                    // ZenQuotes 무료 이용 조건상 출처 표기가 필요하다.
+                    if quote.isFromZenQuotes {
+                        Divider().opacity(0.2)
+                        Link(destination: RemoteQuoteStore.attributionURL) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "link")
+                                Text(RemoteQuoteStore.attribution)
+                            }
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.accent)
+                        }
+                    }
                 }
                 .padding(ClayTheme.Spacing.l)
                 .frame(maxWidth: .infinity, alignment: .leading)

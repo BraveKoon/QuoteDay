@@ -627,4 +627,31 @@ public enum AuthorLibrary {
     public static func author(id: String) -> Author {
         byID[id] ?? .unknown
     }
+
+    /// 이름 → Author 색인. 영문명과 한글명을 모두 키로 넣는다.
+    ///
+    /// ZenQuotes 처럼 이름만 주는 외부 데이터에 내장 인물 소개를 붙이는 데 쓴다.
+    private static let byNormalizedName: [String: Author] = {
+        var index: [String: Author] = [:]
+        for author in all {
+            index[normalize(author.name)] = author
+            if let korean = author.koreanName {
+                index[normalize(korean)] = author
+            }
+        }
+        return index
+    }()
+
+    /// 이름이 일치하는 인물. 대소문자·공백·마침표 차이는 무시한다.
+    /// (예: `"Martin Luther King, Jr."` → `"Martin Luther King Jr."`)
+    public static func author(matchingName name: String) -> Author? {
+        byNormalizedName[normalize(name)]
+    }
+
+    private static func normalize(_ name: String) -> String {
+        name.lowercased()
+            .filter { $0.isLetter || $0.isNumber || $0.isWhitespace }
+            .split(separator: " ", omittingEmptySubsequences: true)
+            .joined(separator: " ")
+    }
 }

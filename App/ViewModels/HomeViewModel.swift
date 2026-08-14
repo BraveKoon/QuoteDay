@@ -25,8 +25,13 @@ final class HomeViewModel {
 
     // MARK: - 오늘의 명언
 
+    /// ZenQuotes 사용이 켜져 있고 오늘 자 캐시가 있으면 그것을, 아니면 내장 명언을 쓴다.
     func quoteOfTheDay(for date: Date = .now) -> QuotePresentation {
-        quoteService.presentationOfTheDay(for: date, preferred: settings.preferredCategory)
+        quoteService.todayPresentation(
+            for: date,
+            preferred: settings.preferredCategory,
+            useRemote: settings.usesRemoteQuoteOfTheDay
+        )
     }
 
     // MARK: - 날짜 / 인사

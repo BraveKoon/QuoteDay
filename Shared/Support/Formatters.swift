@@ -32,6 +32,14 @@ enum Formatters {
         return formatter
     }()
 
+    /// "8월 15일 오전 9:12" — 마지막 갱신 시각 표시용.
+    static let shortDateTime: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = .autoupdatingCurrent
+        formatter.setLocalizedDateFormatFromTemplate("MMMd j:mm")
+        return formatter
+    }()
+
     static func timeRange(_ start: Date, _ end: Date) -> String {
         let startText = time.string(from: start)
         guard end > start else { return startText }

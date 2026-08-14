@@ -59,7 +59,8 @@ final class AppRouter {
         switch link {
         case .quote(let id):
             // 존재하지 않는 명언 ID 면 홈으로만 이동하고 상세는 띄우지 않는다.
-            if quoteService.quote(id: id) != nil {
+            // (내장 명언과 ZenQuotes 캐시를 모두 확인한다)
+            if quoteService.presentation(id: id) != nil {
                 presentedQuoteID = id
             } else {
                 AppLog.quotes.debug("존재하지 않는 명언 딥링크: \(id.uuidString, privacy: .public)")

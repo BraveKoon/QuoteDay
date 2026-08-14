@@ -79,6 +79,10 @@
 			isa = PBXBuildFile;
 			fileRef = 2ADAAC0D312F05E8DD5464E4 /* QuoteDetailView.swift */;
 		};
+		57637725F7B19FA9A01C258B = {
+			isa = PBXBuildFile;
+			fileRef = E40F4F782E2301BB3B796F80 /* RemoteQuoteService.swift */;
+		};
 		590A70C51E3A0296F2295B81 = {
 			isa = PBXBuildFile;
 			fileRef = D550BB8FC789EF2AFF6F4056 /* CalendarDayCell.swift */;
@@ -118,6 +122,10 @@
 		76BB2F69333B3FCD80F7E683 = {
 			isa = PBXBuildFile;
 			fileRef = 4630106E5179B747C7D7131A /* QuoteDayApp.swift */;
+		};
+		78D93F5FDAA1480D7AE3E7A7 = {
+			isa = PBXBuildFile;
+			fileRef = E40F4F782E2301BB3B796F80 /* RemoteQuoteService.swift */;
 		};
 		7BB212837B646C2E0BD5F9DD = {
 			isa = PBXBuildFile;
@@ -260,6 +268,10 @@
 			isa = PBXBuildFile;
 			fileRef = 78432620EB5EAAD902F01C15 /* QuoteLibrary.swift */;
 		};
+		FE97EB8251F358EEC0393B72 = {
+			isa = PBXBuildFile;
+			fileRef = 16FBAC84771CF89D20788E56 /* RemoteQuoteTests.swift */;
+		};
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -304,6 +316,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = AppCategory.swift;
+			sourceTree = "<group>";
+		};
+		16FBAC84771CF89D20788E56 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = RemoteQuoteTests.swift;
 			sourceTree = "<group>";
 		};
 		1E5C87233090C8CFDB8B803C = {
@@ -579,6 +597,12 @@
 			path = WidgetSnapshot.swift;
 			sourceTree = "<group>";
 		};
+		E40F4F782E2301BB3B796F80 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = RemoteQuoteService.swift;
+			sourceTree = "<group>";
+		};
 		EA6908188FDC58BA5247C0CD = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -726,6 +750,7 @@
 			isa = PBXGroup;
 			children = (
 				977166F8078E4665587F2B0B /* QuoteService.swift */,
+				E40F4F782E2301BB3B796F80 /* RemoteQuoteService.swift */,
 				EA6908188FDC58BA5247C0CD /* SharedStore.swift */,
 			);
 			path = Services;
@@ -784,6 +809,7 @@
 			isa = PBXGroup;
 			children = (
 				330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */,
+				16FBAC84771CF89D20788E56 /* RemoteQuoteTests.swift */,
 				ECB8A315BC81E2AB5F7AD82D /* ScheduleAndNavigationTests.swift */,
 			);
 			path = Tests;
@@ -1018,6 +1044,7 @@
 				4AE0697B1039CE2285796789 /* CalendarViewModel.swift in Sources */,
 				4D3473BCA45CD1A27F8F1AD3 /* WidgetSnapshot.swift in Sources */,
 				56A6E646A60B69B5B93458BA /* QuoteDetailView.swift in Sources */,
+				57637725F7B19FA9A01C258B /* RemoteQuoteService.swift in Sources */,
 				590A70C51E3A0296F2295B81 /* CalendarDayCell.swift in Sources */,
 				5DEF99A272929AD81056A110 /* HomeView.swift in Sources */,
 				67F88D13F3EA196CC8254AE4 /* AppCategory.swift in Sources */,
@@ -1057,6 +1084,7 @@
 			files = (
 				A611F1A0E3957787978AA87E /* ScheduleAndNavigationTests.swift in Sources */,
 				E90E1911D37099FEB85CD56F /* QuoteEngineTests.swift in Sources */,
+				FE97EB8251F358EEC0393B72 /* RemoteQuoteTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1072,6 +1100,7 @@
 				274FC7CEDF1B1B6D57664751 /* ClayTheme.swift in Sources */,
 				3B4F33BFA3D0EB1D44B7D95E /* AuthorLibrary.swift in Sources */,
 				3E9ACAD08D64C3B230BE8CC3 /* DeepLink.swift in Sources */,
+				78D93F5FDAA1480D7AE3E7A7 /* RemoteQuoteService.swift in Sources */,
 				7BB212837B646C2E0BD5F9DD /* Author.swift in Sources */,
 				8403B7B2D91BB070B87ED12B /* ClayStyle.swift in Sources */,
 				A978B4F4E853643057590D68 /* QuoteCategoryOption.swift in Sources */,

@@ -44,6 +44,10 @@ public enum SharedDefaultsKey {
     public static let appearance = "settings.appearance"
     public static let hasRequestedNotifications = "settings.hasRequestedNotifications"
     public static let mirrorToSystemCalendar = "settings.mirrorToSystemCalendar"
+    public static let remoteQuoteEnabled = "settings.remoteQuote.enabled"
+    public static let remoteQuote = "remoteQuote.cache.v1"
+    public static let remoteQuoteLastAttempt = "remoteQuote.lastAttempt"
+    public static let remoteQuoteLastError = "remoteQuote.lastError"
 }
 
 /// 위젯 스냅샷의 읽기/쓰기 담당.

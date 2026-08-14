@@ -7,8 +7,12 @@ struct SettingsView: View {
     @Environment(NotificationService.self) private var notifications
     @Environment(CalendarService.self) private var calendarService
     @Environment(ScheduleStore.self) private var store
+    @Environment(AppEnvironment.self) private var appEnvironment
 
     @State private var pendingNotificationCount = 0
+    @State private var isRefreshingRemoteQuote = false
+    /// 캐시 상태를 다시 읽게 만드는 트리거.
+    @State private var remoteQuoteRefreshToken = 0
 
     var body: some View {
         @Bindable var settings = settings
@@ -18,6 +22,7 @@ struct SettingsView: View {
                 header
 
                 notificationCard(settings: settings)
+                remoteQuoteCard(settings: settings)
                 dailyQuoteCard(settings: settings)
                 preferredCategoryCard(settings: settings)
                 appearanceCard(settings: settings)
@@ -100,6 +105,102 @@ struct SettingsView: View {
         case .notDetermined: "미설정"
         @unknown default: "알 수 없음"
         }
+    }
+
+    // MARK: - ZenQuotes
+
+    private func remoteQuoteCard(settings: AppSettings) -> some View {
+        @Bindable var settings = settings
+
+        return card(title: "오늘의 명언 소스", symbol: "antenna.radiowaves.left.and.right") {
+            VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+                Toggle(isOn: $settings.usesRemoteQuoteOfTheDay) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("ZenQuotes 사용")
+                            .font(ClayFont.headline())
+                            .foregroundStyle(ClayTheme.textPrimary)
+                        Text("매일 ZenQuotes 의 오늘의 명언을 받아옵니다. 꺼 두면 앱에 내장된 한국어 명언만 사용합니다.")
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .tint(ClayTheme.accent)
+                .onChange(of: settings.usesRemoteQuoteOfTheDay) { _, isOn in
+                    guard isOn else {
+                        remoteQuoteRefreshToken += 1
+                        return
+                    }
+                    Task { await refreshRemoteQuote(force: false) }
+                }
+
+                if settings.usesRemoteQuoteOfTheDay {
+                    Divider().opacity(0.2)
+
+                    // remoteQuoteRefreshToken 을 참조해 갱신 후 다시 계산되게 한다.
+                    let _ = remoteQuoteRefreshToken
+                    let store = RemoteQuoteStore.shared
+
+                    if let presentation = store.presentation() {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("\u{201C}\(presentation.quote.text)\u{201D}")
+                                .font(ClayFont.callout())
+                                .foregroundStyle(ClayTheme.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .lineLimit(3)
+                            Text("— \(presentation.author.displayName)")
+                                .font(ClayFont.caption())
+                                .foregroundStyle(ClayTheme.textSecondary)
+                        }
+                    } else {
+                        Text("아직 오늘의 명언을 받아오지 못했어요. 내장 명언을 보여 주는 중입니다.")
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    if let error = store.lastErrorMessage {
+                        Text(error)
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.danger)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    if let attempt = store.lastAttemptDate {
+                        Text("마지막 확인 \(Formatters.shortDateTime.string(from: attempt))")
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.textSecondary)
+                    }
+
+                    Button {
+                        Task { await refreshRemoteQuote(force: true) }
+                    } label: {
+                        if isRefreshingRemoteQuote {
+                            ProgressView()
+                        } else {
+                            Label("지금 새로고침", systemImage: "arrow.clockwise")
+                        }
+                    }
+                    .clayButton(.secondary, fullWidth: true)
+                    .disabled(isRefreshingRemoteQuote)
+
+                    Link(destination: RemoteQuoteStore.attributionURL) {
+                        Text(RemoteQuoteStore.attribution)
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.accent)
+                            .underline()
+                    }
+                    .padding(.top, 2)
+                }
+            }
+        }
+    }
+
+    private func refreshRemoteQuote(force: Bool) async {
+        isRefreshingRemoteQuote = true
+        await appEnvironment.refreshRemoteQuote(force: force)
+        isRefreshingRemoteQuote = false
+        remoteQuoteRefreshToken += 1
     }
 
     // MARK: - 매일의 명언

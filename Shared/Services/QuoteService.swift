@@ -102,7 +102,29 @@ public struct QuoteService: Sendable {
     public func quote(slug: String) -> Quote? { library.quote(slug: slug) }
     public func author(for quote: Quote) -> Author { library.author(for: quote) }
     public func presentation(for quote: Quote) -> QuotePresentation { library.presentation(for: quote) }
-    public func presentation(id: UUID) -> QuotePresentation? { library.presentation(id: id) }
+    /// 딥링크로 들어온 명언 조회.
+    ///
+    /// 내장 라이브러리에 없으면 ZenQuotes 캐시까지 확인한다. 알림이나 위젯이
+    /// 원격 명언을 가리키고 있을 수 있기 때문이다.
+    public func presentation(id: UUID, remote: RemoteQuoteStore = .shared) -> QuotePresentation? {
+        library.presentation(id: id) ?? remote.presentation(matching: id)
+    }
+
+    /// 오늘의 명언. 원격 사용이 켜져 있고 오늘 자 캐시가 있으면 그것을 쓴다.
+    ///
+    /// 캐시가 없거나(첫 실행·오프라인) 기능이 꺼져 있으면 내장 명언으로 되돌아가므로
+    /// 네트워크 없이도 화면은 항상 채워진다.
+    public func todayPresentation(
+        for date: Date = .now,
+        preferred category: AppCategory? = nil,
+        useRemote: Bool,
+        remote: RemoteQuoteStore = .shared
+    ) -> QuotePresentation {
+        if useRemote, let remotePresentation = remote.presentation(on: date) {
+            return remotePresentation
+        }
+        return presentationOfTheDay(for: date, preferred: category)
+    }
     public func quotes(in category: AppCategory) -> [Quote] { library.quotes(in: category) }
     public func quotes(byAuthor authorID: String) -> [Quote] { library.quotes(byAuthor: authorID) }
     public func search(_ term: String) -> [Quote] { library.search(term) }

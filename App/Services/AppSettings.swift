@@ -39,6 +39,7 @@ final class AppSettings {
     @ObservationIgnored private var storedPreferredCategory: AppCategory?
     @ObservationIgnored private var storedAppearance: Appearance
     @ObservationIgnored private var storedMirrorsToSystemCalendar: Bool
+    @ObservationIgnored private var storedUsesRemoteQuote: Bool
 
     init(defaults: UserDefaults = AppGroup.defaults) {
         self.defaults = defaults
@@ -51,6 +52,8 @@ final class AppSettings {
         self.storedAppearance = Appearance(rawValue: defaults.string(forKey: SharedDefaultsKey.appearance) ?? "")
             ?? .system
         self.storedMirrorsToSystemCalendar = defaults.bool(forKey: SharedDefaultsKey.mirrorToSystemCalendar)
+        // 값이 없으면 켜 둔 상태로 시작한다.
+        self.storedUsesRemoteQuote = defaults.object(forKey: SharedDefaultsKey.remoteQuoteEnabled) as? Bool ?? true
     }
 
     var isDailyQuoteEnabled: Bool {
@@ -135,6 +138,23 @@ final class AppSettings {
             withMutation(keyPath: \.mirrorsToSystemCalendar) {
                 storedMirrorsToSystemCalendar = newValue
                 defaults.set(newValue, forKey: SharedDefaultsKey.mirrorToSystemCalendar)
+            }
+        }
+    }
+
+    /// 오늘의 명언을 ZenQuotes `/today` 에서 받아올지.
+    ///
+    /// 위젯도 App Group 을 통해 같은 값을 읽는다. 꺼 두면 앱은 완전히
+    /// 오프라인으로 동작하며 내장 명언만 사용한다.
+    var usesRemoteQuoteOfTheDay: Bool {
+        get {
+            access(keyPath: \.usesRemoteQuoteOfTheDay)
+            return storedUsesRemoteQuote
+        }
+        set {
+            withMutation(keyPath: \.usesRemoteQuoteOfTheDay) {
+                storedUsesRemoteQuote = newValue
+                defaults.set(newValue, forKey: SharedDefaultsKey.remoteQuoteEnabled)
             }
         }
     }

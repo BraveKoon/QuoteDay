@@ -33,6 +33,7 @@ struct QuoteEntry: TimelineEntry {
 struct QuoteTimelineProvider: AppIntentTimelineProvider {
     private let quoteService = QuoteService.shared
     private let snapshotStore = WidgetSnapshotStore()
+    private let remoteStore = RemoteQuoteStore.shared
 
     func placeholder(in context: Context) -> QuoteEntry {
         .placeholder()
@@ -50,6 +51,10 @@ struct QuoteTimelineProvider: AppIntentTimelineProvider {
         let calendar = Calendar.current
         let midnight = now.nextMidnight(calendar: calendar)
 
+        // 사용자가 앱을 열지 않아도 위젯이 스스로 오늘 자 명언을 받아 온다.
+        // 실패하면 그대로 내장 명언으로 그려진다.
+        await remoteStore.refreshIfNeeded(now: now)
+
         // 남은 시간과 "다음 일정"이 자연스럽게 갱신되도록 한 시간 간격으로 항목을 만든다.
         var entries: [QuoteEntry] = [makeEntry(at: now, configuration: configuration)]
         var cursor = calendar.date(bySetting: .minute, value: 0, of: now.addingTimeInterval(3600)) ?? midnight
@@ -64,12 +69,19 @@ struct QuoteTimelineProvider: AppIntentTimelineProvider {
     }
 
     private func makeEntry(at date: Date, configuration: SelectQuoteCategoryIntent) -> QuoteEntry {
-        let quote = quoteService.quoteOfTheDay(for: date, preferred: configuration.category.category)
+        // 위젯에서 특정 카테고리를 골랐다면 원격 명언(카테고리 정보가 없다)은 쓰지 않는다.
+        let useRemote = configuration.category == .all && remoteStore.isEnabled
+        let presentation = quoteService.todayPresentation(
+            for: date,
+            preferred: configuration.category.category,
+            useRemote: useRemote,
+            remote: remoteStore
+        )
         let snapshot = snapshotStore.load()
         return QuoteEntry(
             date: date,
-            quote: quote,
-            author: quoteService.author(for: quote),
+            quote: presentation.quote,
+            author: presentation.author,
             todaySchedules: snapshot.schedules(on: date),
             nextSchedule: snapshot.nextSchedule(after: date)
         )

@@ -25,7 +25,8 @@
       "Bash(python tools/check_project.py)",
       "Bash(python -c ' *)",
       "Bash(python -)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(ls -lat \"C:/Users/danie/AppData/Local/Temp/claude/C--Users-danie-OneDrive------------Claude-Code/e875e1d9-fec2-46f5-9171-b34af8d1cd39/scratchpad\" 2>/dev/null | head -20; echo \"--- 최근 이미지 \\(Downloads/Desktop/Pictures\\) ---\"; find \"C:/Users/danie/Downloads\" \"C:/Users/danie/Desktop\" \"C:/Users/danie/Pictures\" -maxdepth 2 -type f \\\\\\( -iname \"*.png\" -o -iname \"*.jpg\" \\\\\\) -newermt \"-2 days\" 2>/dev/null | head -20; echo \"--- Claude 세션 첨부 폴더 ---\"; find \"C:/Users/danie/AppData/Roaming/Claude\" -maxdepth 4 -type d -iname \"*attach*\" -o -maxdepth 4 -type d -iname \"*upload*\" 2>/dev/null | head)"
     ]
   }
 }

@@ -452,6 +452,44 @@ def check_resources() -> None:
     if "com.apple.widgetkit-extension" not in widget_info:
         fail("위젯 Info.plist 의 확장 포인트가 잘못되었습니다.")
 
+    check_app_icon()
+
+
+def check_app_icon() -> None:
+    """앱 아이콘이 iOS 요구사항(1024x1024, 알파 없는 PNG)을 만족하는지."""
+    import json
+    import struct
+
+    iconset = ROOT / "App/Resources/Assets.xcassets/AppIcon.appiconset"
+    contents = json.loads((iconset / "Contents.json").read_text(encoding="utf-8"))
+    images = contents.get("images", [])
+    filenames = [entry["filename"] for entry in images if entry.get("filename")]
+
+    if not filenames:
+        warn("앱 아이콘 이미지가 없습니다. 홈 화면에 빈 아이콘으로 표시됩니다.")
+        return
+
+    for filename in filenames:
+        path = iconset / filename
+        if not path.exists():
+            fail(f"Contents.json 이 없는 아이콘 파일을 가리킵니다: {filename}")
+            continue
+
+        data = path.read_bytes()
+        if data[:8] != b"\x89PNG\r\n\x1a\n":
+            fail(f"{filename} 이 PNG 가 아닙니다.")
+            continue
+
+        width, height, _, color_type = struct.unpack(">IIBB", data[16:26])
+        if (width, height) != (1024, 1024):
+            fail(f"{filename} 크기가 {width}x{height} 입니다. 1024x1024 여야 합니다.")
+        # 컬러타입 4(Gray+A) / 6(RGBA) 는 알파 채널을 포함한다.
+        # App Store Connect 는 알파가 있는 앱 아이콘을 거부한다.
+        if color_type in (4, 6):
+            fail(f"{filename} 에 알파 채널이 있습니다. 알파 없는 PNG 로 저장해야 합니다.")
+
+    print(f"  앱 아이콘 {len(filenames)}개 점검")
+
 
 # --------------------------------------------------------------------------
 # 4. 명언 데이터 정합성

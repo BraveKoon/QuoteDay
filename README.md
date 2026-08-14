@@ -135,6 +135,7 @@ python tools/check_project.py
 - **타겟 경계 위반** — 위젯이 앱 전용 타입을 참조하면 실패 (모듈이 다르므로 실제 컴파일 오류가 됨)
 - `@main` 이 타겟당 정확히 하나인지
 - entitlements / Info.plist / App Group 식별자 일치
+- 앱 아이콘이 1024x1024 이고 알파 채널이 없는지 (알파가 있으면 App Store 가 거부한다)
 
 macOS 에서는 여기에 더해:
 
@@ -159,7 +160,6 @@ xcodebuild -scheme QuoteDay -destination 'platform=iOS Simulator,name=iPhone 15'
 ## 7. 남아 있는 제한
 
 - 인물 초상 이미지는 포함되어 있지 않다(라이선스 문제). 현재는 이니셜 플레이스홀더.
-- 앱 아이콘 이미지가 비어 있다 — `AppIcon.appiconset` 에 1024pt PNG 를 넣어야 한다.
 - iOS 캘린더 연동은 **읽기 + 내보내기**만 지원한다. 기기 캘린더에서 수정한 내용이
   앱 일정으로 돌아오지는 않는다.
 - Live Activity(동적 섬)는 아직 없다.

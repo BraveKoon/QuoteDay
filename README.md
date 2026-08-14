@@ -65,7 +65,7 @@ QuoteDay/
 │   ├── ViewModels/      HomeViewModel, CalendarViewModel
 │   ├── Components/      QuoteCard, CategoryChip, ScheduleRow, CalendarDayCell, AuthorPortrait, EmptyState
 │   └── Views/           Home / Calendar / Schedule / Quote / Settings / RootTabView
-├── Widget/              QuoteWidget (Small·Medium·Large) + 타임라인 프로바이더
+├── Widget/              홈 화면(Small·Medium·Large) + 잠금화면(accessory) 위젯
 ├── Tests/               XCTest 51개
 └── tools/               프로젝트 생성기 + 정적 검증기
 ```
@@ -98,7 +98,9 @@ Swift 의 `Hasher` 는 프로세스마다 시드가 달라 쓸 수 없다.
 - 알림 탭 → `userInfo` 의 `quoteday://quote/<uuid>` → `AppRouter` → 명언 상세.
 
 ### 위젯
-- Small(명언) / Medium(명언+인물+카테고리) / Large(명언+인물+오늘의 일정+남은 시간)
+- 홈 화면: Small(명언) / Medium(명언+인물+카테고리) / Large(명언+인물+오늘의 일정+남은 시간)
+- 잠금화면·대기 화면: Inline(다음 일정 한 줄) / Circular(일정 시각) / Rectangular(명언+인물)
+  accessory 패밀리는 시스템이 색을 걷어내므로 클레이 표면 대신 대비와 정보 밀도만 남겼다.
 - 명언은 위젯이 **직접 계산**하고, 일정만 App Group 스냅샷에서 읽는다.
   스냅샷이 없어도 명언은 항상 나온다.
 - 타임라인은 자정까지 1시간 간격 + 자정 리로드.
@@ -160,5 +162,5 @@ xcodebuild -scheme QuoteDay -destination 'platform=iOS Simulator,name=iPhone 15'
 - 앱 아이콘 이미지가 비어 있다 — `AppIcon.appiconset` 에 1024pt PNG 를 넣어야 한다.
 - iOS 캘린더 연동은 **읽기 + 내보내기**만 지원한다. 기기 캘린더에서 수정한 내용이
   앱 일정으로 돌아오지는 않는다.
-- 잠금화면 위젯(accessory 패밀리)과 Live Activity 는 아직 없다.
+- Live Activity(동적 섬)는 아직 없다.
 - 현지화 파일은 없다. UI 문자열이 한국어로 하드코딩되어 있다.

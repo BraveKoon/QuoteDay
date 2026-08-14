@@ -7,7 +7,12 @@ import OSLog
 /// 그리고 `project.yml` 의 값만 바꾸면 된다.
 public enum AppGroup {
     public static let identifier = "group.com.quoteday.app"
+    /// 홈 화면 위젯 (Small / Medium / Large).
     public static let widgetKind = "QuoteDayQuoteWidget"
+    /// 잠금화면 · 대기 화면 위젯 (accessory 패밀리).
+    public static let lockScreenWidgetKind = "QuoteDayLockScreenWidget"
+    /// 일정이 바뀌었을 때 함께 갱신해야 하는 위젯 종류.
+    public static let allWidgetKinds = [widgetKind, lockScreenWidgetKind]
 
     /// App Group 이 아직 프로비저닝되지 않았으면 `standard` 로 자연스럽게 내려간다.
     /// (개발 초기에 팀 설정 없이도 앱이 동작하도록.)

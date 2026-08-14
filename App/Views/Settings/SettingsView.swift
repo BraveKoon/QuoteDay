@@ -253,14 +253,31 @@ struct SettingsView: View {
     private var widgetGuideCard: some View {
         card(title: "위젯 추가하기", symbol: "square.grid.2x2") {
             VStack(alignment: .leading, spacing: ClayTheme.Spacing.xs) {
+                Text("홈 화면")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
                 guideRow("1", "홈 화면을 길게 누릅니다.")
                 guideRow("2", "왼쪽 위 + 버튼을 누릅니다.")
                 guideRow("3", "\u{2018}QuoteDay\u{2019}를 검색해 원하는 크기를 추가합니다.")
-                Divider().opacity(0.2).padding(.vertical, 2)
                 Text("작게: 오늘의 명언 / 보통: 명언과 인물 / 크게: 명언과 오늘의 일정")
                     .font(ClayFont.caption())
                     .foregroundStyle(ClayTheme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
+
+                Divider().opacity(0.2).padding(.vertical, 2)
+
+                Text("잠금화면")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+                guideRow("1", "잠금화면을 길게 누르고 \u{2018}사용자화\u{2019}를 누릅니다.")
+                guideRow("2", "\u{2018}잠금 화면\u{2019}을 고른 뒤 시계 아래 영역을 누릅니다.")
+                guideRow("3", "\u{2018}QuoteDay\u{2019}를 찾아 추가합니다.")
+                Text("한 줄: 다음 일정 / 원형: 일정 시각 / 사각형: 명언과 인물. 같은 위젯이 대기 화면(StandBy)에도 표시됩니다.")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Divider().opacity(0.2).padding(.vertical, 2)
                 if !AppGroup.isConfigured {
                     Text("App Group 이 설정되지 않아 위젯에서 일정이 보이지 않을 수 있어요.")
                         .font(ClayFont.caption())

@@ -233,7 +233,9 @@ final class ScheduleStore {
             .map { $0.snapshot() }
 
         snapshotStore.save(WidgetSnapshot(generatedAt: .now, schedules: Array(relevant)))
-        WidgetCenter.shared.reloadTimelines(ofKind: AppGroup.widgetKind)
+        for kind in AppGroup.allWidgetKinds {
+            WidgetCenter.shared.reloadTimelines(ofKind: kind)
+        }
     }
 
     /// 앱 시작 시 호출. 오래 실행하지 않아 사라진 알림을 복구한다.

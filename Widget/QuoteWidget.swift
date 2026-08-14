@@ -103,5 +103,6 @@ struct QuoteWidget: Widget {
 struct QuoteDayWidgetBundle: WidgetBundle {
     var body: some Widget {
         QuoteWidget()
+        QuoteLockScreenWidget()
     }
 }

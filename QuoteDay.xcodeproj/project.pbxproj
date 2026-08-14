@@ -208,6 +208,10 @@
 			isa = PBXBuildFile;
 			fileRef = 6BDDF94451A76F3514755327 /* ScheduleItem.swift */;
 		};
+		DE6EA08B4E53C3E261437D33 = {
+			isa = PBXBuildFile;
+			fileRef = 92764A39C91CEA9700FC1043 /* LockScreenWidget.swift */;
+		};
 		E0F2D8D9B1C678E99C20443E = {
 			isa = PBXBuildFile;
 			fileRef = F073D177DF22CDE733B3CE27 /* Formatters.swift */;
@@ -479,6 +483,12 @@
 			path = AuthorPortrait.swift;
 			sourceTree = "<group>";
 		};
+		92764A39C91CEA9700FC1043 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = LockScreenWidget.swift;
+			sourceTree = "<group>";
+		};
 		977166F8078E4665587F2B0B = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -744,6 +754,7 @@
 			children = (
 				7BD832EF2A49D54A9CDC3E86 /* Assets.xcassets */,
 				BEE634E1756D117ED62F0B83 /* Info.plist */,
+				92764A39C91CEA9700FC1043 /* LockScreenWidget.swift */,
 				7732596E0B435CDA08567803 /* QuoteDayWidget.entitlements */,
 				DC88F77730B0A8B227917080 /* QuoteWidget.swift */,
 				F5735AE0F57BF45DE8DC20D3 /* QuoteWidgetViews.swift */,
@@ -1066,6 +1077,7 @@
 				A978B4F4E853643057590D68 /* QuoteCategoryOption.swift in Sources */,
 				B61EF751E16F2543F4AA2BD7 /* SharedStore.swift in Sources */,
 				D2668C38DF3F4E13A526C718 /* QuoteWidget.swift in Sources */,
+				DE6EA08B4E53C3E261437D33 /* LockScreenWidget.swift in Sources */,
 				E0F2D8D9B1C678E99C20443E /* Formatters.swift in Sources */,
 				EAE6423D6315601DD5B8C259 /* QuoteLibraryData.swift in Sources */,
 				F0198F0B08D2E24E555D431D /* QuoteService.swift in Sources */,

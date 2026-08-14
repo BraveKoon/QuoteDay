@@ -1,0 +1,4 @@
+wordwall_solver/build/
+wordwall_solver/dist/
+__pycache__/
+*.pyc

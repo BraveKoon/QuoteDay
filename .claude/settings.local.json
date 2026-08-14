@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install *)",
+      "Bash(pyinstaller --onefile --windowed --name \"WordwallScreenSolver\" --hidden-import=\"PIL._tkinter_finder\" --hidden-import=\"cv2\" screen_solver.py)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\danie\\\\OneDrive - 잠신중학교\\\\문서\\\\Claude Code\\\\wordwall_solver\\\\dist\" | Select-Object Name, @{N=\"크기\\(MB\\)\";E={[math]::Round\\($_.Length/1MB,1\\)}})",
+      "Bash(python test_screenshot.py)",
+      "Bash(where tesseract *)",
+      "Bash(\"C:\\\\Program Files\\\\Tesseract-OCR\\\\tesseract.exe\" --version)",
+      "Bash(pyinstaller --onefile --windowed --name \"WordwallScreenSolver\" --hidden-import=\"PIL._tkinter_finder\" --hidden-import=\"cv2\" --hidden-import=\"collections\" screen_solver.py)",
+      "Bash(del /f dist\\\\WordwallScreenSolver.exe)",
+      "WebFetch(domain:wordwall.net)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git add *)"
+    ]
+  }
+}

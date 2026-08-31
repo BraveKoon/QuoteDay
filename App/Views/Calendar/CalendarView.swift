@@ -145,13 +145,13 @@ struct CalendarView: View {
                 }
                 .clayCard()
             } else {
-                ForEach(schedules) { item in
+                ForEach(schedules) { occurrence in
                     ScheduleRow(
-                        item: item,
-                        showsCountdown: item.isUpcoming,
-                        onTap: { editorTarget = .edit(id: item.id) },
-                        onDelete: { store.delete(item) },
-                        onShuffleQuote: { store.shuffleQuote(for: item) }
+                        occurrence: occurrence,
+                        showsCountdown: occurrence.isUpcoming,
+                        onTap: { editorTarget = .edit(id: occurrence.scheduleID) },
+                        onDelete: { store.delete(occurrence.item) },
+                        onShuffleQuote: { store.shuffleQuote(for: occurrence.item) }
                     )
                 }
             }
@@ -220,7 +220,9 @@ struct CalendarView: View {
     /// 알림/위젯에서 특정 일정으로 들어온 경우 그 날짜를 선택한다.
     private func syncWithRouter() {
         guard let id = router.highlightedScheduleID, let item = store.item(id: id) else { return }
-        viewModel.select(item.startDate)
+        // 반복 일정은 첫 회차가 아니라 앞으로 올 회차의 날짜로 이동한다.
+        let occurrence = item.nextOccurrence() ?? item.firstOccurrence
+        viewModel.select(occurrence.start)
         editorTarget = .edit(id: id)
         router.highlightedScheduleID = nil
     }

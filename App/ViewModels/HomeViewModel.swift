@@ -54,23 +54,24 @@ final class HomeViewModel {
 
     // MARK: - 일정
 
-    var todaySchedules: [ScheduleItem] {
+    /// 오늘 시작하는 회차들. 반복 일정도 여기서 함께 나온다.
+    var todaySchedules: [ScheduleOccurrence] {
         store.schedules(on: .now)
     }
 
-    func nextSchedule(from date: Date = .now) -> ScheduleItem? {
+    func nextSchedule(from date: Date = .now) -> ScheduleOccurrence? {
         store.nextSchedule(after: date)
     }
 
     /// 다음 일정까지 남은 시간 문구. 없으면 nil.
     func countdownText(from date: Date = .now) -> String? {
         guard let next = nextSchedule(from: date) else { return nil }
-        return Formatters.countdown(to: next.startDate, from: date)
+        return Formatters.countdown(to: next.start, from: date)
     }
 
-    /// 다음 일정에 배정된 명언(미리보기용).
-    func quote(for item: ScheduleItem) -> QuotePresentation {
-        quoteService.presentation(for: item.resolvedQuote(using: quoteService))
+    /// 일정 회차에 배정된 명언(미리보기용).
+    func quote(for occurrence: ScheduleOccurrence) -> QuotePresentation {
+        quoteService.presentation(for: occurrence.resolvedQuote(using: quoteService))
     }
 
     var hasAnySchedule: Bool { !store.items.isEmpty }

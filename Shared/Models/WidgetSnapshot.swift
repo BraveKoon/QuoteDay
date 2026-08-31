@@ -17,6 +17,10 @@ public struct ScheduleSnapshot: Codable, Hashable, Identifiable, Sendable {
     }
 
     public var category: AppCategory { AppCategory(storedValue: categoryRaw) }
+
+    /// 반복 일정은 여러 회차가 같은 `id` 를 갖는다.
+    /// 목록에서 회차를 구분해야 할 때는 이 값을 쓴다.
+    public var occurrenceKey: String { "\(id.uuidString)@\(Int(start.timeIntervalSince1970))" }
 }
 
 /// 앱 → 위젯으로 넘기는 데이터 묶음.

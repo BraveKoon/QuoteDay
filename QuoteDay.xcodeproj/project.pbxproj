@@ -159,6 +159,10 @@
 			isa = PBXBuildFile;
 			fileRef = 68AF5F4C36CB6BD502ED293B /* CalendarView.swift */;
 		};
+		A3EFD6A913446758F74885C6 = {
+			isa = PBXBuildFile;
+			fileRef = 0147B67921CDA9A60E55A185 /* RecurrencePicker.swift */;
+		};
 		A611F1A0E3957787978AA87E = {
 			isa = PBXBuildFile;
 			fileRef = ECB8A315BC81E2AB5F7AD82D /* ScheduleAndNavigationTests.swift */;
@@ -228,6 +232,10 @@
 			isa = PBXBuildFile;
 			fileRef = 330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */;
 		};
+		EA127D7DA9AF5DD3A378C517 = {
+			isa = PBXBuildFile;
+			fileRef = F3A3F8E52A1F69398F2D4444 /* RecurrenceTests.swift */;
+		};
 		EAE6423D6315601DD5B8C259 = {
 			isa = PBXBuildFile;
 			fileRef = 2B5CC22705DFC11BC2CCAF19 /* QuoteLibraryData.swift */;
@@ -256,6 +264,10 @@
 			isa = PBXBuildFile;
 			fileRef = 5FA85081F75F9D3264BF4A88 /* NotificationService.swift */;
 		};
+		F543163AE1AD608F9654896D = {
+			isa = PBXBuildFile;
+			fileRef = F2829150112B2526E9BB263C /* ScheduleOccurrence.swift */;
+		};
 		F79E7F7801BFA303399230C6 = {
 			isa = PBXBuildFile;
 			fileRef = 78432620EB5EAAD902F01C15 /* QuoteLibrary.swift */;
@@ -263,6 +275,10 @@
 		FA2F2685730524FBA4B64937 = {
 			isa = PBXBuildFile;
 			fileRef = 1E5C87233090C8CFDB8B803C /* AuthorLibrary.swift */;
+		};
+		FBD1E60A8648A702A7AD11A1 = {
+			isa = PBXBuildFile;
+			fileRef = C8D39E1307079CA8DAEFACF0 /* RecurrenceRule.swift */;
 		};
 		FD41707ABC8F0F23C40EDD40 = {
 			isa = PBXBuildFile;
@@ -306,6 +322,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0147B67921CDA9A60E55A185 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = RecurrencePicker.swift;
+			sourceTree = "<group>";
+		};
 		0D23819310177CB1F080C484 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -579,6 +601,12 @@
 			path = Persistence.swift;
 			sourceTree = "<group>";
 		};
+		C8D39E1307079CA8DAEFACF0 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = RecurrenceRule.swift;
+			sourceTree = "<group>";
+		};
 		D550BB8FC789EF2AFF6F4056 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -633,6 +661,18 @@
 			path = Formatters.swift;
 			sourceTree = "<group>";
 		};
+		F2829150112B2526E9BB263C = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ScheduleOccurrence.swift;
+			sourceTree = "<group>";
+		};
+		F3A3F8E52A1F69398F2D4444 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = RecurrenceTests.swift;
+			sourceTree = "<group>";
+		};
 		F5735AE0F57BF45DE8DC20D3 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -684,7 +724,9 @@
 		14CEC3A21E54D2DD5AB31760 = {
 			isa = PBXGroup;
 			children = (
+				C8D39E1307079CA8DAEFACF0 /* RecurrenceRule.swift */,
 				6BDDF94451A76F3514755327 /* ScheduleItem.swift */,
+				F2829150112B2526E9BB263C /* ScheduleOccurrence.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -715,6 +757,7 @@
 				22C5EB5933AD18B1128F4542 /* CategoryChip.swift */,
 				3876A7BBD91A09B40EA3E1E9 /* EmptyStateView.swift */,
 				C6C0B3EB82F8AB2F6B75C190 /* QuoteCard.swift */,
+				0147B67921CDA9A60E55A185 /* RecurrencePicker.swift */,
 				4A21180D8A8F60CCF2AE357A /* ScheduleRow.swift */,
 			);
 			path = Components;
@@ -809,6 +852,7 @@
 			isa = PBXGroup;
 			children = (
 				330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */,
+				F3A3F8E52A1F69398F2D4444 /* RecurrenceTests.swift */,
 				16FBAC84771CF89D20788E56 /* RemoteQuoteTests.swift */,
 				ECB8A315BC81E2AB5F7AD82D /* ScheduleAndNavigationTests.swift */,
 			);
@@ -1060,6 +1104,7 @@
 				99F344420C5988238B2BBED4 /* AppSettings.swift in Sources */,
 				9A18AB2F56FD7DE300151D28 /* Author.swift in Sources */,
 				9AA3D50A8A3F3B6C7B7FDB41 /* CalendarView.swift in Sources */,
+				A3EFD6A913446758F74885C6 /* RecurrencePicker.swift in Sources */,
 				B2A65AB6AA7F9C3D6377A514 /* DeepLink.swift in Sources */,
 				B36E03D938949E98FEE3A7B3 /* QuoteLibraryData.swift in Sources */,
 				BC3E8BCB2ABD0370A9F91A47 /* CalendarService.swift in Sources */,
@@ -1073,8 +1118,10 @@
 				EF1C01EDDF6569CB6FBF05CB /* Persistence.swift in Sources */,
 				F01FF9526EF3C15B534C0096 /* RootTabView.swift in Sources */,
 				F312B673E8A7311A0F950A00 /* NotificationService.swift in Sources */,
+				F543163AE1AD608F9654896D /* ScheduleOccurrence.swift in Sources */,
 				F79E7F7801BFA303399230C6 /* QuoteLibrary.swift in Sources */,
 				FA2F2685730524FBA4B64937 /* AuthorLibrary.swift in Sources */,
+				FBD1E60A8648A702A7AD11A1 /* RecurrenceRule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1084,6 +1131,7 @@
 			files = (
 				A611F1A0E3957787978AA87E /* ScheduleAndNavigationTests.swift in Sources */,
 				E90E1911D37099FEB85CD56F /* QuoteEngineTests.swift in Sources */,
+				EA127D7DA9AF5DD3A378C517 /* RecurrenceTests.swift in Sources */,
 				FE97EB8251F358EEC0393B72 /* RemoteQuoteTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

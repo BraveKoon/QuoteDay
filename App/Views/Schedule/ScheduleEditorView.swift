@@ -54,6 +54,7 @@ struct ScheduleEditorView: View {
                 VStack(spacing: ClayTheme.Spacing.m) {
                     titleField
                     timeCard
+                    repeatCard
                     categoryCard
                     notificationCard
                     memoCard
@@ -115,7 +116,7 @@ struct ScheduleEditorView: View {
                 Text("설정 앱 > QuoteDay > 알림에서 허용하면 명언 알림을 받을 수 있어요. 알림 없이도 일정은 정상적으로 저장됩니다.")
             }
             .confirmationDialog(
-                "이 일정을 삭제할까요?",
+                deleteConfirmationTitle,
                 isPresented: $showsDeleteConfirmation,
                 titleVisibility: .visible
             ) {
@@ -154,6 +155,10 @@ struct ScheduleEditorView: View {
                     // 시작을 옮기면 길이를 유지한 채 종료도 함께 옮긴다.
                     let duration = draft.endDate.timeIntervalSince(oldValue)
                     draft.endDate = newValue.addingTimeInterval(max(duration, 0))
+                    // 시작이 반복 종료일을 지나가면 종료일도 밀어 준다.
+                    if let repeatEnd = draft.recurrence.endDate, repeatEnd < newValue {
+                        draft.recurrence.endDate = defaultRepeatEndDate
+                    }
                 }
             Divider().opacity(0.2)
             DatePicker("종료", selection: $draft.endDate, in: draft.startDate...)
@@ -161,6 +166,55 @@ struct ScheduleEditorView: View {
         }
         .tint(ClayTheme.accent)
         .foregroundStyle(ClayTheme.textPrimary)
+        .padding(ClayTheme.Spacing.m)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .clayCard()
+    }
+
+    private var repeatCard: some View {
+        VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+            fieldLabel("반복")
+            RecurrencePicker(selection: frequencyBinding)
+
+            if draft.recurrence.isRepeating {
+                Divider().opacity(0.2)
+
+                Toggle(isOn: repeatEndEnabledBinding) {
+                    Text("반복 종료일 정하기")
+                        .font(ClayFont.callout())
+                        .foregroundStyle(ClayTheme.textPrimary)
+                }
+                .tint(ClayTheme.accent)
+
+                if draft.recurrence.endDate != nil {
+                    DatePicker(
+                        "종료 날짜",
+                        selection: repeatEndDateBinding,
+                        in: draft.startDate...,
+                        displayedComponents: .date
+                    )
+                    .font(ClayFont.callout())
+                    .tint(ClayTheme.accent)
+                    .foregroundStyle(ClayTheme.textPrimary)
+                }
+
+                Text(draft.recurrence.summary(anchor: draft.startDate))
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+
+                if startsOnWeekendWithWeekdayRepeat {
+                    Text("주말에 시작하는 주중 반복은 다음 평일부터 시작해요.")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                }
+
+                if isEditing {
+                    Text("반복 일정을 고치면 모든 회차에 함께 적용돼요.")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                }
+            }
+        }
         .padding(ClayTheme.Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
         .clayCard()
@@ -199,14 +253,14 @@ struct ScheduleEditorView: View {
                     Text("명언 알림")
                         .font(ClayFont.headline())
                         .foregroundStyle(ClayTheme.textPrimary)
-                    Text("시작 시간에 이 카테고리의 명언을 보내 드려요.")
+                    Text(notificationDescription)
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
                 }
             }
             .tint(ClayTheme.accent)
 
-            if draft.startDate <= .now && draft.isQuoteNotificationEnabled {
+            if draft.isQuoteNotificationEnabled && !hasUpcomingOccurrence {
                 Text("이미 지난 시간이라 알림은 예약되지 않아요.")
                     .font(ClayFont.caption())
                     .foregroundStyle(ClayTheme.danger)
@@ -262,6 +316,11 @@ struct ScheduleEditorView: View {
         .clayCard(tint: draft.category.tint.opacity(0.35))
     }
 
+    /// 반복 일정은 회차 하나가 아니라 시리즈 전체가 지워진다.
+    private var deleteConfirmationTitle: String {
+        editingItem?.isRecurring == true ? "반복되는 회차를 모두 삭제할까요?" : "이 일정을 삭제할까요?"
+    }
+
     private func fieldLabel(_ text: String) -> some View {
         Text(text)
             .font(ClayFont.caption())
@@ -269,6 +328,75 @@ struct ScheduleEditorView: View {
     }
 
     // MARK: - 동작
+
+    /// 주기를 바꾸면 종료일도 함께 정리한다(반복 안 함 → 종료일 없음).
+    private var frequencyBinding: Binding<RecurrenceFrequency> {
+        Binding(
+            get: { draft.recurrence.frequency },
+            set: { newValue in
+                draft.recurrence = RecurrenceRule(
+                    frequency: newValue,
+                    endDate: draft.recurrence.endDate
+                )
+            }
+        )
+    }
+
+    private var repeatEndEnabledBinding: Binding<Bool> {
+        Binding(
+            get: { draft.recurrence.endDate != nil },
+            set: { isOn in draft.recurrence.endDate = isOn ? defaultRepeatEndDate : nil }
+        )
+    }
+
+    private var repeatEndDateBinding: Binding<Date> {
+        Binding(
+            get: { draft.recurrence.endDate ?? defaultRepeatEndDate },
+            set: { draft.recurrence.endDate = $0 }
+        )
+    }
+
+    /// 종료일을 처음 켤 때 제안하는 날짜.
+    private var defaultRepeatEndDate: Date {
+        Calendar.current.date(byAdding: .month, value: 3, to: draft.startDate) ?? draft.startDate
+    }
+
+    /// 주말에 시작하는 "주중 매일" 은 그날 회차가 없다. 저장이 안 된 것처럼 보이지 않게 알려 준다.
+    private var startsOnWeekendWithWeekdayRepeat: Bool {
+        guard draft.recurrence.frequency == .weekday else { return false }
+        let weekday = Calendar.current.component(.weekday, from: draft.startDate)
+        return weekday == 1 || weekday == 7
+    }
+
+    private var notificationDescription: String {
+        draft.recurrence.isRepeating
+            ? "반복되는 회차마다 이 카테고리의 명언을 새로 골라 보내 드려요."
+            : "시작 시간에 이 카테고리의 명언을 보내 드려요."
+    }
+
+    /// 앞으로 알림을 보낼 회차가 남아 있는지. 반복 일정은 시작이 지났어도 남아 있을 수 있다.
+    private var hasUpcomingOccurrence: Bool {
+        if draft.startDate > .now { return true }
+        guard draft.recurrence.isRepeating else { return false }
+
+        let now = Date.now
+        let calendar = Calendar.current
+        guard
+            let horizon = calendar.date(
+                byAdding: .day,
+                value: NotificationService.scheduleHorizonDays,
+                to: now
+            )
+        else { return false }
+
+        return !draft.recurrence.occurrenceStarts(
+            anchor: draft.startDate,
+            from: now,
+            to: horizon,
+            limit: 1,
+            calendar: calendar
+        ).isEmpty
+    }
 
     private var resolvedPreviewQuote: Quote {
         if let slug = draft.quoteSlug, let quote = quoteService.quote(slug: slug) {

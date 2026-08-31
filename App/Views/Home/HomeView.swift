@@ -90,7 +90,7 @@ struct HomeView: View {
                             .font(ClayFont.caption())
                             .foregroundStyle(ClayTheme.textSecondary)
                         Spacer()
-                        if let countdown = Formatters.countdown(to: next.startDate, from: context.date) {
+                        if let countdown = Formatters.countdown(to: next.start, from: context.date) {
                             Text(countdown)
                                 .font(ClayFont.headline())
                                 .foregroundStyle(ClayTheme.accent)
@@ -103,8 +103,14 @@ struct HomeView: View {
                             .font(ClayFont.headline())
                             .foregroundStyle(ClayTheme.textPrimary)
                             .lineLimit(1)
+                        if next.isRecurring {
+                            Image(systemName: "repeat")
+                                .font(ClayFont.caption())
+                                .foregroundStyle(ClayTheme.textSecondary)
+                                .accessibilityLabel("반복 일정")
+                        }
                         Spacer(minLength: 0)
-                        Text(Formatters.time.string(from: next.startDate))
+                        Text(Formatters.time.string(from: next.start))
                             .font(ClayFont.callout())
                             .foregroundStyle(ClayTheme.textSecondary)
                     }
@@ -164,13 +170,13 @@ struct HomeView: View {
                 }
                 .clayCard()
             } else {
-                ForEach(schedules) { item in
+                ForEach(schedules) { occurrence in
                     ScheduleRow(
-                        item: item,
-                        showsCountdown: item.isUpcoming,
-                        onTap: { editorTarget = .edit(id: item.id) },
-                        onDelete: { store.delete(item) },
-                        onShuffleQuote: { store.shuffleQuote(for: item) }
+                        occurrence: occurrence,
+                        showsCountdown: occurrence.isUpcoming,
+                        onTap: { editorTarget = .edit(id: occurrence.scheduleID) },
+                        onDelete: { store.delete(occurrence.item) },
+                        onShuffleQuote: { store.shuffleQuote(for: occurrence.item) }
                     )
                 }
             }

@@ -9,6 +9,7 @@
 - 최소 지원 버전: **iOS 17.0**
 - 명언·인물 데이터가 번들에 내장되어 **네트워크 없이도 모든 기능이 동작**
 - 오늘의 명언은 선택적으로 [ZenQuotes](https://zenquotes.io/) `/today` 에서 갱신 (끄면 완전 오프라인)
+- 버전별 변경 사항은 [CHANGELOG.md](CHANGELOG.md) 에 정리한다
 
 ---
 

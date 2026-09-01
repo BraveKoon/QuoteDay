@@ -17,3 +17,7 @@ __pycache__/
 # 이 저장소는 QuoteDay 앱 전용이다.
 # wordwall_solver 는 별도 프로젝트라 로컬에만 남겨 두고 추적하지 않는다.
 wordwall_solver/
+
+# 에이전트 스킬 설치물 (개인 도구, 앱 저장소에는 포함하지 않는다)
+.claude/skills/
+skills-lock.json

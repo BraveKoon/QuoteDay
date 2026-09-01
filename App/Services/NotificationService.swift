@@ -22,8 +22,13 @@ final class NotificationService {
     static let dailyQuoteHorizonDays = 14
     /// iOS 는 앱당 64개의 대기 알림만 유지한다. 일정 알림은 가까운 순서로 잘라 낸다.
     static let maxScheduledItemNotifications = 40
+    /// 반복 일정 하나가 가져갈 수 있는 대기 알림 수. 한 일정이 예산을 다 쓰지 않게 한다.
+    static let maxNotificationsPerSchedule = 8
+    /// 반복 회차를 미리 예약해 두는 기간. 앱을 열 때마다 다시 채운다.
+    static let scheduleHorizonDays = 60
 
     private static let dailyQuotePrefix = "daily-quote-"
+    private static let schedulePrefix = "schedule-"
 
     init(
         center: UNUserNotificationCenter = .current(),
@@ -81,74 +86,135 @@ final class NotificationService {
 
     // MARK: - 일정 알림
 
-    /// 일정 하나에 대한 명언 알림을 예약한다. 이미 있으면 교체한다.
+    /// 일정 하나의 명언 알림을 예약한다. 이미 있으면 교체한다.
+    ///
+    /// 반복 일정이면 `scheduleHorizonDays` 안의 회차를
+    /// `maxNotificationsPerSchedule` 개까지 미리 예약한다.
+    /// 반복 트리거를 쓰지 않는 이유는 회차마다 다른 명언을 담기 위해서다.
     func schedule(for item: ScheduleItem) async {
-        cancel(scheduleID: item.id)
+        await cancelAll(scheduleID: item.id)
 
         guard item.isQuoteNotificationEnabled else { return }
-        guard item.startDate > .now else {
-            AppLog.notifications.debug("과거 일정이라 알림을 예약하지 않습니다: \(item.displayTitle, privacy: .public)")
+
+        let occurrences = upcomingOccurrences(for: item)
+        guard !occurrences.isEmpty else {
+            AppLog.notifications.debug("예약할 회차가 없어 건너뜁니다: \(item.displayTitle, privacy: .public)")
             return
         }
         guard await requestAuthorizationIfNeeded() else { return }
 
-        let quote = item.resolvedQuote(using: quoteService)
+        for occurrence in occurrences {
+            await add(occurrence)
+        }
+    }
+
+    /// 지금부터 예약 기간 안에 남아 있는 회차.
+    private func upcomingOccurrences(for item: ScheduleItem, from date: Date = .now) -> [ScheduleOccurrence] {
+        guard let horizon = calendar.date(byAdding: .day, value: Self.scheduleHorizonDays, to: date) else {
+            return []
+        }
+        return item.occurrences(
+            from: date.addingTimeInterval(1),
+            to: horizon,
+            limit: Self.maxNotificationsPerSchedule,
+            calendar: calendar
+        )
+    }
+
+    /// 회차 하나를 알림 센터에 등록한다.
+    private func add(_ occurrence: ScheduleOccurrence) async {
+        let quote = occurrence.resolvedQuote(using: quoteService)
         let author = quoteService.author(for: quote)
-        let category = item.category
+        let category = occurrence.category
 
         let content = UNMutableNotificationContent()
         content.title = "\(category.emoji) \(category.notificationLead)"
-        content.subtitle = item.displayTitle
+        content.subtitle = occurrence.displayTitle
         content.body = "\u{201C}\(quote.text)\u{201D}\n— \(author.displayName)"
         content.sound = .default
         content.userInfo = [
             NotificationPayloadKey.deepLink: DeepLink.quote(quote.id).url.absoluteString,
             NotificationPayloadKey.quoteID: quote.id.uuidString,
-            NotificationPayloadKey.scheduleID: item.id.uuidString,
+            NotificationPayloadKey.scheduleID: occurrence.scheduleID.uuidString,
             NotificationPayloadKey.category: category.rawValue
         ]
 
         let components = calendar.dateComponents(
             [.year, .month, .day, .hour, .minute],
-            from: item.startDate
+            from: occurrence.start
         )
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         let request = UNNotificationRequest(
-            identifier: item.notificationIdentifier,
+            identifier: occurrence.notificationIdentifier,
             content: content,
-            trigger: trigger
+            trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         )
 
         do {
             try await center.add(request)
-            AppLog.notifications.debug("알림 예약: \(item.displayTitle, privacy: .public)")
+            AppLog.notifications.debug("알림 예약: \(occurrence.displayTitle, privacy: .public)")
         } catch {
             AppLog.notifications.error("알림 예약 실패: \(error.localizedDescription, privacy: .public)")
         }
     }
 
+    /// 일정 하나에 딸린 알림을 모두 지운다(반복 회차 포함).
     func cancel(scheduleID: UUID) {
-        center.removePendingNotificationRequests(withIdentifiers: ["schedule-\(scheduleID.uuidString)"])
+        center.removePendingNotificationRequests(withIdentifiers: ["\(Self.schedulePrefix)\(scheduleID.uuidString)"])
+        Task { await cancelAll(scheduleID: scheduleID) }
+    }
+
+    /// 같은 일정의 회차 알림까지 지운 뒤에 돌아온다.
+    /// 새로 예약하기 직전에는 이 쪽을 써야 방금 만든 알림이 지워지지 않는다.
+    private func cancelAll(scheduleID: UUID) async {
+        let prefix = "\(Self.schedulePrefix)\(scheduleID.uuidString)"
+        let identifiers = await center.pendingNotificationRequests()
+            .map(\.identifier)
+            .filter { $0.hasPrefix(prefix) }
+        guard !identifiers.isEmpty else { return }
+        center.removePendingNotificationRequests(withIdentifiers: identifiers)
     }
 
     /// 저장된 일정 전체를 기준으로 대기 알림을 다시 만든다.
     ///
     /// 앱을 오랫동안 실행하지 않아 예약이 사라졌거나, 설정이 바뀐 뒤에 호출한다.
+    /// 반복 일정이 있으면 회차가 금방 64개 제한에 닿기 때문에
+    /// 전체를 시간순으로 모아 가까운 것부터 예산만큼만 채운다.
     func rescheduleAll(items: [ScheduleItem]) async {
-        let identifiers = items.map(\.notificationIdentifier)
-        center.removePendingNotificationRequests(withIdentifiers: identifiers)
+        await cancelAllScheduleNotifications()
+
+        let now = Date.now
+        guard let horizon = calendar.date(byAdding: .day, value: Self.scheduleHorizonDays, to: now) else {
+            return
+        }
 
         let upcoming = items
-            .filter { $0.isQuoteNotificationEnabled && $0.startDate > .now }
-            .sorted { $0.startDate < $1.startDate }
+            .filter(\.isQuoteNotificationEnabled)
+            .flatMap {
+                $0.occurrences(
+                    from: now.addingTimeInterval(1),
+                    to: horizon,
+                    limit: Self.maxNotificationsPerSchedule,
+                    calendar: calendar
+                )
+            }
+            .sorted { $0.start < $1.start }
             .prefix(Self.maxScheduledItemNotifications)
 
         guard !upcoming.isEmpty else { return }
         guard await requestAuthorizationIfNeeded() else { return }
 
-        for item in upcoming {
-            await schedule(for: item)
+        for occurrence in upcoming {
+            await add(occurrence)
         }
+    }
+
+    /// 일정에서 만들어진 대기 알림 전체를 지운다.
+    private func cancelAllScheduleNotifications() async {
+        let identifiers = await center.pendingNotificationRequests()
+            .map(\.identifier)
+            .filter { $0.hasPrefix(Self.schedulePrefix) }
+        guard !identifiers.isEmpty else { return }
+        center.removePendingNotificationRequests(withIdentifiers: identifiers)
     }
 
     // MARK: - 매일의 명언

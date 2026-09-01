@@ -95,7 +95,8 @@ final class CalendarService {
         title: String,
         start: Date,
         end: Date,
-        notes: String?
+        notes: String?,
+        recurrence: RecurrenceRule = .none
     ) async -> String? {
         guard await requestWriteAccess() else { return nil }
         guard let target = store.defaultCalendarForNewEvents else {
@@ -109,9 +110,12 @@ final class CalendarService {
         event.endDate = max(end, start)
         event.notes = notes
         event.calendar = target
+        if let rule = Self.recurrenceRule(for: recurrence) {
+            event.addRecurrenceRule(rule)
+        }
 
         do {
-            try store.save(event, span: .thisEvent, commit: true)
+            try store.save(event, span: recurrence.isRepeating ? .futureEvents : .thisEvent, commit: true)
             return event.eventIdentifier
         } catch {
             record(error)
@@ -125,11 +129,18 @@ final class CalendarService {
         title: String,
         start: Date,
         end: Date,
-        notes: String?
+        notes: String?,
+        recurrence: RecurrenceRule = .none
     ) async -> String? {
         guard await requestWriteAccess() else { return nil }
         guard let event = store.event(withIdentifier: identifier) else {
-            return await export(title: title, start: start, end: end, notes: notes)
+            return await export(
+                title: title,
+                start: start,
+                end: end,
+                notes: notes,
+                recurrence: recurrence
+            )
         }
 
         event.title = title
@@ -137,8 +148,16 @@ final class CalendarService {
         event.endDate = max(end, start)
         event.notes = notes
 
+        // 반복 규칙은 통째로 갈아 끼운다. 남겨 두면 예전 규칙과 겹친다.
+        for existing in event.recurrenceRules ?? [] {
+            event.removeRecurrenceRule(existing)
+        }
+        if let rule = Self.recurrenceRule(for: recurrence) {
+            event.addRecurrenceRule(rule)
+        }
+
         do {
-            try store.save(event, span: .thisEvent, commit: true)
+            try store.save(event, span: recurrence.isRepeating ? .futureEvents : .thisEvent, commit: true)
             return event.eventIdentifier
         } catch {
             record(error)
@@ -149,9 +168,45 @@ final class CalendarService {
     func removeExported(identifier: String) {
         guard canWrite, let event = store.event(withIdentifier: identifier) else { return }
         do {
-            try store.remove(event, span: .thisEvent, commit: true)
+            // 반복 일정이면 뒤따르는 회차까지 함께 지운다.
+            let span: EKSpan = (event.recurrenceRules?.isEmpty == false) ? .futureEvents : .thisEvent
+            try store.remove(event, span: span, commit: true)
         } catch {
             record(error)
+        }
+    }
+
+    /// 앱의 반복 규칙을 EventKit 규칙으로 옮긴다. 반복하지 않으면 nil.
+    private static func recurrenceRule(for recurrence: RecurrenceRule) -> EKRecurrenceRule? {
+        guard recurrence.isRepeating else { return nil }
+        let end = recurrence.endDate.map { EKRecurrenceEnd(end: $0) }
+
+        switch recurrence.frequency {
+        case .none:
+            return nil
+        case .daily:
+            return EKRecurrenceRule(recurrenceWith: .daily, interval: 1, end: end)
+        case .weekday:
+            let weekdays: [EKWeekday] = [.monday, .tuesday, .wednesday, .thursday, .friday]
+            return EKRecurrenceRule(
+                recurrenceWith: .weekly,
+                interval: 1,
+                daysOfTheWeek: weekdays.map { EKRecurrenceDayOfWeek($0) },
+                daysOfTheMonth: nil,
+                monthsOfTheYear: nil,
+                weeksOfTheYear: nil,
+                daysOfTheYear: nil,
+                setPositions: nil,
+                end: end
+            )
+        case .weekly:
+            return EKRecurrenceRule(recurrenceWith: .weekly, interval: 1, end: end)
+        case .biweekly:
+            return EKRecurrenceRule(recurrenceWith: .weekly, interval: 2, end: end)
+        case .monthly:
+            return EKRecurrenceRule(recurrenceWith: .monthly, interval: 1, end: end)
+        case .yearly:
+            return EKRecurrenceRule(recurrenceWith: .yearly, interval: 1, end: end)
         }
     }
 

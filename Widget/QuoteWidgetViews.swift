@@ -130,7 +130,7 @@ struct QuoteWidgetEntryView: View {
                         .foregroundStyle(ClayTheme.textSecondary)
                         .lineLimit(2)
                 } else {
-                    ForEach(entry.todaySchedules.prefix(3)) { schedule in
+                    ForEach(entry.todaySchedules.prefix(3), id: \.occurrenceKey) { schedule in
                         scheduleRow(schedule)
                     }
                     if entry.todaySchedules.count > 3 {

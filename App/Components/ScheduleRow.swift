@@ -1,8 +1,10 @@
 import SwiftUI
 
 /// 일정 한 줄. 홈의 "오늘의 일정"과 캘린더 하단 목록에서 함께 쓴다.
+///
+/// 반복 일정도 회차 단위로 들어오기 때문에 표시되는 시각은 항상 그날의 것이다.
 struct ScheduleRow: View {
-    let item: ScheduleItem
+    let occurrence: ScheduleOccurrence
     var showsCountdown: Bool = false
     var onTap: (() -> Void)?
     var onDelete: (() -> Void)?
@@ -42,11 +44,11 @@ struct ScheduleRow: View {
     private var content: some View {
         HStack(spacing: ClayTheme.Spacing.s) {
             VStack(spacing: 2) {
-                Text(Formatters.time.string(from: item.startDate))
+                Text(Formatters.time.string(from: occurrence.start))
                     .font(ClayFont.headline())
                     .foregroundStyle(ClayTheme.textPrimary)
-                if item.duration > 0 {
-                    Text(Formatters.time.string(from: item.endDate))
+                if occurrence.duration > 0 {
+                    Text(Formatters.time.string(from: occurrence.end))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
                 }
@@ -58,26 +60,32 @@ struct ScheduleRow: View {
 
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: ClayTheme.Spacing.xs) {
-                    Text(item.category.emoji)
-                    Text(item.displayTitle)
+                    Text(occurrence.category.emoji)
+                    Text(occurrence.displayTitle)
                         .font(ClayFont.headline())
                         .foregroundStyle(ClayTheme.textPrimary)
                         .lineLimit(2)
                 }
 
                 HStack(spacing: ClayTheme.Spacing.xs) {
-                    Text(item.category.title)
+                    Text(occurrence.category.title)
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
 
-                    if item.isQuoteNotificationEnabled {
+                    if occurrence.isRecurring {
+                        Image(systemName: "repeat")
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.textSecondary)
+                    }
+
+                    if occurrence.isQuoteNotificationEnabled {
                         Label("명언 알림", systemImage: "bell.fill")
                             .font(ClayFont.caption())
                             .labelStyle(.iconOnly)
                             .foregroundStyle(ClayTheme.accent)
                     }
 
-                    if showsCountdown, let countdown = Formatters.countdown(to: item.startDate) {
+                    if showsCountdown, let countdown = Formatters.countdown(to: occurrence.start) {
                         Text(countdown)
                             .font(ClayFont.caption())
                             .foregroundStyle(ClayTheme.accent)
@@ -88,7 +96,7 @@ struct ScheduleRow: View {
             Spacer(minLength: 0)
 
             Circle()
-                .fill(item.category.tint)
+                .fill(occurrence.category.tint)
                 .frame(width: 10, height: 10)
         }
         .padding(ClayTheme.Spacing.s + 2)
@@ -98,12 +106,15 @@ struct ScheduleRow: View {
 
     private var accessibilityText: String {
         var parts = [
-            Formatters.timeRange(item.startDate, item.endDate),
-            item.displayTitle,
-            item.category.title
+            Formatters.timeRange(occurrence.start, occurrence.end),
+            occurrence.displayTitle,
+            occurrence.category.title
         ]
-        if item.isQuoteNotificationEnabled { parts.append("명언 알림 켜짐") }
-        if showsCountdown, let countdown = Formatters.countdown(to: item.startDate) {
+        if occurrence.isRecurring {
+            parts.append("반복 일정, \(occurrence.item.recurrence.summary(anchor: occurrence.item.startDate))")
+        }
+        if occurrence.isQuoteNotificationEnabled { parts.append("명언 알림 켜짐") }
+        if showsCountdown, let countdown = Formatters.countdown(to: occurrence.start) {
             parts.append(countdown)
         }
         return parts.joined(separator: ", ")

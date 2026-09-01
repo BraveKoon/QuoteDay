@@ -2,12 +2,14 @@
 
 매일의 명언과 일정을 연결하는 iOS 앱. 일정을 등록하면 그 시간에 **카테고리에 어울리는 명언**이
 알림으로 오고, 알림이나 홈 화면 위젯을 누르면 명언 상세와 인물 소개로 바로 들어간다.
+일정에는 **반복**(매일 / 주중 / 매주 / 격주 / 매월 / 매년)을 걸 수 있다.
 전체 UI 는 Claymorphism(클레이모피즘)으로 통일했다.
 
 - Swift 5 / SwiftUI / SwiftData / WidgetKit / AppIntents / UserNotifications / EventKit
 - 최소 지원 버전: **iOS 17.0**
 - 명언·인물 데이터가 번들에 내장되어 **네트워크 없이도 모든 기능이 동작**
 - 오늘의 명언은 선택적으로 [ZenQuotes](https://zenquotes.io/) `/today` 에서 갱신 (끄면 완전 오프라인)
+- 버전별 변경 사항은 [CHANGELOG.md](CHANGELOG.md) 에 정리한다
 
 ---
 
@@ -62,12 +64,14 @@ QuoteDay/
 │   └── AppIntents/      위젯 구성 인텐트
 ├── App/
 │   ├── Models/          ScheduleItem (SwiftData @Model) + ScheduleValidator
+│   │                    RecurrenceRule(반복 규칙·회차 계산) + ScheduleOccurrence(회차)
 │   ├── Services/        Persistence, ScheduleStore, NotificationService, CalendarService, AppSettings
 │   ├── ViewModels/      HomeViewModel, CalendarViewModel
-│   ├── Components/      QuoteCard, CategoryChip, ScheduleRow, CalendarDayCell, AuthorPortrait, EmptyState
+│   ├── Components/      QuoteCard, CategoryChip, RecurrencePicker, ScheduleRow, CalendarDayCell,
+│   │                    AuthorPortrait, EmptyState
 │   └── Views/           Home / Calendar / Schedule / Quote / Settings / RootTabView
 ├── Widget/              홈 화면(Small·Medium·Large) + 잠금화면(accessory) 위젯
-├── Tests/               XCTest 74개
+├── Tests/               XCTest 98개
 └── tools/               프로젝트 생성기 + 정적 검증기
 ```
 
@@ -90,6 +94,22 @@ Swift 의 `Hasher` 는 프로세스마다 시드가 달라 쓸 수 없다.
 관련 카테고리를 끌어온다. 최종 선택은 `일정 ID + 시작 시각` seed 로 고정되어,
 일정을 수정하기 전까지 예고된 명언이 바뀌지 않는다.
 
+### 반복 일정
+반복 회차를 행으로 복제해 저장하지 않는다. 일정 한 건에 **반복 규칙(주기 + 선택적 종료일)** 만
+저장하고, 화면에 필요한 구간의 회차를 `RecurrenceRule.occurrenceStarts` 로 그때그때 계산한다
+(`ScheduleOccurrence`). "매일 · 종료 없음" 도 저장 비용이 일정 한 건과 같고,
+규칙을 고치면 지난 회차까지 한 번에 정리된다.
+
+- 주기: 매일 / 주중 매일(월–금) / 매주 / 2주마다 / 매월 / 매년.
+- 계산은 **항상 첫 회차 기준**이다. 31일에 시작한 매월 반복은 2월에 28일로 당겨지지만
+  3월에는 다시 31일로 돌아온다(직전 회차 기준으로 계산하면 날짜가 앞으로 밀려 굳는다).
+- 창(window)이 아무리 먼 미래여도 첫 후보 위치를 계산으로 건너뛰므로,
+  몇 년 전에 시작한 반복 일정도 순회 비용이 창 크기에만 비례한다.
+- 회차마다 seed 가 달라 **회차별로 다른 명언**이 배정된다. 편집 화면에서 명언을 고정하면
+  모든 회차가 그 명언을 쓴다.
+- 수정·삭제는 회차 하나가 아니라 **반복 전체**에 적용된다(회차별 예외는 두지 않았다).
+- iOS 캘린더로 내보낼 때는 `EKRecurrenceRule` 로 옮겨 기기 캘린더에서도 반복으로 보인다.
+
 ### 오늘의 명언 소스 (ZenQuotes)
 설정에서 켜면(기본값) 오늘의 명언을 ZenQuotes `/today` 에서 받아온다. 다만 **적용 범위를 제한했다.**
 
@@ -107,6 +127,9 @@ Swift 의 `Hasher` 는 프로세스마다 시드가 달라 쓸 수 없다.
 ### 알림
 - 권한은 앱 시작 시가 아니라 **사용자가 명언 알림을 켜는 순간** 요청한다.
 - 일정 알림: 시작 시각에 `UNCalendarNotificationTrigger` 로 1회 예약.
+- 반복 일정: 회차마다 다른 명언을 담아야 하므로 반복 트리거를 쓰지 않고
+  **60일 안의 회차를 일정당 최대 8개**까지 미리 예약한다. iOS 의 앱당 64개 제한이 있어
+  전체 일정 알림은 가까운 순서로 40개까지만 채우고, 앱을 열 때마다 다시 채운다.
 - 매일의 명언: 반복 트리거는 본문을 바꿀 수 없으므로 **14일치를 하루 단위로 미리 예약**하고
   앱을 열 때마다 갱신한다.
 - 앱을 오래 켜지 않아 예약이 소진되면 `refreshOnLaunch()` 가 전부 다시 만든다.
@@ -130,6 +153,8 @@ Swift 의 `Hasher` 는 프로세스마다 시드가 달라 쓸 수 없다.
 | App Group 미설정 | `UserDefaults.standard` 로 내려가고 설정 화면에 경고 표시 |
 | SwiftData 스토어 손상 | 로컬 → 메모리 순으로 내려감 (크래시 없음) |
 | 저장된 카테고리를 모름 | `.etc` 로 강등 |
+| 저장된 반복 주기를 모름 | "반복 안 함" 으로 강등 |
+| 반복 필드가 없던 이전 버전 저장소 | 기본값(`none`)으로 읽혀 마이그레이션 없이 열린다 |
 | 명언 slug 가 사라짐 | 카테고리에서 다시 계산 |
 | 오래된 딥링크 | "명언을 찾을 수 없어요" 빈 상태 |
 | 네트워크 없음 | ZenQuotes 갱신만 건너뛰고 내장 명언으로 표시. 나머지 기능은 영향 없음 |
@@ -178,5 +203,7 @@ xcodebuild -scheme QuoteDay -destination 'platform=iOS Simulator,name=iPhone 15'
 - 인물 초상 이미지는 포함되어 있지 않다(라이선스 문제). 현재는 이니셜 플레이스홀더.
 - iOS 캘린더 연동은 **읽기 + 내보내기**만 지원한다. 기기 캘린더에서 수정한 내용이
   앱 일정으로 돌아오지는 않는다.
+- 반복 일정에 "이 회차만 수정/삭제" 는 없다. 회차 하나를 건너뛰려면 반복 종료일을 조정해야 한다.
+- 반복 주기는 정해진 6가지뿐이다(3일마다 같은 임의 간격, "매월 둘째 화요일" 같은 규칙은 없다).
 - Live Activity(동적 섬)는 아직 없다.
 - 현지화 파일은 없다. UI 문자열이 한국어로 하드코딩되어 있다.

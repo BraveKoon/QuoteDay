@@ -57,29 +57,52 @@ final class ScheduleStore {
         items.first { $0.id == id }
     }
 
-    func schedules(on date: Date) -> [ScheduleItem] {
+    /// 구간 안의 모든 회차. 반복 일정은 여기서 펼쳐진다.
+    func occurrences(from lowerBound: Date, to upperBound: Date, limitPerItem: Int = 200) -> [ScheduleOccurrence] {
         items
-            .filter { calendar.isDate($0.startDate, inSameDayAs: date) }
-            .sorted { $0.startDate < $1.startDate }
+            .flatMap {
+                $0.occurrences(
+                    from: lowerBound,
+                    to: upperBound,
+                    limit: limitPerItem,
+                    calendar: calendar
+                )
+            }
+            .sorted { $0.start < $1.start }
     }
 
-    var todaySchedules: [ScheduleItem] { schedules(on: .now) }
+    /// 그날 시작하는 회차들. 하루에 같은 일정이 두 번 오지는 않으므로 일정당 최대 1건이다.
+    func schedules(on date: Date) -> [ScheduleOccurrence] {
+        let dayStart = calendar.startOfDay(for: date)
+        guard let nextDay = calendar.date(byAdding: .day, value: 1, to: dayStart) else { return [] }
+        return occurrences(from: dayStart, to: nextDay.addingTimeInterval(-1), limitPerItem: 1)
+    }
 
-    /// 아직 시작하지 않은 가장 가까운 일정.
-    func nextSchedule(after date: Date = .now) -> ScheduleItem? {
+    var todaySchedules: [ScheduleOccurrence] { schedules(on: .now) }
+
+    /// 아직 시작하지 않은 가장 가까운 회차.
+    func nextSchedule(after date: Date = .now) -> ScheduleOccurrence? {
         items
-            .filter { $0.startDate > date }
-            .min { $0.startDate < $1.startDate }
+            .compactMap { $0.nextOccurrence(after: date, calendar: calendar) }
+            .min { $0.start < $1.start }
     }
 
     /// 캘린더 화면의 날짜별 점 표시에 쓰는 색인.
     func categoriesByDay(in month: Date) -> [Date: [AppCategory]] {
+        let monthStart = calendar.startOfMonth(for: month)
+        guard let monthEnd = calendar.date(byAdding: .month, value: 1, to: monthStart) else { return [:] }
+
         var result: [Date: [AppCategory]] = [:]
-        for item in items where calendar.isDate(item.startDate, equalTo: month, toGranularity: .month) {
-            let day = calendar.startOfDay(for: item.startDate)
+        // 한 달 = 최대 31 회차라서 매일 반복도 전부 담긴다.
+        for occurrence in occurrences(
+            from: monthStart,
+            to: monthEnd.addingTimeInterval(-1),
+            limitPerItem: 31
+        ) {
+            let day = calendar.startOfDay(for: occurrence.start)
             var categories = result[day] ?? []
-            if !categories.contains(item.category) {
-                categories.append(item.category)
+            if !categories.contains(occurrence.category) {
+                categories.append(occurrence.category)
             }
             result[day] = categories
         }
@@ -96,6 +119,8 @@ final class ScheduleStore {
         var memo: String
         var isQuoteNotificationEnabled: Bool
         var quoteSlug: String?
+        /// 반복 규칙. 기본값이 있어 기존 호출부는 그대로 둔다.
+        var recurrence: RecurrenceRule = .none
     }
 
     @discardableResult
@@ -103,7 +128,9 @@ final class ScheduleStore {
         if let failure = ScheduleValidator.validate(
             title: draft.title,
             start: draft.startDate,
-            end: draft.endDate
+            end: draft.endDate,
+            recurrence: draft.recurrence,
+            calendar: calendar
         ) {
             throw failure
         }
@@ -115,7 +142,8 @@ final class ScheduleStore {
             category: draft.category,
             memo: draft.memo,
             isQuoteNotificationEnabled: draft.isQuoteNotificationEnabled,
-            quoteSlug: draft.quoteSlug
+            quoteSlug: draft.quoteSlug,
+            recurrence: draft.recurrence
         )
         context.insert(item)
         save()
@@ -129,7 +157,9 @@ final class ScheduleStore {
         if let failure = ScheduleValidator.validate(
             title: draft.title,
             start: draft.startDate,
-            end: draft.endDate
+            end: draft.endDate,
+            recurrence: draft.recurrence,
+            calendar: calendar
         ) {
             throw failure
         }
@@ -141,6 +171,8 @@ final class ScheduleStore {
         item.memo = draft.memo
         item.isQuoteNotificationEnabled = draft.isQuoteNotificationEnabled
         item.quoteSlug = draft.quoteSlug
+        // 반복 규칙은 시리즈 전체에 적용된다(회차별 예외는 두지 않는다).
+        item.recurrence = draft.recurrence
         item.updatedAt = .now
 
         save()
@@ -171,6 +203,7 @@ final class ScheduleStore {
     }
 
     /// 일정에 연결된 명언을 다른 것으로 바꾼다(같은 카테고리 내에서 순환).
+    /// 반복 일정이면 이후 모든 회차가 이 명언으로 고정된다.
     func shuffleQuote(for item: ScheduleItem, service: QuoteService = .shared) {
         let pool = service.candidatePool(for: item.category)
         guard !pool.isEmpty else { return }
@@ -203,14 +236,16 @@ final class ScheduleStore {
                 title: "\(item.category.emoji) \(item.displayTitle)",
                 start: item.startDate,
                 end: item.endDate,
-                notes: notes
+                notes: notes,
+                recurrence: item.recurrence
             )
         } else {
             identifier = await calendarService.export(
                 title: "\(item.category.emoji) \(item.displayTitle)",
                 start: item.startDate,
                 end: item.endDate,
-                notes: notes
+                notes: notes,
+                recurrence: item.recurrence
             )
         }
 
@@ -226,9 +261,11 @@ final class ScheduleStore {
         let lowerBound = calendar.startOfDay(for: .now)
         let upperBound = calendar.date(byAdding: .day, value: 8, to: lowerBound) ?? lowerBound
 
-        let relevant = items
-            .filter { $0.startDate >= lowerBound && $0.startDate < upperBound }
-            .sorted { $0.startDate < $1.startDate }
+        let relevant = occurrences(
+            from: lowerBound,
+            to: upperBound.addingTimeInterval(-1),
+            limitPerItem: 8
+        )
             .prefix(40)
             .map { $0.snapshot() }
 
@@ -283,7 +320,8 @@ extension ScheduleStore.Draft {
             category: .study,
             memo: "",
             isQuoteNotificationEnabled: true,
-            quoteSlug: nil
+            quoteSlug: nil,
+            recurrence: .none
         )
     }
 
@@ -295,7 +333,8 @@ extension ScheduleStore.Draft {
             category: item.category,
             memo: item.memo,
             isQuoteNotificationEnabled: item.isQuoteNotificationEnabled,
-            quoteSlug: item.quoteSlug
+            quoteSlug: item.quoteSlug,
+            recurrence: item.recurrence
         )
     }
 }

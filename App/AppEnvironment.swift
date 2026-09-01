@@ -83,13 +83,13 @@ final class AppEnvironment {
         guard scheduleStore.items.isEmpty else { return }
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
-        let samples: [(String, Int, AppCategory)] = [
-            ("수학 공부", 18, .study),
-            ("팀 회의", 10, .work),
-            ("저녁 식사", 19, .meal),
-            ("러닝 5km", 7, .exercise)
+        let samples: [(String, Int, AppCategory, RecurrenceRule)] = [
+            ("수학 공부", 18, .study, RecurrenceRule(frequency: .weekday)),
+            ("팀 회의", 10, .work, RecurrenceRule(frequency: .weekly)),
+            ("저녁 식사", 19, .meal, RecurrenceRule.none),
+            ("러닝 5km", 7, .exercise, RecurrenceRule(frequency: .daily))
         ]
-        for (title, hour, category) in samples {
+        for (title, hour, category, recurrence) in samples {
             let start = calendar.date(byAdding: .hour, value: hour, to: today) ?? today
             _ = try? scheduleStore.create(
                 ScheduleStore.Draft(
@@ -99,7 +99,8 @@ final class AppEnvironment {
                     category: category,
                     memo: "",
                     isQuoteNotificationEnabled: true,
-                    quoteSlug: nil
+                    quoteSlug: nil,
+                    recurrence: recurrence
                 )
             )
         }

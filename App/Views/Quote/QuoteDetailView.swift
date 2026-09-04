@@ -85,7 +85,7 @@ struct QuoteDetailView: View {
 
                     // ZenQuotes 무료 이용 조건상 출처 표기가 필요하다.
                     if quote.isFromZenQuotes {
-                        Divider().opacity(0.2)
+                        ClayDivider()
                         Link(destination: RemoteQuoteStore.attributionURL) {
                             HStack(spacing: 4) {
                                 Image(systemName: "link")
@@ -98,7 +98,7 @@ struct QuoteDetailView: View {
                 }
                 .padding(ClayTheme.Spacing.l)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .clayCard(cornerRadius: ClayTheme.Radius.hero, elevation: 16)
+                .clayCard(cornerRadius: ClayTheme.Radius.hero)
                 .clayAppear(delay: 0.05)
 
                 // 인물 소개
@@ -111,7 +111,7 @@ struct QuoteDetailView: View {
                         .fixedSize(horizontal: false, vertical: true)
 
                     if !author.achievements.isEmpty {
-                        Divider().opacity(0.2)
+                        ClayDivider()
                         Text("주요 업적")
                             .font(ClayFont.caption())
                             .foregroundStyle(ClayTheme.textSecondary)
@@ -139,8 +139,7 @@ struct QuoteDetailView: View {
                             .foregroundStyle(.white)
                             .clayCard(
                                 cornerRadius: ClayTheme.Radius.control,
-                                tint: ClayTheme.accent,
-                                elevation: 10
+                                tint: ClayTheme.accent
                             )
                     }
                     .padding(.top, ClayTheme.Spacing.xs)

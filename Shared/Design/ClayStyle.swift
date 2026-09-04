@@ -2,74 +2,43 @@ import SwiftUI
 
 // MARK: - 카드
 
-/// 클레이 오브젝트처럼 살짝 튀어나온 표면.
+/// 배경 위에 얹는 평면 카드.
 ///
-/// 입체감은 네 겹으로 만든다.
-/// 1. 표면 그라데이션 (좌상단 밝음 → 우하단 어두움)
-/// 2. 안쪽 하이라이트 / 안쪽 그림자 (`ShapeStyle.shadow(.inner:)`)
-/// 3. 바깥쪽 드롭 섀도 + 바깥쪽 하이라이트
-/// 4. 가장자리 스트로크
+/// 입체감은 표면 밝기 차이와 얇은 테두리로만 만든다.
+/// 그라데이션·안쪽 그림자·광택은 쓰지 않는다.
 public struct ClayCardModifier: ViewModifier {
     var cornerRadius: CGFloat
     var tint: Color?
+    /// 떠 있는 정도. 0 이면 그림자 없이 테두리만 그린다.
     var elevation: CGFloat
     var isPressed: Bool
 
     public func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        let innerRadius = max(3, cornerRadius * 0.22)
-        // 눌리면 빛의 방향이 뒤집혀 안으로 들어간 것처럼 보인다.
-        let highlightOffset: CGFloat = isPressed ? 2.5 : -2.5
-        let shadeOffset: CGFloat = isPressed ? -3 : 3.5
 
         return content
             .background {
-                shape
-                    .fill(
-                        baseStyle
-                            .shadow(.inner(
-                                color: ClayTheme.innerHighlight,
-                                radius: innerRadius,
-                                x: highlightOffset,
-                                y: highlightOffset
-                            ))
-                            .shadow(.inner(
-                                color: ClayTheme.innerShade,
-                                radius: innerRadius * 1.2,
-                                x: shadeOffset,
-                                y: shadeOffset * 1.15
-                            ))
-                    )
-                    .overlay {
-                        shape.strokeBorder(ClayTheme.edgeGradient, lineWidth: 1)
-                    }
+                shape.fill(tint ?? ClayTheme.surface)
+            }
+            .overlay {
+                // 색을 채운 카드는 자기 색으로 이미 구분되므로 테두리를 그리지 않는다.
+                if tint == nil {
+                    shape.strokeBorder(ClayTheme.separator, lineWidth: 1)
+                }
             }
             .compositingGroup()
             .shadow(
-                color: ClayTheme.dropShadow,
-                radius: isPressed ? elevation * 0.35 : elevation,
+                color: elevation > 0 ? ClayTheme.shadow : .clear,
+                radius: elevation * 0.4,
                 x: 0,
-                y: isPressed ? elevation * 0.18 : elevation * 0.55
+                y: elevation * 0.15
             )
-            .shadow(
-                color: ClayTheme.dropHighlight,
-                radius: isPressed ? elevation * 0.3 : elevation * 0.8,
-                x: -elevation * 0.28,
-                y: -elevation * 0.32
-            )
-            .scaleEffect(isPressed ? 0.975 : 1)
-    }
-
-    private var baseStyle: AnyShapeStyle {
-        if let tint {
-            AnyShapeStyle(ClayTheme.tintedGradient(tint))
-        } else {
-            AnyShapeStyle(ClayTheme.surfaceGradient)
-        }
+            .opacity(isPressed ? 0.72 : 1)
+            .scaleEffect(isPressed ? 0.985 : 1)
     }
 }
 
-/// 안으로 파인 표면. 입력 필드나 선택되지 않은 셀에 쓴다.
+/// 안으로 들어간 면. 입력 필드나 선택되지 않은 셀에 쓴다.
 public struct ClaySunkenModifier: ViewModifier {
     var cornerRadius: CGFloat
 
@@ -77,64 +46,41 @@ public struct ClaySunkenModifier: ViewModifier {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         return content
             .background {
-                shape
-                    .fill(
-                        ClayTheme.sunkenGradient
-                            .shadow(.inner(color: ClayTheme.innerShade, radius: 5, x: 3, y: 3))
-                            .shadow(.inner(color: ClayTheme.innerHighlight, radius: 4, x: -2, y: -2))
-                    )
-                    .overlay {
-                        shape.strokeBorder(ClayTheme.strokeDark, lineWidth: 0.8)
-                    }
+                shape.fill(ClayTheme.surfaceSunken)
+            }
+            .overlay {
+                shape.strokeBorder(ClayTheme.separator, lineWidth: 1)
             }
     }
 }
 
 // MARK: - 배경
 
-/// 파스텔 그라데이션 + 흐릿한 색 덩어리로 만드는 앱 전체 배경.
+/// 앱 전체 배경. 단색이다.
 public struct ClayBackgroundModifier: ViewModifier {
-    var showsBlobs: Bool
-
     public func body(content: Content) -> some View {
         content.background {
-            ZStack {
-                LinearGradient(
-                    colors: [ClayTheme.backgroundTop, ClayTheme.backgroundBottom],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                if showsBlobs {
-                    GeometryReader { proxy in
-                        let side = max(proxy.size.width, proxy.size.height)
-                        ZStack {
-                            blob(ClayTheme.backgroundBlobA, side: side * 0.75)
-                                .offset(x: -side * 0.28, y: -side * 0.30)
-                            blob(ClayTheme.backgroundBlobB, side: side * 0.68)
-                                .offset(x: side * 0.34, y: -side * 0.10)
-                            blob(ClayTheme.backgroundBlobC, side: side * 0.60)
-                                .offset(x: -side * 0.10, y: side * 0.42)
-                        }
-                        .frame(width: proxy.size.width, height: proxy.size.height)
-                    }
-                    .blur(radius: 60)
-                    .opacity(0.55)
-                }
-            }
-            .ignoresSafeArea()
+            ClayTheme.background.ignoresSafeArea()
         }
     }
+}
 
-    private func blob(_ color: Color, side: CGFloat) -> some View {
-        Circle()
-            .fill(color)
-            .frame(width: side, height: side)
+// MARK: - 구분선
+
+/// 카드 안에서 항목을 나누는 1px 선. 테두리와 같은 색을 쓴다.
+public struct ClayDivider: View {
+    public init() {}
+
+    public var body: some View {
+        Rectangle()
+            .fill(ClayTheme.separator)
+            .frame(height: 1)
     }
 }
 
 // MARK: - 버튼
 
-/// 눌리면 안으로 들어가는 볼록한 클레이 버튼.
+/// 누르면 살짝 흐려지는 평면 버튼.
 public struct ClayButtonStyle: ButtonStyle {
     public enum Prominence {
         case primary
@@ -169,10 +115,11 @@ public struct ClayButtonStyle: ButtonStyle {
         ClayButtonBody(style: self, configuration: configuration)
     }
 
-    fileprivate var tint: Color? {
+    /// 보조 버튼만 면을 비우고 테두리로 형태를 잡는다.
+    fileprivate var fill: Color {
         switch prominence {
         case .primary: ClayTheme.accent
-        case .secondary: nil
+        case .secondary: ClayTheme.surfaceRaised
         case .tinted(let color): color
         case .destructive: ClayTheme.danger
         }
@@ -180,10 +127,15 @@ public struct ClayButtonStyle: ButtonStyle {
 
     fileprivate var foreground: Color {
         switch prominence {
-        case .primary, .destructive: .white
+        case .primary, .destructive: ClayTheme.textOnAccent
         case .secondary: ClayTheme.textPrimary
         case .tinted: ClayTheme.textOnTint
         }
+    }
+
+    fileprivate var hasBorder: Bool {
+        if case .secondary = prominence { return true }
+        return false
     }
 }
 
@@ -195,21 +147,24 @@ private struct ClayButtonBody: View {
     @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
-        configuration.label
+        let shape = RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous)
+
+        return configuration.label
             .font(ClayFont.headline())
             .foregroundStyle(style.foreground)
             .padding(.horizontal, style.horizontalPadding)
             .padding(.vertical, style.verticalPadding)
             .frame(maxWidth: style.fullWidth ? .infinity : nil)
-            .modifier(ClayCardModifier(
-                cornerRadius: style.cornerRadius,
-                tint: style.tint,
-                elevation: 10,
-                isPressed: configuration.isPressed
-            ))
-            .opacity(isEnabled ? 1 : 0.45)
+            .background { shape.fill(style.fill) }
+            .overlay {
+                if style.hasBorder {
+                    shape.strokeBorder(ClayTheme.separator, lineWidth: 1)
+                }
+            }
+            .opacity(isEnabled ? (configuration.isPressed ? 0.72 : 1) : 0.4)
+            .scaleEffect(configuration.isPressed ? 0.985 : 1)
             .animation(
-                reduceMotion ? nil : .spring(response: 0.28, dampingFraction: 0.62),
+                reduceMotion ? nil : .easeOut(duration: 0.15),
                 value: configuration.isPressed
             )
     }
@@ -218,11 +173,12 @@ private struct ClayButtonBody: View {
 // MARK: - View 확장
 
 public extension View {
-    /// 튀어나온 클레이 카드 표면을 입힌다.
+    /// 평면 카드 표면을 입힌다.
+    /// - Parameter elevation: 그림자 세기. 0 이면 그림자 없이 테두리만 남는다.
     func clayCard(
         cornerRadius: CGFloat = ClayTheme.Radius.card,
         tint: Color? = nil,
-        elevation: CGFloat = 14,
+        elevation: CGFloat = 0,
         isPressed: Bool = false
     ) -> some View {
         modifier(ClayCardModifier(
@@ -233,17 +189,17 @@ public extension View {
         ))
     }
 
-    /// 안으로 파인 표면을 입힌다.
+    /// 안으로 들어간 면을 입힌다.
     func claySunken(cornerRadius: CGFloat = ClayTheme.Radius.control) -> some View {
         modifier(ClaySunkenModifier(cornerRadius: cornerRadius))
     }
 
-    /// 앱 전체 파스텔 배경.
-    func clayBackground(showsBlobs: Bool = true) -> some View {
-        modifier(ClayBackgroundModifier(showsBlobs: showsBlobs))
+    /// 앱 전체 배경.
+    func clayBackground() -> some View {
+        modifier(ClayBackgroundModifier())
     }
 
-    /// 클레이 버튼 스타일 단축 표기.
+    /// 버튼 스타일 단축 표기.
     func clayButton(
         _ prominence: ClayButtonStyle.Prominence = .primary,
         cornerRadius: CGFloat = ClayTheme.Radius.control,
@@ -259,7 +215,7 @@ public extension View {
 
 // MARK: - 등장 애니메이션
 
-/// 카드가 살짝 떠오르며 나타나는 효과. `reduceMotion` 이면 즉시 표시한다.
+/// 카드가 페이드로 나타나는 효과. `reduceMotion` 이면 즉시 표시한다.
 public struct ClayAppearModifier: ViewModifier {
     var delay: Double
     @State private var hasAppeared = false
@@ -268,11 +224,9 @@ public struct ClayAppearModifier: ViewModifier {
     public func body(content: Content) -> some View {
         content
             .opacity(hasAppeared || reduceMotion ? 1 : 0)
-            .scaleEffect(hasAppeared || reduceMotion ? 1 : 0.94)
-            .offset(y: hasAppeared || reduceMotion ? 0 : 14)
             .onAppear {
                 guard !reduceMotion else { return }
-                withAnimation(.spring(response: 0.55, dampingFraction: 0.78).delay(delay)) {
+                withAnimation(.easeOut(duration: 0.25).delay(delay)) {
                     hasAppeared = true
                 }
             }
@@ -287,17 +241,17 @@ public extension View {
 
 // MARK: - Preview
 
-#Preview("Clay 디자인 시스템") {
+#Preview("디자인 시스템") {
     ScrollView {
         VStack(spacing: ClayTheme.Spacing.l) {
-            Text("클레이 카드")
+            Text("카드")
                 .font(ClayFont.title())
                 .foregroundStyle(ClayTheme.textPrimary)
                 .padding(ClayTheme.Spacing.l)
                 .frame(maxWidth: .infinity)
                 .clayCard()
 
-            Text("파인 표면")
+            Text("들어간 면")
                 .font(ClayFont.body())
                 .foregroundStyle(ClayTheme.textSecondary)
                 .padding(ClayTheme.Spacing.l)
@@ -314,7 +268,7 @@ public extension View {
                 ForEach(AppCategory.allCases.prefix(5)) { category in
                     Text(category.emoji)
                         .padding(ClayTheme.Spacing.s)
-                        .clayCard(cornerRadius: ClayTheme.Radius.chip, tint: category.tint, elevation: 8)
+                        .clayCard(cornerRadius: ClayTheme.Radius.chip, tint: category.tint)
                 }
             }
         }

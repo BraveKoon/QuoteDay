@@ -116,7 +116,7 @@ struct HomeView: View {
                     }
 
                     if next.isQuoteNotificationEnabled {
-                        Divider().opacity(0.25)
+                        ClayDivider()
                         let quote = viewModel.quote(for: next)
                         Button {
                             router.showQuote(quote.quote)
@@ -138,7 +138,7 @@ struct HomeView: View {
                 }
                 .padding(ClayTheme.Spacing.m)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .clayCard(cornerRadius: ClayTheme.Radius.card, elevation: 12)
+                .clayCard(cornerRadius: ClayTheme.Radius.card)
             }
         }
     }

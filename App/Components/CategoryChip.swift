@@ -42,7 +42,7 @@ struct CategoryChip: View {
         }
         .padding(.horizontal, size.horizontalPadding)
         .padding(.vertical, size.verticalPadding)
-        .clayCard(cornerRadius: ClayTheme.Radius.chip, tint: category.tint, elevation: 6)
+        .clayCard(cornerRadius: ClayTheme.Radius.chip, tint: category.tint)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("카테고리 \(category.title)")
     }
@@ -98,7 +98,6 @@ private struct CategoryButtonStyle: ButtonStyle {
                     .clayCard(
                         cornerRadius: ClayTheme.Radius.control,
                         tint: category.tint,
-                        elevation: 10,
                         isPressed: configuration.isPressed
                     )
             } else {

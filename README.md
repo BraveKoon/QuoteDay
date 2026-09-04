@@ -3,7 +3,7 @@
 매일의 명언과 일정을 연결하는 iOS 앱. 일정을 등록하면 그 시간에 **카테고리에 어울리는 명언**이
 알림으로 오고, 알림이나 홈 화면 위젯을 누르면 명언 상세와 인물 소개로 바로 들어간다.
 일정에는 **반복**(매일 / 주중 / 매주 / 격주 / 매월 / 매년)을 걸 수 있다.
-전체 UI 는 Claymorphism(클레이모피즘)으로 통일했다.
+UI 는 파스텔 팔레트를 유지하되 그라데이션·블러 없이 단색 면과 얇은 선으로만 구성했다.
 
 - Swift 5 / SwiftUI / SwiftData / WidgetKit / AppIntents / UserNotifications / EventKit
 - 최소 지원 버전: **iOS 17.0**
@@ -59,7 +59,7 @@ QuoteDay/
 │   ├── Models/          AppCategory, Quote, Author, DeepLink, WidgetSnapshot, StableHash
 │   ├── Data/            QuoteLibrary(색인) + QuoteLibraryData(원본 130편) + AuthorLibrary(87명)
 │   ├── Services/        QuoteService(선택 알고리즘), RemoteQuoteService(ZenQuotes), SharedStore
-│   ├── Design/          ClayTheme(토큰) + ClayStyle(.clayCard/.clayButton/.clayBackground)
+│   ├── Design/          ClayTheme(색·치수 토큰) + ClayStyle(.clayCard/.clayButton/.clayBackground)
 │   ├── Support/         Formatters
 │   └── AppIntents/      위젯 구성 인텐트
 ├── App/
@@ -81,6 +81,17 @@ QuoteDay/
 ---
 
 ## 4. 핵심 동작
+
+### 화면을 단색으로만 그리는 이유
+표면에 그라데이션·블러·광택을 쓰지 않는다. 층은 두 가지로만 나눈다.
+
+- **밝기** — 배경 < 카드. 카드가 배경보다 밝아서(다크 모드에서는 덜 어두워서) 저절로 떠 보인다.
+- **선** — 카드 테두리와 구분선은 같은 `separator` 색 1px 을 쓴다.
+
+그림자는 화면 위에 실제로 떠 있는 요소, 즉 **탭 바 하나에만** 준다.
+색은 정보를 나르는 데만 쓴다 — 카테고리 파스텔, 강조색, 위험색. 장식으로는 쓰지 않는다.
+뷰에서 색을 하드코딩하지 않고 `ClayTheme` 토큰만 참조하기 때문에,
+팔레트를 바꾸면 앱과 위젯이 함께 따라온다.
 
 ### 오늘의 명언은 왜 랜덤이 아닌가
 앱과 위젯은 **서로 다른 프로세스**다. 랜덤을 쓰면 홈 화면 위젯과 앱이 다른 명언을 보여 준다.
@@ -138,7 +149,7 @@ Swift 의 `Hasher` 는 프로세스마다 시드가 달라 쓸 수 없다.
 ### 위젯
 - 홈 화면: Small(명언) / Medium(명언+인물+카테고리) / Large(명언+인물+오늘의 일정+남은 시간)
 - 잠금화면·대기 화면: Inline(다음 일정 한 줄) / Circular(일정 시각) / Rectangular(명언+인물)
-  accessory 패밀리는 시스템이 색을 걷어내므로 클레이 표면 대신 대비와 정보 밀도만 남겼다.
+  accessory 패밀리는 시스템이 색을 걷어내므로 표면 대신 대비와 정보 밀도만 남겼다.
 - 명언은 위젯이 **직접 계산**하고, 일정만 App Group 스냅샷에서 읽는다.
   스냅샷이 없어도 명언은 항상 나온다.
 - 타임라인은 자정까지 1시간 간격 + 자정 리로드.

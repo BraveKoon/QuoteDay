@@ -101,7 +101,7 @@ struct ScheduleRow: View {
         }
         .padding(ClayTheme.Spacing.s + 2)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .clayCard(cornerRadius: ClayTheme.Radius.control, elevation: 9, isPressed: isPressed)
+        .clayCard(cornerRadius: ClayTheme.Radius.control, isPressed: isPressed)
     }
 
     private var accessibilityText: String {

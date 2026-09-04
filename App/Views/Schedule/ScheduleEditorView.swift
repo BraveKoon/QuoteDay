@@ -74,7 +74,7 @@ struct ScheduleEditorView: View {
                 .padding(.bottom, ClayTheme.Spacing.xl)
             }
             .scrollDismissesKeyboard(.interactively)
-            .clayBackground(showsBlobs: false)
+            .clayBackground()
             .navigationTitle(isEditing ? "일정 수정" : "새 일정")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -160,7 +160,7 @@ struct ScheduleEditorView: View {
                         draft.recurrence.endDate = defaultRepeatEndDate
                     }
                 }
-            Divider().opacity(0.2)
+            ClayDivider()
             DatePicker("종료", selection: $draft.endDate, in: draft.startDate...)
                 .font(ClayFont.callout())
         }
@@ -177,7 +177,7 @@ struct ScheduleEditorView: View {
             RecurrencePicker(selection: frequencyBinding)
 
             if draft.recurrence.isRepeating {
-                Divider().opacity(0.2)
+                ClayDivider()
 
                 Toggle(isOn: repeatEndEnabledBinding) {
                     Text("반복 종료일 정하기")

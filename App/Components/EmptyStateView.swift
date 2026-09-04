@@ -16,7 +16,8 @@ struct EmptyStateView: View {
                 .font(.system(size: 30, weight: .semibold))
                 .foregroundStyle(ClayTheme.accent)
                 .padding(ClayTheme.Spacing.m)
-                .clayCard(cornerRadius: ClayTheme.Radius.control, elevation: 8)
+                // 이 컴포넌트는 카드 안에 놓이므로, 같은 흰 면 대신 한 단계 들어간 면을 쓴다.
+                .claySunken(cornerRadius: ClayTheme.Radius.control)
 
             Text(title)
                 .font(ClayFont.headline())

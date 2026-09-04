@@ -32,6 +32,25 @@ TEST_BUNDLE_ID = "com.quoteday.QuoteDayTests"
 DEPLOYMENT_TARGET = "17.0"
 SWIFT_VERSION = "5.0"
 
+
+def read_version(key: str, fallback: str) -> str:
+    """project.yml 에서 버전 값을 읽는다.
+
+    버전을 두 곳에 적어 두면 반드시 어긋난다(실제로 v1.1 이 1.0 으로 나갔다).
+    project.yml 을 유일한 출처로 삼고 여기서는 읽기만 한다.
+    """
+    spec = ROOT / "project.yml"
+    if spec.exists():
+        for line in spec.read_text(encoding="utf-8").splitlines():
+            stripped = line.strip()
+            if stripped.startswith(f"{key}:"):
+                return stripped.split(":", 1)[1].strip().strip('"').strip("'")
+    return fallback
+
+
+MARKETING_VERSION = read_version("MARKETING_VERSION", "1.0")
+CURRENT_PROJECT_VERSION = read_version("CURRENT_PROJECT_VERSION", "1")
+
 # 타겟별 소스 루트. Shared 는 앱과 위젯 양쪽에 들어간다.
 SOURCE_ROOTS = {
     APP_TARGET: ["App", "Shared"],
@@ -471,12 +490,12 @@ def main() -> int:
         ("ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME", "AccentColor"),
         ("CODE_SIGN_ENTITLEMENTS", quote("App/Resources/QuoteDay.entitlements")),
         ("CODE_SIGN_STYLE", "Automatic"),
-        ("CURRENT_PROJECT_VERSION", "1"),
+        ("CURRENT_PROJECT_VERSION", CURRENT_PROJECT_VERSION),
         ("ENABLE_PREVIEWS", "YES"),
         ("GENERATE_INFOPLIST_FILE", "NO"),
         ("INFOPLIST_FILE", quote("App/Resources/Info.plist")),
         ("LD_RUNPATH_SEARCH_PATHS", list_value(['"$(inherited)"', '"@executable_path/Frameworks"'])),
-        ("MARKETING_VERSION", "1.0"),
+        ("MARKETING_VERSION", MARKETING_VERSION),
         ("PRODUCT_BUNDLE_IDENTIFIER", APP_BUNDLE_ID),
         ("PRODUCT_NAME", quote("$(TARGET_NAME)")),
         ("SWIFT_EMIT_LOC_STRINGS", "YES"),
@@ -487,7 +506,7 @@ def main() -> int:
         ("ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME", "WidgetBackground"),
         ("CODE_SIGN_ENTITLEMENTS", quote("Widget/QuoteDayWidget.entitlements")),
         ("CODE_SIGN_STYLE", "Automatic"),
-        ("CURRENT_PROJECT_VERSION", "1"),
+        ("CURRENT_PROJECT_VERSION", CURRENT_PROJECT_VERSION),
         ("ENABLE_PREVIEWS", "YES"),
         ("GENERATE_INFOPLIST_FILE", "NO"),
         ("INFOPLIST_FILE", quote("Widget/Info.plist")),
@@ -497,7 +516,7 @@ def main() -> int:
             '"@executable_path/Frameworks"',
             '"@executable_path/../../Frameworks"',
         ])),
-        ("MARKETING_VERSION", "1.0"),
+        ("MARKETING_VERSION", MARKETING_VERSION),
         ("PRODUCT_BUNDLE_IDENTIFIER", WIDGET_BUNDLE_ID),
         ("PRODUCT_NAME", quote("$(TARGET_NAME)")),
         ("SKIP_INSTALL", "YES"),
@@ -507,9 +526,9 @@ def main() -> int:
     test_settings = [
         ("BUNDLE_LOADER", quote("$(TEST_HOST)")),
         ("CODE_SIGN_STYLE", "Automatic"),
-        ("CURRENT_PROJECT_VERSION", "1"),
+        ("CURRENT_PROJECT_VERSION", CURRENT_PROJECT_VERSION),
         ("GENERATE_INFOPLIST_FILE", "YES"),
-        ("MARKETING_VERSION", "1.0"),
+        ("MARKETING_VERSION", MARKETING_VERSION),
         ("PRODUCT_BUNDLE_IDENTIFIER", TEST_BUNDLE_ID),
         ("PRODUCT_NAME", quote("$(TARGET_NAME)")),
         ("SWIFT_EMIT_LOC_STRINGS", "NO"),

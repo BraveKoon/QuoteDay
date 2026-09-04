@@ -50,14 +50,16 @@ public struct SupportOption: Identifiable, Hashable, Sendable {
 public extension SupportOption {
     /// 설정 화면에 노출할 후원 수단.
     ///
-    /// ⚠️ 아래 값은 전부 **자리표시자**다. 배포 전에 본인 것으로 바꿔야 한다.
-    /// 특히 계좌번호는 틀리면 남의 계좌로 돈이 가므로 반드시 두 번 확인할 것.
+    /// 계좌번호는 앱에 그대로 실려 나가는 공개 정보다. 바꿀 때는 반드시 두 번 확인할 것 —
+    /// 한 자리만 틀려도 후원금이 남의 계좌로 간다.
+    ///
+    /// ⚠️ Buy Me a Coffee 주소는 아직 **자리표시자**다.
     static let all: [SupportOption] = [
         SupportOption(
             id: "toss-account",
-            title: "토스 계좌로 보내기",
+            title: "토스로 보내기",
             symbol: "wonsign.circle.fill",
-            kind: .account(bank: "토스뱅크", number: "1000-0000-0000", holder: "홍길동")
+            kind: .account(bank: "토스뱅크", number: "1908-1161-1257", holder: "전우진")
         ),
         SupportOption(
             id: "buymeacoffee",

@@ -32,6 +32,8 @@ public enum AppLog {
     public static let notifications = Logger(subsystem: subsystem, category: "notifications")
     public static let calendar = Logger(subsystem: subsystem, category: "calendar")
     public static let widget = Logger(subsystem: subsystem, category: "widget")
+    public static let plus = Logger(subsystem: subsystem, category: "plus")
+    public static let notes = Logger(subsystem: subsystem, category: "notes")
 }
 
 /// `UserDefaults` 에 저장되는 모든 키. 앱과 위젯이 같은 정의를 본다.
@@ -48,6 +50,10 @@ public enum SharedDefaultsKey {
     public static let remoteQuote = "remoteQuote.cache.v1"
     public static let remoteQuoteLastAttempt = "remoteQuote.lastAttempt"
     public static let remoteQuoteLastError = "remoteQuote.lastError"
+    /// 개발용 Plus 잠금 해제 토글. 릴리스 빌드에서는 켤 방법이 없다.
+    public static let plusDebugUnlocked = "plus.debugUnlocked"
+    /// 공유 카드에서 마지막으로 고른 테마.
+    public static let shareCardTheme = "share.cardTheme"
 }
 
 /// 위젯 스냅샷의 읽기/쓰기 담당.

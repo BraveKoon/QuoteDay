@@ -10,6 +10,7 @@ UI 는 파스텔 팔레트를 유지하되 그라데이션·블러 없이 단색
 - 명언·인물 데이터가 번들에 내장되어 **네트워크 없이도 모든 기능이 동작**
 - 오늘의 명언은 선택적으로 [ZenQuotes](https://zenquotes.io/) `/today` 에서 갱신 (끄면 완전 오프라인)
 - 버전별 변경 사항은 [CHANGELOG.md](CHANGELOG.md) 에 정리한다
+- **광고 없음.** 수익은 유료 플랜 **Quote Plus**(StoreKit 2) 하나에서만 나온다
 
 ---
 
@@ -65,11 +66,13 @@ QuoteDay/
 ├── App/
 │   ├── Models/          ScheduleItem (SwiftData @Model) + ScheduleValidator
 │   │                    RecurrenceRule(반복 규칙·회차 계산) + ScheduleOccurrence(회차)
+│   │                    QuoteNote(필사 노트 @Model)
 │   ├── Services/        Persistence, ScheduleStore, NotificationService, CalendarService, AppSettings
+│   │                    PlusStore(구매 상태), NoteStore, QuoteCardRenderer, NotePDFExporter
 │   ├── ViewModels/      HomeViewModel, CalendarViewModel
 │   ├── Components/      QuoteCard, CategoryChip, RecurrencePicker, ScheduleRow, CalendarDayCell,
 │   │                    AuthorPortrait, EmptyState
-│   └── Views/           Home / Calendar / Schedule / Quote / Settings / RootTabView
+│   └── Views/           Home / Calendar / Schedule / Quote / Notes / Plus / Settings / RootTabView
 ├── Widget/              홈 화면(Small·Medium·Large) + 잠금화면(accessory) 위젯
 ├── Tests/               XCTest 98개
 └── tools/               프로젝트 생성기 + 정적 검증기
@@ -81,6 +84,50 @@ QuoteDay/
 ---
 
 ## 4. 핵심 동작
+
+### Quote Plus — 광고 대신 파는 것
+광고 SDK 를 넣지 않는다. 배너도, 전면 광고도, 추적도 없다.
+대신 **깊이 있는 콘텐츠**만 유료로 판다. 경계는 이렇게 그었다.
+
+| | 무료 | Quote Plus |
+|---|---|---|
+| 명언 본문·인물 이름·초상 | ○ | ○ |
+| 일정·알림·위젯 전부 | ○ | ○ |
+| 노트 **쓰기와 읽기** | ○ | ○ |
+| 카드 이미지 공유 | ○ (워터마크) | ○ (워터마크 없음) |
+| 카드 테마 | 2종 | 6종 + 세리프 |
+| 인물 프로필(생몰·시대·업적) | ✕ | ○ |
+| 비하인드 스토리 | ✕ | ○ |
+| 관련 저서·연관 인물 | ✕ | ○ |
+| 노트 PDF 내보내기 | ✕ | ○ |
+
+원칙 세 가지를 코드로 강제한다.
+
+1. **자기가 쓴 글은 잠그지 않는다.** 구독이 끊겨도 노트는 그대로 읽고 쓸 수 있다.
+   파는 것은 밖으로 꺼내는 방법(PDF)이지 자기 기록에 접근할 권리가 아니다.
+2. **없는 콘텐츠로 페이월을 띄우지 않는다.** 비하인드 스토리가 준비되지 않은 명언에는
+   잠금 카드조차 그리지 않는다(`QuoteDetailView.behindStorySection`).
+3. **잠금 판단은 한 곳에서만 한다.** 화면은 `PlusStore.isUnlocked(_ feature:)` 만 묻는다.
+   `PlusFeature` 를 세면 유료 기능이 몇 개인지 코드에서 바로 나온다.
+
+구매 상태는 `PlusStore` 가 StoreKit 2 로 관리한다. `Transaction.currentEntitlements` 로
+권한을 계산하고 `Transaction.updates` 로 앱 밖의 변화(가족 공유 승인, 환불, 다른 기기 구매)를 따라간다.
+스토어를 못 불러와도 앱은 멈추지 않고 무료 사용자로 동작한다.
+DEBUG 빌드의 설정 화면에는 **결제 없이 유료 화면을 확인하는 토글**이 있다.
+
+후원(Buy Me a Coffee / 토스)은 외부 링크로 받고 **어떤 기능도 열지 않는다.**
+기능을 대가로 외부 결제를 받으면 App Store 정책 위반이라, 후원은 순수한 응원으로만 둔다.
+
+### 비하인드 스토리를 3편만 넣은 이유
+배경 설명은 그럴듯하게 지어내기 가장 쉬운 글이다. 확인하지 않은 일화를 넣으면
+앱이 조용히 틀린 역사를 가르치게 된다. 그래서 `BehindStoryLibrary` 는 규칙을 둔다.
+
+- `source` 를 비우지 않는다 — 연설이면 날짜와 장소, 글이면 제목과 연도.
+- 귀속이 논쟁 중인 명언(예: 링컨의 "도끼를 갈겠다")에는 배경을 달지 않는다.
+- 확인하지 못했으면 비워 둔다. UI 는 배경 없는 명언을 정상으로 다룬다.
+
+지금은 검증된 3편(잡스 2005 스탠퍼드, 만델라 1990 보스턴, 아인슈타인 1936「On Education」)만
+들어 있다. 나머지는 출처를 확인하는 대로 배열에 추가하면 되고 코드는 손댈 필요가 없다.
 
 ### 화면을 단색으로만 그리는 이유
 표면에 그라데이션·블러·광택을 쓰지 않는다. 층은 두 가지로만 나눈다.
@@ -165,6 +212,9 @@ Swift 의 `Hasher` 는 프로세스마다 시드가 달라 쓸 수 없다.
 | SwiftData 스토어 손상 | 로컬 → 메모리 순으로 내려감 (크래시 없음) |
 | 저장된 카테고리를 모름 | `.etc` 로 강등 |
 | 저장된 반복 주기를 모름 | "반복 안 함" 으로 강등 |
+| 스토어에서 상품을 못 불러옴 | 무료 사용자로 동작, 페이월이 이유를 안내 |
+| 구매 검증 실패 | 권한을 주지 않고 안내만, 앱은 계속 동작 |
+| 저장된 카드 테마가 프리미엄인데 구독 만료 | 기본 테마로 되돌림 |
 | 반복 필드가 없던 이전 버전 저장소 | 기본값(`none`)으로 읽혀 마이그레이션 없이 열린다 |
 | 명언 slug 가 사라짐 | 카테고리에서 다시 계산 |
 | 오래된 딥링크 | "명언을 찾을 수 없어요" 빈 상태 |
@@ -215,6 +265,9 @@ xcodebuild -scheme QuoteDay -destination 'platform=iOS Simulator,name=iPhone 15'
 - iOS 캘린더 연동은 **읽기 + 내보내기**만 지원한다. 기기 캘린더에서 수정한 내용이
   앱 일정으로 돌아오지는 않는다.
 - 반복 일정에 "이 회차만 수정/삭제" 는 없다. 회차 하나를 건너뛰려면 반복 종료일을 조정해야 한다.
+- 비하인드 스토리는 3편만 채워져 있다. 나머지는 출처 확인 후 채워야 한다.
+- 후원 링크(`SupportLink.all`)는 자리표시자 주소다. 배포 전에 본인 계정으로 바꿔야 한다.
+- 상품 식별자는 App Store Connect 에 등록해야 가격이 뜬다. 등록 전에는 페이월이 안내 문구만 보여 준다.
 - 반복 주기는 정해진 6가지뿐이다(3일마다 같은 임의 간격, "매월 둘째 화요일" 같은 규칙은 없다).
 - Live Activity(동적 섬)는 아직 없다.
 - 현지화 파일은 없다. UI 문자열이 한국어로 하드코딩되어 있다.

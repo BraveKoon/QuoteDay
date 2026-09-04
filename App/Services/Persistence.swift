@@ -7,7 +7,7 @@ import SwiftData
 /// 프로비저닝이 아직 안 된 개발 초기나 스토어가 손상된 경우에도
 /// 앱이 실행되지 않는 상황을 만들지 않기 위함이다.
 enum Persistence {
-    static let schema = Schema([ScheduleItem.self])
+    static let schema = Schema([ScheduleItem.self, QuoteNote.self])
 
     /// 앱 전역에서 쓰는 컨테이너.
     static let shared: ModelContainer = makeContainer()

@@ -18,6 +18,8 @@ final class AppEnvironment {
     let router: AppRouter
     let scheduleStore: ScheduleStore
     let quoteService: QuoteService
+    let plusStore: PlusStore
+    let noteStore: NoteStore
 
     /// `UNUserNotificationCenter` 는 delegate 를 약하게 붙잡으므로 여기서 소유한다.
     private let notificationDelegate: NotificationDelegate
@@ -40,6 +42,8 @@ final class AppEnvironment {
             calendarService: calendarService,
             settings: settings
         )
+        self.plusStore = PlusStore(defaults: defaults)
+        self.noteStore = NoteStore(context: container.mainContext)
 
         self.notificationDelegate = NotificationDelegate(router: router)
         UNUserNotificationCenter.current().delegate = notificationDelegate
@@ -49,6 +53,8 @@ final class AppEnvironment {
     func refresh() async {
         await scheduleStore.refreshOnLaunch()
         calendarService.refreshAuthorizationStatus()
+        // 다른 기기에서 구매했거나 환불된 경우를 여기서 따라잡는다.
+        await plusStore.refreshEntitlements()
         await refreshRemoteQuote()
     }
 
@@ -151,6 +157,8 @@ extension View {
             .environment(environment.notifications)
             .environment(environment.calendarService)
             .environment(environment.scheduleStore)
+            .environment(environment.plusStore)
+            .environment(environment.noteStore)
             .modelContainer(environment.container)
     }
 }

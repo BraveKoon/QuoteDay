@@ -50,10 +50,9 @@ public struct SupportOption: Identifiable, Hashable, Sendable {
 public extension SupportOption {
     /// 설정 화면에 노출할 후원 수단.
     ///
-    /// 계좌번호는 앱에 그대로 실려 나가는 공개 정보다. 바꿀 때는 반드시 두 번 확인할 것 —
-    /// 한 자리만 틀려도 후원금이 남의 계좌로 간다.
-    ///
-    /// ⚠️ Buy Me a Coffee 주소는 아직 **자리표시자**다.
+    /// 여기 값은 전부 실제 후원처다. 앱에 그대로 실려 나가는 공개 정보이므로
+    /// 고칠 때는 반드시 두 번 확인할 것 — 계좌번호가 한 자리만 틀려도
+    /// 후원금이 남의 계좌로 간다.
     static let all: [SupportOption] = [
         SupportOption(
             id: "toss-account",

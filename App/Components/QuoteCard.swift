@@ -64,7 +64,6 @@ struct QuoteCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .clayCard(
             cornerRadius: style == .hero ? ClayTheme.Radius.hero : ClayTheme.Radius.card,
-            elevation: style == .hero ? 18 : 10,
             isPressed: isPressed
         )
         .animation(

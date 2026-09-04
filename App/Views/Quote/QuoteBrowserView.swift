@@ -136,15 +136,13 @@ struct QuoteBrowserView: View {
         }
         .buttonStyle(.plain)
         .background {
+            let shape = RoundedRectangle(cornerRadius: ClayTheme.Radius.chip, style: .continuous)
             if isSelected {
-                RoundedRectangle(cornerRadius: ClayTheme.Radius.chip, style: .continuous)
-                    .fill(
-                        ClayTheme.tintedGradient(tint)
-                            .shadow(.inner(color: .white.opacity(0.5), radius: 3, x: -1, y: -1))
-                    )
+                shape.fill(tint)
             } else {
-                RoundedRectangle(cornerRadius: ClayTheme.Radius.chip, style: .continuous)
-                    .fill(ClayTheme.sunkenGradient)
+                shape
+                    .fill(ClayTheme.surfaceSunken)
+                    .overlay { shape.strokeBorder(ClayTheme.separator, lineWidth: 1) }
             }
         }
         .accessibilityLabel(title)

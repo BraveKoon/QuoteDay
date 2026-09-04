@@ -34,7 +34,7 @@ struct AuthorDetailView: View {
                             }
                             .padding(ClayTheme.Spacing.m)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .clayCard(cornerRadius: ClayTheme.Radius.control, elevation: 9)
+                            .clayCard(cornerRadius: ClayTheme.Radius.control)
                         }
                     }
                 }
@@ -85,7 +85,7 @@ struct AuthorDetailView: View {
         }
         .padding(ClayTheme.Spacing.l)
         .frame(maxWidth: .infinity)
-        .clayCard(cornerRadius: ClayTheme.Radius.hero, elevation: 16)
+        .clayCard(cornerRadius: ClayTheme.Radius.hero)
     }
 
     private func infoPill(_ text: String) -> some View {

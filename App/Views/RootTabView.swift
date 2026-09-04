@@ -104,11 +104,7 @@ struct ClayTabBar: View {
         .background {
             if isSelected {
                 RoundedRectangle(cornerRadius: ClayTheme.Radius.control, style: .continuous)
-                    .fill(
-                        ClayTheme.tintedGradient(ClayTheme.accent)
-                            .shadow(.inner(color: .white.opacity(0.5), radius: 3, x: -1, y: -1))
-                            .shadow(.inner(color: .black.opacity(0.25), radius: 4, x: 2, y: 3))
-                    )
+                    .fill(ClayTheme.accent)
                     .matchedGeometryEffect(id: "tab-indicator", in: indicator)
             }
         }

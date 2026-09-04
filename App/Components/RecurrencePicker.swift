@@ -21,7 +21,7 @@ struct RecurrencePicker: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, ClayTheme.Spacing.s)
                         .foregroundStyle(
-                            selection == frequency ? ClayTheme.textOnTint : ClayTheme.textSecondary
+                            selection == frequency ? ClayTheme.textOnAccent : ClayTheme.textSecondary
                         )
                 }
                 .buttonStyle(RecurrenceButtonStyle(isSelected: selection == frequency))
@@ -42,7 +42,6 @@ private struct RecurrenceButtonStyle: ButtonStyle {
                     .clayCard(
                         cornerRadius: ClayTheme.Radius.control,
                         tint: ClayTheme.accent,
-                        elevation: 10,
                         isPressed: configuration.isPressed
                     )
             } else {

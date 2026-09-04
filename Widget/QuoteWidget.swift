@@ -96,13 +96,7 @@ struct QuoteWidget: Widget {
             provider: QuoteTimelineProvider()
         ) { entry in
             QuoteWidgetEntryView(entry: entry)
-                .containerBackground(for: .widget) {
-                    LinearGradient(
-                        colors: [ClayTheme.backgroundTop, ClayTheme.backgroundBottom],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                }
+                .containerBackground(ClayTheme.background, for: .widget)
         }
         .configurationDisplayName("오늘의 명언")
         .description("매일 자정에 바뀌는 명언과 오늘의 일정을 보여 줍니다.")

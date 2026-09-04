@@ -74,7 +74,7 @@ struct SettingsView: View {
                     .clayButton(.primary, fullWidth: true)
                 }
 
-                Divider().opacity(0.2)
+                ClayDivider()
 
                 HStack {
                     Text("예약된 알림")
@@ -135,7 +135,7 @@ struct SettingsView: View {
                 }
 
                 if settings.usesRemoteQuoteOfTheDay {
-                    Divider().opacity(0.2)
+                    ClayDivider()
 
                     // remoteQuoteRefreshToken 을 참조해 갱신 후 다시 계산되게 한다.
                     let _ = remoteQuoteRefreshToken
@@ -365,7 +365,7 @@ struct SettingsView: View {
                     .foregroundStyle(ClayTheme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Divider().opacity(0.2).padding(.vertical, 2)
+                ClayDivider().padding(.vertical, 2)
 
                 Text("잠금화면")
                     .font(ClayFont.caption())
@@ -378,7 +378,7 @@ struct SettingsView: View {
                     .foregroundStyle(ClayTheme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Divider().opacity(0.2).padding(.vertical, 2)
+                ClayDivider().padding(.vertical, 2)
                 if !AppGroup.isConfigured {
                     Text("App Group 이 설정되지 않아 위젯에서 일정이 보이지 않을 수 있어요.")
                         .font(ClayFont.caption())

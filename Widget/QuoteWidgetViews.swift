@@ -49,7 +49,7 @@ struct QuoteWidgetEntryView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .clayCard(cornerRadius: 24, elevation: 8)
+        .clayCard(cornerRadius: 16)
         .padding(8)
     }
 
@@ -84,7 +84,7 @@ struct QuoteWidgetEntryView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .clayCard(cornerRadius: 26, elevation: 8)
+        .clayCard(cornerRadius: 16)
         .padding(8)
     }
 
@@ -108,7 +108,7 @@ struct QuoteWidgetEntryView: View {
                 portrait(size: 56)
             }
 
-            Divider().opacity(0.25)
+            ClayDivider()
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
@@ -143,7 +143,7 @@ struct QuoteWidgetEntryView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .clayCard(cornerRadius: 30, elevation: 10)
+        .clayCard(cornerRadius: 18)
         .padding(8)
     }
 
@@ -160,25 +160,19 @@ struct QuoteWidgetEntryView: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background {
-            Capsule().fill(ClayTheme.tintedGradient(entry.quote.category.tint))
+            Capsule().fill(entry.quote.category.tint)
         }
     }
 
     private func portrait(size: CGFloat) -> some View {
         ZStack {
-            Circle().fill(
-                LinearGradient(
-                    colors: [entry.quote.category.tint.opacity(0.9), entry.quote.category.tint.opacity(0.5)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
+            Circle().fill(entry.quote.category.tint)
             Text(entry.author.initials)
                 .font(.system(size: size * 0.34, weight: .bold, design: .rounded))
                 .foregroundStyle(ClayTheme.textOnTint)
         }
         .frame(width: size, height: size)
-        .overlay { Circle().strokeBorder(ClayTheme.strokeLight, lineWidth: 1) }
+        .overlay { Circle().strokeBorder(ClayTheme.separator, lineWidth: 1) }
     }
 
     private func scheduleRow(_ schedule: ScheduleSnapshot) -> some View {
@@ -199,7 +193,7 @@ struct QuoteWidgetEntryView: View {
         .padding(.vertical, 5)
         .background {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(ClayTheme.sunkenGradient)
+                .fill(ClayTheme.surfaceSunken)
         }
     }
 }

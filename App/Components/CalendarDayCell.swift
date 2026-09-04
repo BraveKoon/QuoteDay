@@ -65,7 +65,6 @@ private struct CalendarDayButtonStyle: ButtonStyle {
                     .clayCard(
                         cornerRadius: ClayTheme.Radius.tiny,
                         tint: ClayTheme.accent,
-                        elevation: 8,
                         isPressed: configuration.isPressed
                     )
             } else if isToday {

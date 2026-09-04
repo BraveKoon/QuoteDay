@@ -111,7 +111,7 @@ struct CalendarView: View {
             }
         }
         .padding(ClayTheme.Spacing.m)
-        .clayCard(cornerRadius: ClayTheme.Radius.hero, elevation: 16)
+        .clayCard(cornerRadius: ClayTheme.Radius.hero)
     }
 
     // MARK: - 선택한 날짜의 일정
@@ -193,7 +193,7 @@ struct CalendarView: View {
                         }
                         .padding(ClayTheme.Spacing.s + 2)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .clayCard(cornerRadius: ClayTheme.Radius.control, elevation: 8)
+                        .clayCard(cornerRadius: ClayTheme.Radius.control)
                     }
                 }
             } else if calendarService.isDenied {

@@ -3,7 +3,7 @@ import UIKit
 
 /// 인물 사진 영역.
 ///
-/// 번들에 초상 이미지가 있으면 그것을 쓰고, 없으면 이니셜과 파스텔 그라데이션으로
+/// 번들에 초상 이미지가 있으면 그것을 쓰고, 없으면 이니셜과 파스텔 단색으로
 /// 플레이스홀더를 그린다. 네트워크는 사용하지 않으므로 오프라인에서도 동일하다.
 struct AuthorPortrait: View {
     let author: Author
@@ -22,21 +22,14 @@ struct AuthorPortrait: View {
         .frame(width: size, height: size)
         .clipShape(Circle())
         .overlay {
-            Circle().strokeBorder(ClayTheme.edgeGradient, lineWidth: 1.5)
+            Circle().strokeBorder(ClayTheme.separator, lineWidth: 1)
         }
-        .compositingGroup()
-        .shadow(color: ClayTheme.dropShadow, radius: size * 0.14, x: 0, y: size * 0.08)
-        .shadow(color: ClayTheme.dropHighlight, radius: size * 0.1, x: -size * 0.05, y: -size * 0.05)
         .accessibilityLabel("\(author.displayName) 초상")
     }
 
     private var placeholder: some View {
         ZStack {
-            LinearGradient(
-                colors: [tint.opacity(0.95), tint.opacity(0.55)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            tint
             Text(author.initials)
                 .font(.system(size: size * 0.34, weight: .bold, design: .rounded))
                 .foregroundStyle(ClayTheme.textOnTint)

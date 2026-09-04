@@ -15,9 +15,6 @@ public extension Color {
     }
 
     /// 라이트/다크에서 서로 다른 값을 갖는 동적 색.
-    ///
-    /// 클레이모피즘은 그림자와 하이라이트의 대비로 입체감을 만들기 때문에
-    /// 두 모드에서 색을 각각 지정해야 형태가 살아남는다.
     static func clay(light: UInt32, dark: UInt32, opacity: Double = 1) -> Color {
         #if canImport(UIKit)
         return Color(uiColor: UIColor { traits in
@@ -53,57 +50,48 @@ public enum ClayPalette {
 
 // MARK: - 테마 토큰
 
-/// 클레이 UI 를 구성하는 표면·그림자·문자 색과 치수.
+/// UI 를 구성하는 표면·문자 색과 치수.
 ///
+/// 표면은 모두 **단색**이다. 그라데이션·블러·광택으로 입체감을 만들지 않고,
+/// 배경과 카드의 밝기 차이 + 얇은 구분선만으로 층을 나눈다.
 /// 하드코딩을 피하기 위해 뷰에서는 반드시 이 토큰만 참조한다.
 public enum ClayTheme {
 
     // 표면
-    /// 카드의 밝은 쪽 (좌상단).
-    public static let surfaceTop = Color.clay(light: 0xFFFFFF, dark: 0x39405A)
-    /// 카드의 어두운 쪽 (우하단).
-    public static let surfaceBottom = Color.clay(light: 0xEDF0FA, dark: 0x2C3149)
-    /// 카드 위에 얹는 보조 표면(칩, 작은 버튼).
-    public static let surfaceRaised = Color.clay(light: 0xF7F8FE, dark: 0x424A68)
-    /// 눌린 상태/입력 필드의 안쪽 면.
-    public static let surfaceSunken = Color.clay(light: 0xE4E8F5, dark: 0x252A3E)
+    /// 화면 배경. 카드보다 한 단계 어둡다(다크 모드에서는 더 어둡다).
+    public static let background = Color.clay(light: 0xF3F4F8, dark: 0x121420)
+    /// 카드·시트의 면.
+    public static let surface = Color.clay(light: 0xFFFFFF, dark: 0x1C1F2C)
+    /// 카드 위에 한 겹 더 얹는 면(칩, 작은 버튼).
+    public static let surfaceRaised = Color.clay(light: 0xF7F8FB, dark: 0x252938)
+    /// 입력 필드처럼 안으로 들어간 면.
+    public static let surfaceSunken = Color.clay(light: 0xEDEFF5, dark: 0x161822)
 
-    // 배경
-    public static let backgroundTop = Color.clay(light: 0xF2F1FC, dark: 0x1B1F30)
-    public static let backgroundBottom = Color.clay(light: 0xFDF0F3, dark: 0x141726)
-    public static let backgroundBlobA = Color.clay(light: 0xCBD5FF, dark: 0x394373)
-    public static let backgroundBlobB = Color.clay(light: 0xFFD9E4, dark: 0x4A2E45)
-    public static let backgroundBlobC = Color.clay(light: 0xCFF3E4, dark: 0x22453C)
-
-    // 그림자 / 하이라이트
-    /// 카드 바깥쪽 아래 그림자.
-    public static let dropShadow = Color.clay(light: 0x9AA3C7, dark: 0x05060C).opacity(0.45)
-    /// 카드 바깥쪽 위 하이라이트(빛이 좌상단에서 온다고 가정).
-    public static let dropHighlight = Color.clay(light: 0xFFFFFF, dark: 0x59628C).opacity(0.75)
-    /// 카드 안쪽 하이라이트.
-    public static let innerHighlight = Color.clay(light: 0xFFFFFF, dark: 0x707CAE).opacity(0.85)
-    /// 카드 안쪽 그림자.
-    public static let innerShade = Color.clay(light: 0xA7AEC9, dark: 0x11141F).opacity(0.55)
-    /// 테두리 스트로크.
-    public static let strokeLight = Color.clay(light: 0xFFFFFF, dark: 0x6A749E).opacity(0.6)
-    public static let strokeDark = Color.clay(light: 0xB6BDD6, dark: 0x0F1220).opacity(0.35)
+    // 선
+    /// 카드 테두리와 구분선. 배경 대비 아주 약하게만 보인다.
+    public static let separator = Color.clay(light: 0xDFE2EC, dark: 0x333849)
+    /// 떠 있는 요소(탭 바 등)에만 쓰는 옅은 그림자.
+    public static let shadow = Color.clay(light: 0x2E3350, dark: 0x000000).opacity(0.10)
 
     // 문자
     public static let textPrimary = Color.clay(light: 0x2E3350, dark: 0xF1F3FF)
     public static let textSecondary = Color.clay(light: 0x6E7595, dark: 0xB3B9D6)
+    /// 파스텔 위에 얹는 글자색.
     public static let textOnTint = Color.clay(light: 0x2A2F49, dark: 0x151827)
+    /// 강조색 위에 얹는 글자색.
+    public static let textOnAccent = Color.white
 
     // 강조
-    public static let accent = Color.clay(light: 0x7C86F0, dark: 0x99A2FF)
-    public static let danger = Color.clay(light: 0xF08080, dark: 0xE58686)
+    public static let accent = Color.clay(light: 0x5A64D8, dark: 0x99A2FF)
+    public static let danger = Color.clay(light: 0xD65A5A, dark: 0xE58686)
 
     // 치수
     public enum Radius {
-        public static let card: CGFloat = 32
-        public static let hero: CGFloat = 40
-        public static let control: CGFloat = 24
-        public static let chip: CGFloat = 18
-        public static let tiny: CGFloat = 14
+        public static let card: CGFloat = 16
+        public static let hero: CGFloat = 20
+        public static let control: CGFloat = 12
+        public static let chip: CGFloat = 8
+        public static let tiny: CGFloat = 8
     }
 
     public enum Spacing {
@@ -112,49 +100,6 @@ public enum ClayTheme {
         public static let m: CGFloat = 18
         public static let l: CGFloat = 26
         public static let xl: CGFloat = 36
-    }
-
-    /// 카드 표면 그라데이션.
-    public static var surfaceGradient: LinearGradient {
-        LinearGradient(
-            colors: [surfaceTop, surfaceBottom],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-
-    public static var raisedGradient: LinearGradient {
-        LinearGradient(
-            colors: [surfaceRaised, surfaceBottom],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-
-    public static var sunkenGradient: LinearGradient {
-        LinearGradient(
-            colors: [surfaceSunken, surfaceRaised],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-
-    /// 카테고리 색을 클레이 표면에 얹을 때 쓰는 그라데이션.
-    public static func tintedGradient(_ tint: Color) -> LinearGradient {
-        LinearGradient(
-            colors: [tint.opacity(0.95), tint.opacity(0.65)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-
-    /// 테두리용 그라데이션(좌상단 밝고 우하단 어둡게).
-    public static var edgeGradient: LinearGradient {
-        LinearGradient(
-            colors: [strokeLight, .clear, strokeDark],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
     }
 }
 

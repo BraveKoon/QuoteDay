@@ -16,6 +16,8 @@ struct SettingsView: View {
     /// 캐시 상태를 다시 읽게 만드는 트리거.
     @State private var remoteQuoteRefreshToken = 0
     @State private var showsPaywall = false
+    /// 방금 복사한 후원 수단. 체크 표시를 잠깐 보여 주기 위한 값이다.
+    @State private var copiedSupportID: String?
 
     var body: some View {
         @Bindable var settings = settings
@@ -169,26 +171,77 @@ struct SettingsView: View {
                     .foregroundStyle(ClayTheme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                ForEach(SupportLink.all) { link in
-                    Link(destination: link.url) {
-                        HStack(spacing: ClayTheme.Spacing.s) {
-                            Image(systemName: link.symbol)
-                                .frame(width: 20)
-                            Text(link.title)
-                                .font(ClayFont.headline())
-                            Spacer(minLength: 0)
-                            Image(systemName: "arrow.up.right")
-                                .font(.caption)
-                        }
-                        .foregroundStyle(ClayTheme.textPrimary)
-                        .padding(.vertical, ClayTheme.Spacing.s + 2)
-                        .padding(.horizontal, ClayTheme.Spacing.s)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .clayCard(cornerRadius: ClayTheme.Radius.control)
-                    }
-                    .accessibilityLabel("\(link.title) 열기")
+                ForEach(SupportOption.all) { option in
+                    supportRow(option)
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func supportRow(_ option: SupportOption) -> some View {
+        switch option.kind {
+        case .link(let url):
+            Link(destination: url) {
+                supportRowLabel(option, trailingSymbol: "arrow.up.right")
+            }
+            .accessibilityLabel("\(option.title) 열기")
+
+        case .account:
+            // 계좌는 나가는 링크가 아니라 복사해 가는 정보다.
+            Button {
+                copyAccount(option)
+            } label: {
+                supportRowLabel(
+                    option,
+                    subtitle: option.accountLine,
+                    trailingSymbol: copiedSupportID == option.id ? "checkmark" : "doc.on.doc"
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("\(option.title), \(option.accountLine ?? "")")
+            .accessibilityHint("두 번 탭하면 계좌번호를 복사합니다.")
+        }
+    }
+
+    private func supportRowLabel(
+        _ option: SupportOption,
+        subtitle: String? = nil,
+        trailingSymbol: String
+    ) -> some View {
+        HStack(spacing: ClayTheme.Spacing.s) {
+            Image(systemName: option.symbol)
+                .frame(width: 20)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(option.title)
+                    .font(ClayFont.headline())
+                if let subtitle {
+                    Text(subtitle)
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                        .monospacedDigit()
+                }
+            }
+            Spacer(minLength: 0)
+            Image(systemName: trailingSymbol)
+                .font(.caption)
+                .foregroundStyle(copiedSupportID == option.id ? ClayTheme.accent : ClayTheme.textSecondary)
+        }
+        .foregroundStyle(ClayTheme.textPrimary)
+        .padding(.vertical, ClayTheme.Spacing.s + 2)
+        .padding(.horizontal, ClayTheme.Spacing.s)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .clayCard(cornerRadius: ClayTheme.Radius.control)
+    }
+
+    private func copyAccount(_ option: SupportOption) {
+        guard let text = option.copyableText else { return }
+        UIPasteboard.general.string = text
+        withAnimation { copiedSupportID = option.id }
+        // 체크 표시를 잠깐 보여 준 뒤 원래 아이콘으로 되돌린다.
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            withAnimation { copiedSupportID = nil }
         }
     }
 

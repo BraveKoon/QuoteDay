@@ -16,12 +16,15 @@ final class PlusStore {
 
     /// App Store Connect 에 등록할 상품 식별자.
     enum ProductID {
+        /// 자동 갱신 구독(월간). 기본으로 권하는 플랜이다.
+        static let monthly = "com.quoteday.plus.monthly"
         /// 자동 갱신 구독(연간).
         static let yearly = "com.quoteday.plus.yearly"
         /// 비소모성 평생 이용권.
         static let lifetime = "com.quoteday.plus.lifetime"
 
-        static let all: [String] = [yearly, lifetime]
+        /// 페이월에 보일 순서. 스토어는 순서를 보장하지 않으므로 여기서 고정한다.
+        static let all: [String] = [monthly, yearly, lifetime]
     }
 
     /// 구매 시도의 결과. 화면은 이 값만 보고 안내 문구를 고른다.

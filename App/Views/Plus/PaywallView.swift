@@ -177,11 +177,25 @@ struct PaywallView: View {
         .disabled(plus.purchasingProductID != nil)
     }
 
+    /// 구독 주기는 상품 정보에서 읽는다. 문구를 손으로 적어 두면
+    /// App Store Connect 에서 주기를 바꿨을 때 화면만 거짓말을 하게 된다.
     private func subtitle(for product: Product) -> String {
-        if product.subscription != nil {
-            return "매년 갱신 · 언제든 해지"
+        guard let period = product.subscription?.subscriptionPeriod else {
+            return "한 번 결제하면 계속 사용"
         }
-        return "한 번 결제하면 계속 사용"
+        return "\(Self.periodText(period)) 갱신 · 언제든 해지"
+    }
+
+    private static func periodText(_ period: Product.SubscriptionPeriod) -> String {
+        let unit: String
+        switch period.unit {
+        case .day: unit = "일"
+        case .week: unit = "주"
+        case .month: unit = "개월"
+        case .year: unit = "년"
+        @unknown default: unit = "기간"
+        }
+        return period.value == 1 ? "매\(unit)" : "\(period.value)\(unit)마다"
     }
 
     private var restoreButton: some View {
@@ -200,7 +214,7 @@ struct PaywallView: View {
 
     private var legalFootnote: some View {
         VStack(spacing: ClayTheme.Spacing.xs) {
-            Text("연간 플랜은 해지하지 않으면 만료 24시간 전에 자동으로 갱신됩니다. 구매 후 App Store 계정 설정에서 언제든 해지할 수 있어요.")
+            Text("결제는 App Store 계정으로 이루어집니다. 구독 플랜은 해지하지 않으면 만료 24시간 전에 자동으로 갱신되고, 설정 앱의 구독 관리에서 언제든 해지할 수 있어요.")
             Text("평생 이용권은 한 번만 결제하며 갱신되지 않습니다.")
         }
         .font(ClayFont.caption())

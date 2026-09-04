@@ -134,16 +134,41 @@ final class PlusTests: XCTestCase {
         XCTAssertTrue(note.isEmpty)
     }
 
-    // MARK: - 후원 링크
+    // MARK: - 후원 수단
 
-    func testSupportLinksAreWellFormed() {
-        XCTAssertFalse(SupportLink.all.isEmpty)
-        for link in SupportLink.all {
-            XCTAssertFalse(link.title.isEmpty)
-            XCTAssertEqual(link.url.scheme, "https", "후원 링크는 https 여야 한다.")
+    func testSupportOptionsAreWellFormed() {
+        XCTAssertFalse(SupportOption.all.isEmpty)
+        for option in SupportOption.all {
+            XCTAssertFalse(option.title.isEmpty)
+            if let url = option.url {
+                XCTAssertEqual(url.scheme, "https", "후원 링크는 https 여야 한다.")
+            }
         }
-        let ids = Set(SupportLink.all.map(\.id))
-        XCTAssertEqual(ids.count, SupportLink.all.count)
+        let ids = Set(SupportOption.all.map(\.id))
+        XCTAssertEqual(ids.count, SupportOption.all.count)
+    }
+
+    func testAccountOptionExposesCopyableTextAndLinkDoesNot() {
+        let account = SupportOption(
+            id: "a", title: "계좌", symbol: "wonsign.circle.fill",
+            kind: .account(bank: "토스뱅크", number: "1000-0000-0000", holder: "홍길동")
+        )
+        XCTAssertEqual(account.copyableText, "토스뱅크 1000-0000-0000")
+        XCTAssertEqual(account.accountLine, "토스뱅크 1000-0000-0000 · 홍길동")
+        XCTAssertNil(account.url, "계좌는 여는 링크가 아니다.")
+
+        let link = SupportOption(
+            id: "b", title: "링크", symbol: "cup.and.saucer.fill",
+            kind: .link(URL(string: "https://example.com")!)
+        )
+        XCTAssertNil(link.copyableText)
+        XCTAssertNil(link.accountLine)
+        XCTAssertNotNil(link.url)
+    }
+
+    func testAtLeastOneAccountIsOffered() {
+        let hasAccount = SupportOption.all.contains { $0.copyableText != nil }
+        XCTAssertTrue(hasAccount, "계좌 이체를 원하는 사람을 위한 수단이 하나는 있어야 한다.")
     }
 
     // MARK: - 상품 식별자
@@ -153,6 +178,7 @@ final class PlusTests: XCTestCase {
     func testProductIDsAreUniqueAndPrefixed() {
         let ids = PlusStore.ProductID.all
         XCTAssertEqual(Set(ids).count, ids.count)
+        XCTAssertEqual(ids.first, PlusStore.ProductID.monthly, "월정액을 먼저 보여 준다.")
         for id in ids {
             XCTAssertTrue(id.hasPrefix("com.quoteday."), "\(id) 가 번들 접두사를 따르지 않는다.")
         }

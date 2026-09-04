@@ -133,8 +133,6 @@ struct QuoteDetailView: View {
 
     @ViewBuilder
     private func behindStorySection(for presentation: QuotePresentation) -> some View {
-        // 배경이 준비되지 않은 명언에는 아무것도 그리지 않는다.
-        // 없는 콘텐츠를 미끼로 페이월을 띄우면 그건 속이는 것이다.
         if let story = BehindStoryLibrary.story(for: presentation.quote.slug) {
             if plus.isUnlocked(.behindStory) {
                 VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
@@ -172,14 +170,29 @@ struct QuoteDetailView: View {
                 .clayCard()
                 .clayAppear(delay: 0.08)
             } else {
-                PlusLockedCard(
+                PlusLockedPreview(
                     feature: .behindStory,
                     message: "\(story.occasion). 이 문장이 어떤 상황에서 나왔는지 읽어 보세요."
                 ) {
                     paywallFeature = .behindStory
+                } content: {
+                    VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+                        Text(story.occasion)
+                            .font(ClayFont.callout())
+                            .foregroundStyle(ClayTheme.accent)
+                        Text(story.context)
+                            .font(ClayFont.body())
+                            .foregroundStyle(ClayTheme.textPrimary)
+                            .lineSpacing(4)
+                    }
                 }
                 .clayAppear(delay: 0.08)
             }
+        } else {
+            // 배경이 아직 없는 명언. 잠금이 아니라 준비 상태를 알린다 —
+            // 없는 콘텐츠로 페이월을 띄우면 그건 속이는 것이다.
+            ComingSoonCard(title: "비하인드 스토리")
+                .clayAppear(delay: 0.08)
         }
     }
 
@@ -277,11 +290,22 @@ struct QuoteDetailView: View {
             .clayCard()
             .clayAppear(delay: 0.12)
         } else {
-            PlusLockedCard(
+            PlusLockedPreview(
                 feature: .authorProfile,
                 message: "\(author.displayName)이(가) 어떤 삶을 살았고 무엇을 남겼는지 한 장에 정리해 드려요."
             ) {
                 paywallFeature = .authorProfile
+            } content: {
+                VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+                    if let lifespan = author.lifespanText {
+                        profileRow("생몰", lifespan)
+                    }
+                    profileRow("활동", "\(author.occupation) · \(author.nationality)")
+                    Text(author.biography)
+                        .font(ClayFont.body())
+                        .foregroundStyle(ClayTheme.textPrimary)
+                        .lineSpacing(4)
+                }
             }
             .clayAppear(delay: 0.12)
         }
@@ -361,11 +385,34 @@ struct QuoteDetailView: View {
             .clayCard()
             .clayAppear(delay: 0.14)
         } else {
-            PlusLockedCard(
+            PlusLockedPreview(
                 feature: .relatedWorks,
-                message: "\(author.displayName)의 저서와 이 인물의 다른 명언으로 이어 볼 수 있어요."
+                message: siblings.isEmpty
+                    ? "\(author.displayName)의 저서를 함께 볼 수 있어요."
+                    : "\(author.displayName)의 저서와 다른 명언 \(siblings.count)편으로 이어 볼 수 있어요.",
+                previewHeight: 150
             ) {
                 paywallFeature = .relatedWorks
+            } content: {
+                VStack(alignment: .leading, spacing: ClayTheme.Spacing.xs) {
+                    ForEach(Array(author.notableWorks.prefix(3).enumerated()), id: \.offset) { _, work in
+                        HStack(alignment: .top, spacing: 6) {
+                            Image(systemName: "book.closed")
+                                .font(.caption2)
+                                .foregroundStyle(ClayTheme.accent)
+                                .padding(.top, 3)
+                            Text(work)
+                                .font(ClayFont.callout())
+                                .foregroundStyle(ClayTheme.textPrimary)
+                        }
+                    }
+                    ForEach(siblings.prefix(2)) { sibling in
+                        Text("\u{201C}\(sibling.text)\u{201D}")
+                            .font(ClayFont.callout())
+                            .foregroundStyle(ClayTheme.textPrimary)
+                            .lineLimit(2)
+                    }
+                }
             }
             .clayAppear(delay: 0.14)
         }

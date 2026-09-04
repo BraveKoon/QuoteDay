@@ -187,9 +187,9 @@
 			isa = PBXBuildFile;
 			fileRef = 93DE5A09EF44EBEAC0D2811D /* PaywallView.swift */;
 		};
-		8EDA705206E5E5FE54A2525E = {
+		8C7632D473701A2C99D81CDC = {
 			isa = PBXBuildFile;
-			fileRef = 57095C23F8E95A080AACCD55 /* SupportLink.swift */;
+			fileRef = 8BB93BFC51F079D8EC86CA9D /* SupportOption.swift */;
 		};
 		971D00BB73121F8149108710 = {
 			isa = PBXBuildFile;
@@ -222,6 +222,10 @@
 		A611F1A0E3957787978AA87E = {
 			isa = PBXBuildFile;
 			fileRef = ECB8A315BC81E2AB5F7AD82D /* ScheduleAndNavigationTests.swift */;
+		};
+		A79992568A0CD208629EE516 = {
+			isa = PBXBuildFile;
+			fileRef = 8BB93BFC51F079D8EC86CA9D /* SupportOption.swift */;
 		};
 		A978B4F4E853643057590D68 = {
 			isa = PBXBuildFile;
@@ -347,10 +351,6 @@
 		F36722AB805F041C420331F6 = {
 			isa = PBXBuildFile;
 			fileRef = 60B6D8C17726CB47DFA1CCF8 /* BehindStory.swift */;
-		};
-		F398648115FFFB9E9A511BE3 = {
-			isa = PBXBuildFile;
-			fileRef = 57095C23F8E95A080AACCD55 /* SupportLink.swift */;
 		};
 		F543163AE1AD608F9654896D = {
 			isa = PBXBuildFile;
@@ -557,12 +557,6 @@
 			path = SettingsView.swift;
 			sourceTree = "<group>";
 		};
-		57095C23F8E95A080AACCD55 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.swift;
-			path = SupportLink.swift;
-			sourceTree = "<group>";
-		};
 		5747F94B3F2BB21AEC316693 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -663,6 +657,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = AuthorDetailView.swift;
+			sourceTree = "<group>";
+		};
+		8BB93BFC51F079D8EC86CA9D = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = SupportOption.swift;
 			sourceTree = "<group>";
 		};
 		91081FCE4FC5571EA6F0ABA6 = {
@@ -1142,7 +1142,7 @@
 				EE249BE91E4B13A46667234E /* Quote.swift */,
 				5F128CFBB5886FDBC1FF852B /* ShareCardTheme.swift */,
 				A44C4AFF27C954A27365D8DC /* StableIdentifier.swift */,
-				57095C23F8E95A080AACCD55 /* SupportLink.swift */,
+				8BB93BFC51F079D8EC86CA9D /* SupportOption.swift */,
 				E0E18626C493AE5C0EE77817 /* WidgetSnapshot.swift */,
 			);
 			path = Models;
@@ -1331,6 +1331,7 @@
 				82EED4E43C9EBCF04F529395 /* AppEnvironment.swift in Sources */,
 				84EE7C5F90BB712DC963D8BC /* StableIdentifier.swift in Sources */,
 				88C5EB04B41FBEC1776591E5 /* PaywallView.swift in Sources */,
+				8C7632D473701A2C99D81CDC /* SupportOption.swift in Sources */,
 				971D00BB73121F8149108710 /* BehindStoryLibrary.swift in Sources */,
 				99F344420C5988238B2BBED4 /* AppSettings.swift in Sources */,
 				9A18AB2F56FD7DE300151D28 /* Author.swift in Sources */,
@@ -1356,7 +1357,6 @@
 				EF1C01EDDF6569CB6FBF05CB /* Persistence.swift in Sources */,
 				F01FF9526EF3C15B534C0096 /* RootTabView.swift in Sources */,
 				F312B673E8A7311A0F950A00 /* NotificationService.swift in Sources */,
-				F398648115FFFB9E9A511BE3 /* SupportLink.swift in Sources */,
 				F543163AE1AD608F9654896D /* ScheduleOccurrence.swift in Sources */,
 				F79E7F7801BFA303399230C6 /* QuoteLibrary.swift in Sources */,
 				FA2F2685730524FBA4B64937 /* AuthorLibrary.swift in Sources */,
@@ -1393,7 +1393,7 @@
 				78D93F5FDAA1480D7AE3E7A7 /* RemoteQuoteService.swift in Sources */,
 				7BB212837B646C2E0BD5F9DD /* Author.swift in Sources */,
 				8403B7B2D91BB070B87ED12B /* ClayStyle.swift in Sources */,
-				8EDA705206E5E5FE54A2525E /* SupportLink.swift in Sources */,
+				A79992568A0CD208629EE516 /* SupportOption.swift in Sources */,
 				A978B4F4E853643057590D68 /* QuoteCategoryOption.swift in Sources */,
 				B61EF751E16F2543F4AA2BD7 /* SharedStore.swift in Sources */,
 				D2668C38DF3F4E13A526C718 /* QuoteWidget.swift in Sources */,

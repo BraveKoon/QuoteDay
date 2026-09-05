@@ -38,8 +38,14 @@ final class PlusStore {
 
     // MARK: - 상태
 
-    /// Plus 이용 권한이 있는지. 테스트 토글이 켜져 있으면 그것이 우선한다.
-    var isPlus: Bool { isDebugUnlocked || hasEntitlement }
+    /// Plus 이용 권한이 있는지.
+    ///
+    /// 판매를 내려 둔 동안에는 항상 `true` 다 — 살 방법이 없는데 잠가 두면
+    /// 사용자에게는 열 수 없는 자물쇠만 남는다.
+    var isPlus: Bool {
+        guard AppFeatureFlags.isPlusEnabled else { return true }
+        return isDebugUnlocked || hasEntitlement
+    }
 
     /// 스토어에서 불러온 상품. 순서는 `ProductID.all` 을 따른다.
     private(set) var products: [Product] = []
@@ -76,6 +82,10 @@ final class PlusStore {
     init(defaults: UserDefaults = AppGroup.defaults) {
         self.defaults = defaults
         self.storedDebugUnlocked = defaults.bool(forKey: SharedDefaultsKey.plusDebugUnlocked)
+
+        // 판매를 내려 둔 동안에는 StoreKit 을 아예 건드리지 않는다.
+        guard AppFeatureFlags.isPlusEnabled else { return }
+
         // 앱 밖에서 일어난 구매(가족 공유 승인, 환불, 다른 기기에서의 구매)를 받는다.
         self.updateListener = Task { [weak self] in
             for await update in Transaction.updates {
@@ -99,10 +109,16 @@ final class PlusStore {
         return isPlus
     }
 
+    /// 화면에 구매·페이월·PLUS 표식을 그려도 되는지.
+    /// 잠금 판단(`isUnlocked`)과 분리해 둔다 — 판매를 내려 두면
+    /// "열려 있지만 파는 중은 아닌" 상태가 되기 때문이다.
+    var isStoreVisible: Bool { AppFeatureFlags.isPlusEnabled }
+
     // MARK: - 스토어
 
     /// 상품 정보를 불러온다. 실패해도 던지지 않는다 — 페이월이 가격 없이 뜰 뿐이다.
     func loadProducts() async {
+        guard AppFeatureFlags.isPlusEnabled else { return }
         guard products.isEmpty, !isLoadingProducts else { return }
         isLoadingProducts = true
         defer { isLoadingProducts = false }
@@ -120,6 +136,8 @@ final class PlusStore {
 
     /// 저장된 영수증으로 권한을 다시 계산한다. 앱이 활성화될 때마다 호출한다.
     func refreshEntitlements() async {
+        guard AppFeatureFlags.isPlusEnabled else { return }
+
         var unlocked = false
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result else { continue }

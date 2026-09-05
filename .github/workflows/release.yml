@@ -67,6 +67,11 @@ jobs:
       - name: 태그 달기
         if: steps.guard.outputs.should_release == 'true'
         run: |
+          # 러너에는 커밋 작성자 정보가 없다. 주석 태그는 커밋처럼 서명자를 요구하므로
+          # 이 값을 미리 정해 주지 않으면 "empty ident name" 으로 죽는다.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git tag -a "${{ steps.version.outputs.tag }}" \
             -m "${{ steps.version.outputs.tag }}"
           git push origin "${{ steps.version.outputs.tag }}"

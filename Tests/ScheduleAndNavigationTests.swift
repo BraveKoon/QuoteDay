@@ -270,6 +270,29 @@ final class ScheduleAndNavigationTests: XCTestCase {
         XCTAssertEqual(AppCategory(storedValue: "study"), .study)
     }
 
+    // MARK: - App Group 없는 환경
+
+    /// 엔타이틀먼트가 없는 환경(서명 없는 CI 빌드, App Group 미프로비저닝)에서
+    /// 공유 저장소를 만지면 프로세스가 죽지 않고 `standard` 로 내려가야 한다.
+    ///
+    /// 예전 구현은 `UserDefaults(suiteName:)` 의 nil 여부로 판단했는데,
+    /// 엔타이틀먼트가 없어도 객체는 돌아오기 때문에 읽고 쓰는 순간 죽었다.
+    func testSharedDefaultsWorkWithoutAppGroupEntitlement() {
+        let defaults = AppGroup.defaults
+        let key = "test.appgroup.probe"
+
+        // 죽지 않고 값이 오가면 성공이다.
+        defaults.set(true, forKey: key)
+        XCTAssertTrue(defaults.bool(forKey: key))
+        defaults.removeObject(forKey: key)
+        XCTAssertFalse(defaults.bool(forKey: key))
+    }
+
+    func testAppGroupConfigurationCheckDoesNotCrash() {
+        // 값이 true 든 false 든 상관없다. 묻는 것만으로 죽지 않으면 된다.
+        _ = AppGroup.isConfigured
+    }
+
     // MARK: - 도우미
 
     private func makeDate(_ year: Int, _ month: Int, _ day: Int) -> Date {

@@ -75,7 +75,7 @@ QuoteDay/
 │   └── Views/           Home / Calendar / Schedule / Quote / Notes / Plus / Settings / RootTabView
 ├── Widget/              홈 화면(Small·Medium·Large) + 잠금화면(accessory) 위젯
 ├── Tests/               XCTest 98개
-└── tools/               프로젝트 생성기 + 정적 검증기
+└── tools/               프로젝트 생성기 + 정적 검증기 + CHANGELOG 절 추출기
 ```
 
 뷰는 SwiftData 컨텍스트를 직접 만지지 않는다. 모든 쓰기는 `ScheduleStore` 를 거치며,
@@ -253,6 +253,31 @@ macOS 에서는 여기에 더해:
 xcodebuild -scheme QuoteDay -destination 'platform=iOS Simulator,name=iPhone 15' build
 xcodebuild -scheme QuoteDay -destination 'platform=iOS Simulator,name=iPhone 15' test
 ```
+
+### CI (`.github/workflows/ci.yml`)
+PR 과 `main` 푸시에서 돈다. 두 단계로 나눠 두었다.
+
+1. **정적 검증** (Linux, 무료) — `check_project.py` 와 **프로젝트 파일 드리프트 검사**.
+   파일을 추가·삭제하고 `generate_xcodeproj.py` 를 다시 돌리지 않으면 여기서 실패한다.
+2. **빌드와 테스트** (macOS) — 1단계가 통과했을 때만 켠다. macOS 러너는 무료 한도를
+   분당 10배로 소모하므로, 값싼 검사에서 걸릴 실수로 비싼 러너를 켜지 않는다.
+   시뮬레이터는 이름을 박아 두지 않고 `simctl` 로 그때그때 사용 가능한 iPhone 을 고른다.
+
+러너 이미지는 `macos-15` 로 고정했다. 언젠가 이 라벨이 물러나면 워크플로에서 올려 주면 된다.
+
+### 릴리스 자동화 (`.github/workflows/release.yml`)
+`main` 에 머지되면 `project.yml` 의 `MARKETING_VERSION` 을 읽어, 그 태그가 아직 없으면
+태그를 달고 GitHub Release 를 만든다. 노트는 `CHANGELOG.md` 의 해당 절에서 가져온다.
+
+그래서 릴리스 절차는 **PR 안에서 두 줄을 고치는 것**이 전부다.
+
+1. `project.yml` 의 `MARKETING_VERSION` 을 올리고 `generate_xcodeproj.py` 재실행
+2. `CHANGELOG.md` 의 `## [미출시]` 를 `## [1.3] - 2026-09-05` 처럼 버전과 날짜로 확정
+3. 머지 → 태그와 릴리스가 자동으로 생긴다
+
+버전을 올리지 않은 머지는 태그가 이미 있으므로 조용히 넘어간다.
+버전만 올리고 CHANGELOG 를 안 적었으면 릴리스 작업이 실패한다 — 빈 릴리스를 막기 위한 장치다.
+노트를 미리 확인하려면 `python tools/changelog_section.py 1.3` 을 돌려 보면 된다.
 
 ---
 

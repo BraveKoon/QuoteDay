@@ -1,0 +1,107 @@
+name: CI
+
+# PR 과 main 푸시에서 돈다.
+# 이 저장소에는 오랫동안 검증이 없어서 컴파일되지 않은 코드가 main 에 들어갔다.
+# 이 워크플로가 그 구멍을 막는다.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# 같은 브랜치에 새 커밋이 오면 이전 실행은 취소한다. macOS 러너는 분당 10배로
+# 계산되므로, 겹쳐 도는 것만 막아도 한도가 꽤 아껴진다.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 먼저 무료(Linux) 검사를 돌린다. 여기서 걸리는 실수라면
+  # 비싼 macOS 러너를 켤 이유가 없다.
+  verify:
+    name: 정적 검증
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 프로젝트 구조 검증
+        run: python3 tools/check_project.py
+
+      - name: 프로젝트 파일이 생성기 출력과 일치하는지
+        run: |
+          python3 tools/generate_xcodeproj.py
+          if ! git diff --quiet -- QuoteDay.xcodeproj; then
+            echo "::error::QuoteDay.xcodeproj 가 생성기 출력과 다릅니다."
+            echo "파일을 추가·삭제한 뒤 'python tools/generate_xcodeproj.py' 를 다시 돌리고 커밋하세요."
+            git diff --stat -- QuoteDay.xcodeproj
+            exit 1
+          fi
+
+  build-test:
+    name: 빌드와 테스트
+    needs: verify
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 툴체인 확인
+        # 러너 이미지의 기본 Xcode 를 쓴다. 특정 버전 경로를 박아 두면
+        # 이미지가 갱신될 때 "그런 경로 없음"으로 조용히 깨진다.
+        # 대신 무엇으로 빌드했는지 로그에 남긴다.
+        run: |
+          xcodebuild -version
+          swift --version
+          # xcbeautify 는 러너 이미지에 들어 있지만, 빠진 이미지를 만나도
+          # 로그가 안 보이는 것보다는 설치하는 편이 낫다.
+          command -v xcbeautify >/dev/null || brew install xcbeautify
+
+      - name: 시뮬레이터 고르기
+        id: sim
+        # 러너 이미지마다 준비된 기기가 달라서 이름을 박아 두면 언젠가 깨진다.
+        # 사용 가능한 iPhone 중 첫 번째의 UDID 를 그때그때 찾는다.
+        run: |
+          UDID=$(xcrun simctl list devices available --json \
+            | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)['devices']
+          for runtime, devices in sorted(data.items()):
+              if 'iOS' not in runtime:
+                  continue
+              for device in devices:
+                  if device.get('isAvailable') and device['name'].startswith('iPhone'):
+                      print(device['udid'])
+                      raise SystemExit
+          raise SystemExit('사용 가능한 iPhone 시뮬레이터가 없습니다.')
+          ")
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices | grep "$UDID"
+
+      - name: 빌드
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project QuoteDay.xcodeproj \
+            -scheme QuoteDay \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            | xcbeautify
+
+      - name: 테스트
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project QuoteDay.xcodeproj \
+            -scheme QuoteDay \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            | xcbeautify

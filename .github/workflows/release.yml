@@ -1,0 +1,90 @@
+name: Release
+
+# main 에 코드가 들어오면 project.yml 의 버전을 보고, 아직 릴리스가 없으면 만든다.
+#
+# 흐름:
+#   1. PR 에서 project.yml 의 MARKETING_VERSION 을 올리고
+#      CHANGELOG 의 [미출시] 를 [새 버전] 으로 바꾼다.
+#   2. PR 을 머지한다.
+#   3. 이 워크플로가 태그를 달고 릴리스를 만든다.
+#
+# 버전을 올리지 않은 머지에서는 조용히 넘어간다(이미 태그가 있으므로).
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: 태그와 릴리스 만들기
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # 태그를 확인해야 하므로 전체 이력을 받는다.
+          fetch-depth: 0
+
+      - name: 버전 읽기
+        id: version
+        # project.yml 이 버전의 유일한 출처다. 생성기도 여기서 읽는다.
+        run: |
+          VERSION=$(grep -m1 'MARKETING_VERSION:' project.yml \
+            | sed -E 's/.*MARKETING_VERSION: *"?([^"]+)"?.*/\1/' \
+            | tr -d '[:space:]')
+          if [ -z "$VERSION" ]; then
+            echo "::error::project.yml 에서 MARKETING_VERSION 을 읽지 못했습니다."
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "이번 커밋의 버전: $VERSION"
+
+      - name: 이미 릴리스된 버전인지 확인
+        id: guard
+        run: |
+          if git rev-parse -q --verify "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null; then
+            echo "${{ steps.version.outputs.tag }} 태그가 이미 있습니다. 넘어갑니다."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 릴리스 노트 뽑기
+        if: steps.guard.outputs.should_release == 'true'
+        run: |
+          # CHANGELOG 에 해당 버전 절이 없으면 여기서 멈춘다.
+          # 버전만 올리고 변경 내역을 안 적은 릴리스를 막기 위한 장치다.
+          python3 tools/changelog_section.py "${{ steps.version.outputs.version }}" > release-notes.md
+          echo "--- 릴리스 노트 ---"
+          cat release-notes.md
+
+      - name: 태그 달기
+        if: steps.guard.outputs.should_release == 'true'
+        run: |
+          git tag -a "${{ steps.version.outputs.tag }}" \
+            -m "${{ steps.version.outputs.tag }}"
+          git push origin "${{ steps.version.outputs.tag }}"
+
+      - name: 릴리스 만들기
+        if: steps.guard.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            cat release-notes.md
+            echo
+            echo "---"
+            echo
+            echo "**전체 변경 내역**: https://github.com/${{ github.repository }}/commits/${{ steps.version.outputs.tag }}"
+          } > release-body.md
+
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --notes-file release-body.md \
+            --verify-tag

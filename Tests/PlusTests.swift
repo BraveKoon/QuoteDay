@@ -171,6 +171,46 @@ final class PlusTests: XCTestCase {
         XCTAssertTrue(hasAccount, "계좌 이체를 원하는 사람을 위한 수단이 하나는 있어야 한다.")
     }
 
+    // MARK: - 판매 스위치
+
+    /// 판매를 내려 두었으면 유료 기능이 전부 열려 있어야 한다.
+    /// 살 방법이 없는데 잠겨 있으면 열 수 없는 자물쇠만 남는다.
+    @MainActor
+    func testEverythingIsOpenWhileTheStoreIsOff() {
+        let store = makeCleanStore()
+
+        if AppFeatureFlags.isPlusEnabled {
+            // 판매 중이라면 구매 전에는 잠겨 있어야 한다.
+            XCTAssertFalse(store.isPlus)
+            XCTAssertTrue(store.isStoreVisible)
+        } else {
+            XCTAssertTrue(store.isPlus)
+            XCTAssertFalse(store.isStoreVisible, "판매를 내려 두면 구매 화면도 숨겨야 한다.")
+            for feature in PlusFeature.allCases {
+                XCTAssertTrue(store.isUnlocked(feature), "\(feature.rawValue) 가 잠겨 있다.")
+            }
+        }
+    }
+
+    /// 판매를 내려 둔 동안에는 StoreKit 을 건드리지 않는다.
+    @MainActor
+    func testStoreIsNotQueriedWhileOff() async {
+        guard !AppFeatureFlags.isPlusEnabled else { return }
+        let store = makeCleanStore()
+        await store.loadProducts()
+        XCTAssertTrue(store.products.isEmpty)
+        XCTAssertFalse(store.isLoadingProducts)
+    }
+
+    /// 저장된 디버그 토글이 남아 있지 않은 새 저장소.
+    @MainActor
+    private func makeCleanStore() -> PlusStore {
+        let suite = "test.plus.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        return PlusStore(defaults: defaults)
+    }
+
     // MARK: - 상품 식별자
 
     // `PlusStore` 가 @MainActor 라 중첩 타입도 같은 격리를 따른다.

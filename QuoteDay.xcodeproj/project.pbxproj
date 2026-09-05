@@ -183,6 +183,10 @@
 			isa = PBXBuildFile;
 			fileRef = A44C4AFF27C954A27365D8DC /* StableIdentifier.swift */;
 		};
+		867B398C21FA03611D5E66A7 = {
+			isa = PBXBuildFile;
+			fileRef = A038F65A8FD7C5DB5E8BEC9C /* AppFeatureFlags.swift */;
+		};
 		88C5EB04B41FBEC1776591E5 = {
 			isa = PBXBuildFile;
 			fileRef = 93DE5A09EF44EBEAC0D2811D /* PaywallView.swift */;
@@ -190,6 +194,10 @@
 		8C7632D473701A2C99D81CDC = {
 			isa = PBXBuildFile;
 			fileRef = 8BB93BFC51F079D8EC86CA9D /* SupportOption.swift */;
+		};
+		8E12D4ADCD33426481595F82 = {
+			isa = PBXBuildFile;
+			fileRef = A038F65A8FD7C5DB5E8BEC9C /* AppFeatureFlags.swift */;
 		};
 		971D00BB73121F8149108710 = {
 			isa = PBXBuildFile;
@@ -707,6 +715,12 @@
 			path = QuoteShareCard.swift;
 			sourceTree = "<group>";
 		};
+		A038F65A8FD7C5DB5E8BEC9C = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = AppFeatureFlags.swift;
+			sourceTree = "<group>";
+		};
 		A44C4AFF27C954A27365D8DC = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -1135,6 +1149,7 @@
 			isa = PBXGroup;
 			children = (
 				107C8CACD0B1D80133241EEA /* AppCategory.swift */,
+				A038F65A8FD7C5DB5E8BEC9C /* AppFeatureFlags.swift */,
 				AE345CFB9A92ECE5CD5EE824 /* Author.swift */,
 				60B6D8C17726CB47DFA1CCF8 /* BehindStory.swift */,
 				A891BF38ED152A6472BE1E46 /* DeepLink.swift */,
@@ -1332,6 +1347,7 @@
 				84EE7C5F90BB712DC963D8BC /* StableIdentifier.swift in Sources */,
 				88C5EB04B41FBEC1776591E5 /* PaywallView.swift in Sources */,
 				8C7632D473701A2C99D81CDC /* SupportOption.swift in Sources */,
+				8E12D4ADCD33426481595F82 /* AppFeatureFlags.swift in Sources */,
 				971D00BB73121F8149108710 /* BehindStoryLibrary.swift in Sources */,
 				99F344420C5988238B2BBED4 /* AppSettings.swift in Sources */,
 				9A18AB2F56FD7DE300151D28 /* Author.swift in Sources */,
@@ -1393,6 +1409,7 @@
 				78D93F5FDAA1480D7AE3E7A7 /* RemoteQuoteService.swift in Sources */,
 				7BB212837B646C2E0BD5F9DD /* Author.swift in Sources */,
 				8403B7B2D91BB070B87ED12B /* ClayStyle.swift in Sources */,
+				867B398C21FA03611D5E66A7 /* AppFeatureFlags.swift in Sources */,
 				A79992568A0CD208629EE516 /* SupportOption.swift in Sources */,
 				A978B4F4E853643057590D68 /* QuoteCategoryOption.swift in Sources */,
 				B61EF751E16F2543F4AA2BD7 /* SharedStore.swift in Sources */,

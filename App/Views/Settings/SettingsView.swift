@@ -27,7 +27,9 @@ struct SettingsView: View {
             VStack(spacing: ClayTheme.Spacing.m) {
                 header
 
-                plusCard
+                if plus.isStoreVisible {
+                    plusCard
+                }
                 notesCard
                 notificationCard(settings: settings)
                 remoteQuoteCard(settings: settings)

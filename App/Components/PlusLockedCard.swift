@@ -154,6 +154,13 @@ struct ComingSoonCard: View {
 /// 이미 열려 있는 Plus 구획 위에 붙이는 작은 표식.
 struct PlusBadge: View {
     var body: some View {
+        // 판매를 내려 둔 동안에는 무료로 열려 있으므로 표식이 거짓말이 된다.
+        if AppFeatureFlags.isPlusEnabled {
+            badge
+        }
+    }
+
+    private var badge: some View {
         Text("PLUS")
             .font(.system(size: 10, weight: .bold, design: .rounded))
             .foregroundStyle(ClayTheme.textOnAccent)

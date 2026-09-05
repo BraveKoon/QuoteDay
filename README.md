@@ -86,8 +86,15 @@ QuoteDay/
 ## 4. 핵심 동작
 
 ### Quote Plus — 광고 대신 파는 것
+> **지금은 판매를 내려 두었다.** `AppFeatureFlags.isPlusEnabled` 가 `false` 라서
+> 아래 표의 Plus 기능이 **전부 무료로 열려 있고**, 페이월·구매 버튼·PLUS 표식은
+> 화면에 나오지 않으며 StoreKit 을 아예 호출하지 않는다.
+> 살 방법이 없는데 잠가 두면 사용자에게는 열 수 없는 자물쇠만 남기 때문이다.
+> 판매를 시작할 때는 그 값을 `true` 로 바꾸고 App Store Connect 에
+> `PlusStore.ProductID` 의 상품을 등록하면 된다. 코드는 그대로 둔 채 스위치만 올리면 된다.
+
 광고 SDK 를 넣지 않는다. 배너도, 전면 광고도, 추적도 없다.
-대신 **깊이 있는 콘텐츠**만 유료로 판다. 경계는 이렇게 그었다.
+대신 **깊이 있는 콘텐츠**만 유료로 판다. 판매를 켰을 때의 경계는 이렇다.
 
 | | 무료 | Quote Plus |
 |---|---|---|
@@ -110,6 +117,8 @@ QuoteDay/
    준비된 명언에만 잠금이 걸린다.
 3. **잠금 판단은 한 곳에서만 한다.** 화면은 `PlusStore.isUnlocked(_ feature:)` 만 묻는다.
    `PlusFeature` 를 세면 유료 기능이 몇 개인지 코드에서 바로 나온다.
+4. **"열려 있음"과 "파는 중"을 나눠 둔다.** 잠금은 `isUnlocked(_:)`, 구매 화면 노출은
+   `isStoreVisible` 이 답한다. 판매를 내려 두면 전자는 참이고 후자는 거짓이 된다.
 
 구매 상태는 `PlusStore` 가 StoreKit 2 로 관리한다. `Transaction.currentEntitlements` 로
 권한을 계산하고 `Transaction.updates` 로 앱 밖의 변화(가족 공유 승인, 환불, 다른 기기 구매)를 따라간다.

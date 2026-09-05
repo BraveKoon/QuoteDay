@@ -8,19 +8,27 @@ struct SettingsView: View {
     @Environment(CalendarService.self) private var calendarService
     @Environment(ScheduleStore.self) private var store
     @Environment(AppEnvironment.self) private var appEnvironment
+    @Environment(PlusStore.self) private var plus
+    @Environment(NoteStore.self) private var notes
 
     @State private var pendingNotificationCount = 0
     @State private var isRefreshingRemoteQuote = false
     /// 캐시 상태를 다시 읽게 만드는 트리거.
     @State private var remoteQuoteRefreshToken = 0
+    @State private var showsPaywall = false
+    /// 방금 복사한 후원 수단. 체크 표시를 잠깐 보여 주기 위한 값이다.
+    @State private var copiedSupportID: String?
 
     var body: some View {
         @Bindable var settings = settings
 
-        ScrollView {
+        NavigationStack {
+            ScrollView {
             VStack(spacing: ClayTheme.Spacing.m) {
                 header
 
+                plusCard
+                notesCard
                 notificationCard(settings: settings)
                 remoteQuoteCard(settings: settings)
                 dailyQuoteCard(settings: settings)
@@ -28,6 +36,7 @@ struct SettingsView: View {
                 appearanceCard(settings: settings)
                 calendarCard(settings: settings)
                 widgetGuideCard
+                supportCard
                 aboutCard
             }
             .padding(.horizontal, ClayTheme.Spacing.m)
@@ -36,9 +45,16 @@ struct SettingsView: View {
         }
         .scrollIndicators(.hidden)
         .clayBackground()
+        .sheet(isPresented: $showsPaywall) {
+            PaywallView()
+        }
         .task {
             await notifications.refreshAuthorizationStatus()
             pendingNotificationCount = await notifications.pendingNotificationCount()
+        }
+        // 이 화면은 자체 "설정" 헤더를 쓰므로 내비게이션 바를 감춘다.
+        // 밀어 올린 화면(노트 모아 보기)은 각자 바를 갖는다.
+        .toolbar(.hidden, for: .navigationBar)
         }
     }
 
@@ -47,6 +63,186 @@ struct SettingsView: View {
             .font(ClayFont.hero())
             .foregroundStyle(ClayTheme.textPrimary)
             .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Quote Plus
+
+    private var plusCard: some View {
+        card(title: "Quote Plus", symbol: "book.pages") {
+            VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+                if plus.isPlus {
+                    HStack(spacing: ClayTheme.Spacing.xs) {
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundStyle(ClayTheme.accent)
+                        Text("사용 중")
+                            .font(ClayFont.callout())
+                            .foregroundStyle(ClayTheme.textPrimary)
+                        Spacer()
+                        if plus.isDebugUnlocked && !plus.hasEntitlement {
+                            Text("테스트 모드")
+                                .font(ClayFont.caption())
+                                .foregroundStyle(ClayTheme.textSecondary)
+                        }
+                    }
+                    Text("인물 프로필, 비하인드 스토리, 노트 PDF 내보내기, 프리미엄 카드 테마를 모두 쓸 수 있어요.")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    Text("명언 뒤의 이야기와 인물 프로필을 열고, 노트를 PDF 로 내보낼 수 있어요.")
+                        .font(ClayFont.callout())
+                        .foregroundStyle(ClayTheme.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("광고는 앞으로도 넣지 않습니다.")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+
+                    Button("Quote Plus 알아보기") { showsPaywall = true }
+                        .clayButton(.primary, fullWidth: true)
+                        .padding(.top, ClayTheme.Spacing.xs)
+                }
+
+                Button("구매 복원") {
+                    Task { await plus.restore() }
+                }
+                .clayButton(.secondary, fullWidth: true)
+
+                #if DEBUG
+                // 결제 없이 Plus 화면을 확인하기 위한 스위치.
+                // DEBUG 빌드에만 존재하므로 배포본에는 나타나지 않는다.
+                ClayDivider().padding(.vertical, 2)
+                Toggle(isOn: Binding(
+                    get: { plus.isDebugUnlocked },
+                    set: { plus.isDebugUnlocked = $0 }
+                )) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("테스트용 Plus 잠금 해제")
+                            .font(ClayFont.callout())
+                            .foregroundStyle(ClayTheme.textPrimary)
+                        Text("개발 빌드 전용. 결제 없이 유료 화면을 확인합니다.")
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.textSecondary)
+                    }
+                }
+                .tint(ClayTheme.accent)
+                #endif
+            }
+        }
+    }
+
+    // MARK: - 노트
+
+    private var notesCard: some View {
+        card(title: "나의 노트", symbol: "square.and.pencil") {
+            VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+                Text(notes.isEmpty
+                     ? "명언 상세에서 노트를 쓰면 여기 모입니다."
+                     : "지금까지 \(notes.notes.count)편의 명언에 생각을 남겼어요.")
+                    .font(ClayFont.callout())
+                    .foregroundStyle(ClayTheme.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                NavigationLink {
+                    NotesListView()
+                } label: {
+                    Label("노트 모아 보기", systemImage: "chevron.right")
+                        .font(ClayFont.headline())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, ClayTheme.Spacing.s + 2)
+                        .foregroundStyle(ClayTheme.textPrimary)
+                        .clayCard(cornerRadius: ClayTheme.Radius.control)
+                }
+            }
+        }
+    }
+
+    // MARK: - 후원
+
+    private var supportCard: some View {
+        card(title: "개발자 후원하기", symbol: "cup.and.saucer.fill") {
+            VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+                Text("광고 없는 쾌적한 앱을 만들기 위해 노력 중입니다.\n커피 한 잔으로 응원해 주세요!")
+                    .font(ClayFont.callout())
+                    .foregroundStyle(ClayTheme.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("후원은 순수한 응원이에요. Quote Plus 기능이 열리지는 않습니다.")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                ForEach(SupportOption.all) { option in
+                    supportRow(option)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func supportRow(_ option: SupportOption) -> some View {
+        switch option.kind {
+        case .link(let url):
+            Link(destination: url) {
+                supportRowLabel(option, trailingSymbol: "arrow.up.right")
+            }
+            .accessibilityLabel("\(option.title) 열기")
+
+        case .account:
+            // 계좌는 나가는 링크가 아니라 복사해 가는 정보다.
+            Button {
+                copyAccount(option)
+            } label: {
+                supportRowLabel(
+                    option,
+                    subtitle: option.accountLine,
+                    trailingSymbol: copiedSupportID == option.id ? "checkmark" : "doc.on.doc"
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("\(option.title), \(option.accountLine ?? "")")
+            .accessibilityHint("두 번 탭하면 계좌번호를 복사합니다.")
+        }
+    }
+
+    private func supportRowLabel(
+        _ option: SupportOption,
+        subtitle: String? = nil,
+        trailingSymbol: String
+    ) -> some View {
+        HStack(spacing: ClayTheme.Spacing.s) {
+            Image(systemName: option.symbol)
+                .frame(width: 20)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(option.title)
+                    .font(ClayFont.headline())
+                if let subtitle {
+                    Text(subtitle)
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                        .monospacedDigit()
+                }
+            }
+            Spacer(minLength: 0)
+            Image(systemName: trailingSymbol)
+                .font(.caption)
+                .foregroundStyle(copiedSupportID == option.id ? ClayTheme.accent : ClayTheme.textSecondary)
+        }
+        .foregroundStyle(ClayTheme.textPrimary)
+        .padding(.vertical, ClayTheme.Spacing.s + 2)
+        .padding(.horizontal, ClayTheme.Spacing.s)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .clayCard(cornerRadius: ClayTheme.Radius.control)
+    }
+
+    private func copyAccount(_ option: SupportOption) {
+        guard let text = option.copyableText else { return }
+        UIPasteboard.general.string = text
+        withAnimation { copiedSupportID = option.id }
+        // 체크 표시를 잠깐 보여 준 뒤 원래 아이콘으로 되돌린다.
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            withAnimation { copiedSupportID = nil }
+        }
     }
 
     // MARK: - 알림

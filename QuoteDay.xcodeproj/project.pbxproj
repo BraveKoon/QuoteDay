@@ -15,6 +15,14 @@
 			isa = PBXBuildFile;
 			fileRef = 91081FCE4FC5571EA6F0ABA6 /* AuthorPortrait.swift */;
 		};
+		0DCF303893655CEE25F591F6 = {
+			isa = PBXBuildFile;
+			fileRef = 7CA9E13CF0D451B629400AEF /* PlusTests.swift */;
+		};
+		1097DB041263D476797561CF = {
+			isa = PBXBuildFile;
+			fileRef = 69B32C4A8C04DC7317304508 /* NotesListView.swift */;
+		};
 		120B5E867FA3107D92C71FE5 = {
 			isa = PBXBuildFile;
 			fileRef = 55F17BFD846695A20D9D29C0 /* SettingsView.swift */;
@@ -35,6 +43,10 @@
 			isa = PBXBuildFile;
 			fileRef = 22C5EB5933AD18B1128F4542 /* CategoryChip.swift */;
 		};
+		1A7BA782ECC63DC98933A63A = {
+			isa = PBXBuildFile;
+			fileRef = BE73433C5222A7AF14D1B59F /* PlusFeature.swift */;
+		};
 		1CBE485ACA40E29F814B9188 = {
 			isa = PBXBuildFile;
 			fileRef = EE249BE91E4B13A46667234E /* Quote.swift */;
@@ -43,6 +55,14 @@
 			isa = PBXBuildFile;
 			fileRef = C7334277AFD709E5C8CED783 /* ClayTheme.swift */;
 		};
+		2C03B956BA894037B8B31130 = {
+			isa = PBXBuildFile;
+			fileRef = 586489CE3066FA1123FEA5AF /* NoteEditorSheet.swift */;
+		};
+		2EA55067F038930D99FA1934 = {
+			isa = PBXBuildFile;
+			fileRef = A5126AC6B9EEEB06605D2A0E /* ShareCardSheet.swift */;
+		};
 		30DC1167F132F2A4C3EC3DD3 = {
 			isa = PBXBuildFile;
 			fileRef = 86384655A61BDA1B3BA39930 /* AuthorDetailView.swift */;
@@ -50,6 +70,10 @@
 		33EF386FCA0634210F790544 = {
 			isa = PBXBuildFile;
 			fileRef = F073D177DF22CDE733B3CE27 /* Formatters.swift */;
+		};
+		3421DBB93FFB148B06D39C56 = {
+			isa = PBXBuildFile;
+			fileRef = 9B0DEE8D640A384D6F87D320 /* BehindStoryLibrary.swift */;
 		};
 		3B4F33BFA3D0EB1D44B7D95E = {
 			isa = PBXBuildFile;
@@ -75,6 +99,14 @@
 			isa = PBXBuildFile;
 			fileRef = E0E18626C493AE5C0EE77817 /* WidgetSnapshot.swift */;
 		};
+		4F287646E538AD5343972CFE = {
+			isa = PBXBuildFile;
+			fileRef = BE73433C5222A7AF14D1B59F /* PlusFeature.swift */;
+		};
+		502D4DF22951B28133F5383B = {
+			isa = PBXBuildFile;
+			fileRef = 0C72FE8A99F4B0AC2C0F8233 /* NotePDFExporter.swift */;
+		};
 		56A6E646A60B69B5B93458BA = {
 			isa = PBXBuildFile;
 			fileRef = 2ADAAC0D312F05E8DD5464E4 /* QuoteDetailView.swift */;
@@ -86,6 +118,10 @@
 		590A70C51E3A0296F2295B81 = {
 			isa = PBXBuildFile;
 			fileRef = D550BB8FC789EF2AFF6F4056 /* CalendarDayCell.swift */;
+		};
+		5DE75781AC2C6C34B7125C2C = {
+			isa = PBXBuildFile;
+			fileRef = 020A9AAB2971017A79E05CA7 /* NoteStore.swift */;
 		};
 		5DEF99A272929AD81056A110 = {
 			isa = PBXBuildFile;
@@ -147,6 +183,18 @@
 			isa = PBXBuildFile;
 			fileRef = A44C4AFF27C954A27365D8DC /* StableIdentifier.swift */;
 		};
+		88C5EB04B41FBEC1776591E5 = {
+			isa = PBXBuildFile;
+			fileRef = 93DE5A09EF44EBEAC0D2811D /* PaywallView.swift */;
+		};
+		8C7632D473701A2C99D81CDC = {
+			isa = PBXBuildFile;
+			fileRef = 8BB93BFC51F079D8EC86CA9D /* SupportOption.swift */;
+		};
+		971D00BB73121F8149108710 = {
+			isa = PBXBuildFile;
+			fileRef = 9B0DEE8D640A384D6F87D320 /* BehindStoryLibrary.swift */;
+		};
 		99F344420C5988238B2BBED4 = {
 			isa = PBXBuildFile;
 			fileRef = 5F3B248406F193408C5C8ACD /* AppSettings.swift */;
@@ -159,6 +207,14 @@
 			isa = PBXBuildFile;
 			fileRef = 68AF5F4C36CB6BD502ED293B /* CalendarView.swift */;
 		};
+		A028CA9ACBD697CAA9152658 = {
+			isa = PBXBuildFile;
+			fileRef = A03831465D6B84BA3C01365A /* QuoteShareCard.swift */;
+		};
+		A3D90B6FADFCC61019998A1C = {
+			isa = PBXBuildFile;
+			fileRef = 4F80E4DF1C332D39FC03926A /* PlusLockedCard.swift */;
+		};
 		A3EFD6A913446758F74885C6 = {
 			isa = PBXBuildFile;
 			fileRef = 0147B67921CDA9A60E55A185 /* RecurrencePicker.swift */;
@@ -166,6 +222,10 @@
 		A611F1A0E3957787978AA87E = {
 			isa = PBXBuildFile;
 			fileRef = ECB8A315BC81E2AB5F7AD82D /* ScheduleAndNavigationTests.swift */;
+		};
+		A79992568A0CD208629EE516 = {
+			isa = PBXBuildFile;
+			fileRef = 8BB93BFC51F079D8EC86CA9D /* SupportOption.swift */;
 		};
 		A978B4F4E853643057590D68 = {
 			isa = PBXBuildFile;
@@ -192,9 +252,21 @@
 			isa = PBXBuildFile;
 			fileRef = BA227CCFCA532594824638B4 /* CalendarService.swift */;
 		};
+		BCED74CC6E4E2CAA677470FE = {
+			isa = PBXBuildFile;
+			fileRef = 5747F94B3F2BB21AEC316693 /* PlusStore.swift */;
+		};
+		BEB0DE8C449B2C0F9374542D = {
+			isa = PBXBuildFile;
+			fileRef = 5F128CFBB5886FDBC1FF852B /* ShareCardTheme.swift */;
+		};
 		C0344652D1E0D3C7BE60D901 = {
 			isa = PBXBuildFile;
 			fileRef = EA6908188FDC58BA5247C0CD /* SharedStore.swift */;
+		};
+		C33D6DCAD6ABCACE80630E9E = {
+			isa = PBXBuildFile;
+			fileRef = AEB41383E28A9477BAEF8B7E /* QuoteNote.swift */;
 		};
 		C64F40DB2035491678ED700C = {
 			isa = PBXBuildFile;
@@ -228,6 +300,14 @@
 			isa = PBXBuildFile;
 			fileRef = F073D177DF22CDE733B3CE27 /* Formatters.swift */;
 		};
+		E5700511C07D47B95A0AE516 = {
+			isa = PBXBuildFile;
+			fileRef = 60B6D8C17726CB47DFA1CCF8 /* BehindStory.swift */;
+		};
+		E5A30A7FE7C04554AB7114DD = {
+			isa = PBXBuildFile;
+			fileRef = 5F128CFBB5886FDBC1FF852B /* ShareCardTheme.swift */;
+		};
 		E90E1911D37099FEB85CD56F = {
 			isa = PBXBuildFile;
 			fileRef = 330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */;
@@ -239,6 +319,10 @@
 		EAE6423D6315601DD5B8C259 = {
 			isa = PBXBuildFile;
 			fileRef = 2B5CC22705DFC11BC2CCAF19 /* QuoteLibraryData.swift */;
+		};
+		EB3AF8A833DA6BC3C99ABD06 = {
+			isa = PBXBuildFile;
+			fileRef = DC1F83E1856F4E9FCEF59BE1 /* QuoteCardRenderer.swift */;
 		};
 		EE747B0B97D3D751FC62FDC8 = {
 			isa = PBXBuildFile;
@@ -263,6 +347,10 @@
 		F312B673E8A7311A0F950A00 = {
 			isa = PBXBuildFile;
 			fileRef = 5FA85081F75F9D3264BF4A88 /* NotificationService.swift */;
+		};
+		F36722AB805F041C420331F6 = {
+			isa = PBXBuildFile;
+			fileRef = 60B6D8C17726CB47DFA1CCF8 /* BehindStory.swift */;
 		};
 		F543163AE1AD608F9654896D = {
 			isa = PBXBuildFile;
@@ -326,6 +414,18 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = RecurrencePicker.swift;
+			sourceTree = "<group>";
+		};
+		020A9AAB2971017A79E05CA7 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = NoteStore.swift;
+			sourceTree = "<group>";
+		};
+		0C72FE8A99F4B0AC2C0F8233 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = NotePDFExporter.swift;
 			sourceTree = "<group>";
 		};
 		0D23819310177CB1F080C484 = {
@@ -433,6 +533,12 @@
 			path = ScheduleRow.swift;
 			sourceTree = "<group>";
 		};
+		4F80E4DF1C332D39FC03926A = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = PlusLockedCard.swift;
+			sourceTree = "<group>";
+		};
 		5025F8A7E5D81A0448248F7C = {
 			isa = PBXFileReference;
 			lastKnownFileType = text.plist.entitlements;
@@ -451,10 +557,28 @@
 			path = SettingsView.swift;
 			sourceTree = "<group>";
 		};
+		5747F94B3F2BB21AEC316693 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = PlusStore.swift;
+			sourceTree = "<group>";
+		};
 		580B96EDF2D379725ADB41D0 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = QuoteCategoryOption.swift;
+			sourceTree = "<group>";
+		};
+		586489CE3066FA1123FEA5AF = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = NoteEditorSheet.swift;
+			sourceTree = "<group>";
+		};
+		5F128CFBB5886FDBC1FF852B = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ShareCardTheme.swift;
 			sourceTree = "<group>";
 		};
 		5F3B248406F193408C5C8ACD = {
@@ -469,6 +593,12 @@
 			path = NotificationService.swift;
 			sourceTree = "<group>";
 		};
+		60B6D8C17726CB47DFA1CCF8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = BehindStory.swift;
+			sourceTree = "<group>";
+		};
 		648ADB8AEFB7172F5548AA76 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -479,6 +609,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = CalendarView.swift;
+			sourceTree = "<group>";
+		};
+		69B32C4A8C04DC7317304508 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = NotesListView.swift;
 			sourceTree = "<group>";
 		};
 		6BDDF94451A76F3514755327 = {
@@ -511,10 +647,22 @@
 			path = Assets.xcassets;
 			sourceTree = "<group>";
 		};
+		7CA9E13CF0D451B629400AEF = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = PlusTests.swift;
+			sourceTree = "<group>";
+		};
 		86384655A61BDA1B3BA39930 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = AuthorDetailView.swift;
+			sourceTree = "<group>";
+		};
+		8BB93BFC51F079D8EC86CA9D = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = SupportOption.swift;
 			sourceTree = "<group>";
 		};
 		91081FCE4FC5571EA6F0ABA6 = {
@@ -529,10 +677,22 @@
 			path = LockScreenWidget.swift;
 			sourceTree = "<group>";
 		};
+		93DE5A09EF44EBEAC0D2811D = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = PaywallView.swift;
+			sourceTree = "<group>";
+		};
 		977166F8078E4665587F2B0B = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = QuoteService.swift;
+			sourceTree = "<group>";
+		};
+		9B0DEE8D640A384D6F87D320 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = BehindStoryLibrary.swift;
 			sourceTree = "<group>";
 		};
 		9C8A02276319E2AD40A5BECB = {
@@ -541,10 +701,22 @@
 			path = HomeViewModel.swift;
 			sourceTree = "<group>";
 		};
+		A03831465D6B84BA3C01365A = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteShareCard.swift;
+			sourceTree = "<group>";
+		};
 		A44C4AFF27C954A27365D8DC = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = StableIdentifier.swift;
+			sourceTree = "<group>";
+		};
+		A5126AC6B9EEEB06605D2A0E = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ShareCardSheet.swift;
 			sourceTree = "<group>";
 		};
 		A891BF38ED152A6472BE1E46 = {
@@ -559,10 +731,22 @@
 			path = Author.swift;
 			sourceTree = "<group>";
 		};
+		AEB41383E28A9477BAEF8B7E = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteNote.swift;
+			sourceTree = "<group>";
+		};
 		BA227CCFCA532594824638B4 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = CalendarService.swift;
+			sourceTree = "<group>";
+		};
+		BE73433C5222A7AF14D1B59F = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = PlusFeature.swift;
 			sourceTree = "<group>";
 		};
 		BEE634E1756D117ED62F0B83 = {
@@ -611,6 +795,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = CalendarDayCell.swift;
+			sourceTree = "<group>";
+		};
+		DC1F83E1856F4E9FCEF59BE1 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteCardRenderer.swift;
 			sourceTree = "<group>";
 		};
 		DC88F77730B0A8B227917080 = {
@@ -724,6 +914,7 @@
 		14CEC3A21E54D2DD5AB31760 = {
 			isa = PBXGroup;
 			children = (
+				AEB41383E28A9477BAEF8B7E /* QuoteNote.swift */,
 				C8D39E1307079CA8DAEFACF0 /* RecurrenceRule.swift */,
 				6BDDF94451A76F3514755327 /* ScheduleItem.swift */,
 				F2829150112B2526E9BB263C /* ScheduleOccurrence.swift */,
@@ -745,6 +936,8 @@
 				86384655A61BDA1B3BA39930 /* AuthorDetailView.swift */,
 				0D23819310177CB1F080C484 /* QuoteBrowserView.swift */,
 				2ADAAC0D312F05E8DD5464E4 /* QuoteDetailView.swift */,
+				A03831465D6B84BA3C01365A /* QuoteShareCard.swift */,
+				A5126AC6B9EEEB06605D2A0E /* ShareCardSheet.swift */,
 			);
 			path = Quote;
 			sourceTree = "<group>";
@@ -756,11 +949,20 @@
 				D550BB8FC789EF2AFF6F4056 /* CalendarDayCell.swift */,
 				22C5EB5933AD18B1128F4542 /* CategoryChip.swift */,
 				3876A7BBD91A09B40EA3E1E9 /* EmptyStateView.swift */,
+				4F80E4DF1C332D39FC03926A /* PlusLockedCard.swift */,
 				C6C0B3EB82F8AB2F6B75C190 /* QuoteCard.swift */,
 				0147B67921CDA9A60E55A185 /* RecurrencePicker.swift */,
 				4A21180D8A8F60CCF2AE357A /* ScheduleRow.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		4E424792AB134FFB09EC9640 = {
+			isa = PBXGroup;
+			children = (
+				93DE5A09EF44EBEAC0D2811D /* PaywallView.swift */,
+			);
+			path = Plus;
 			sourceTree = "<group>";
 		};
 		51B141E1E5C40FEE5FD5E5B6 = {
@@ -781,6 +983,8 @@
 			children = (
 				46D127C34398A9D7BED9A5E5 /* Calendar */,
 				9CBBF034CDF457D8B4F1D08F /* Home */,
+				E7F010151A07EC9BE8BB0657 /* Notes */,
+				4E424792AB134FFB09EC9640 /* Plus */,
 				4886F00048A8C9D93C5757BA /* Quote */,
 				53546DADF352DDED4B5495D5 /* RootTabView.swift */,
 				866254788E09566483FCCC3C /* Schedule */,
@@ -803,6 +1007,7 @@
 			isa = PBXGroup;
 			children = (
 				1E5C87233090C8CFDB8B803C /* AuthorLibrary.swift */,
+				9B0DEE8D640A384D6F87D320 /* BehindStoryLibrary.swift */,
 				78432620EB5EAAD902F01C15 /* QuoteLibrary.swift */,
 				2B5CC22705DFC11BC2CCAF19 /* QuoteLibraryData.swift */,
 			);
@@ -851,6 +1056,7 @@
 		8AEC345AF92FEBA935540FBF = {
 			isa = PBXGroup;
 			children = (
+				7CA9E13CF0D451B629400AEF /* PlusTests.swift */,
 				330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */,
 				F3A3F8E52A1F69398F2D4444 /* RecurrenceTests.swift */,
 				16FBAC84771CF89D20788E56 /* RemoteQuoteTests.swift */,
@@ -914,8 +1120,12 @@
 			children = (
 				5F3B248406F193408C5C8ACD /* AppSettings.swift */,
 				BA227CCFCA532594824638B4 /* CalendarService.swift */,
+				0C72FE8A99F4B0AC2C0F8233 /* NotePDFExporter.swift */,
+				020A9AAB2971017A79E05CA7 /* NoteStore.swift */,
 				5FA85081F75F9D3264BF4A88 /* NotificationService.swift */,
 				C787DD862E108CE535D42920 /* Persistence.swift */,
+				5747F94B3F2BB21AEC316693 /* PlusStore.swift */,
+				DC1F83E1856F4E9FCEF59BE1 /* QuoteCardRenderer.swift */,
 				713DE0C004E84D4AFF654912 /* ScheduleStore.swift */,
 			);
 			path = Services;
@@ -926,12 +1136,25 @@
 			children = (
 				107C8CACD0B1D80133241EEA /* AppCategory.swift */,
 				AE345CFB9A92ECE5CD5EE824 /* Author.swift */,
+				60B6D8C17726CB47DFA1CCF8 /* BehindStory.swift */,
 				A891BF38ED152A6472BE1E46 /* DeepLink.swift */,
+				BE73433C5222A7AF14D1B59F /* PlusFeature.swift */,
 				EE249BE91E4B13A46667234E /* Quote.swift */,
+				5F128CFBB5886FDBC1FF852B /* ShareCardTheme.swift */,
 				A44C4AFF27C954A27365D8DC /* StableIdentifier.swift */,
+				8BB93BFC51F079D8EC86CA9D /* SupportOption.swift */,
 				E0E18626C493AE5C0EE77817 /* WidgetSnapshot.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		E7F010151A07EC9BE8BB0657 = {
+			isa = PBXGroup;
+			children = (
+				586489CE3066FA1123FEA5AF /* NoteEditorSheet.swift */,
+				69B32C4A8C04DC7317304508 /* NotesListView.swift */,
+			);
+			path = Notes;
 			sourceTree = "<group>";
 		};
 		ECAC025C821625377FF8A023 = {
@@ -1079,17 +1302,23 @@
 			buildActionMask = 2147483647;
 			files = (
 				0CD5478196C468A0AEF8791A /* AuthorPortrait.swift in Sources */,
+				1097DB041263D476797561CF /* NotesListView.swift in Sources */,
 				120B5E867FA3107D92C71FE5 /* SettingsView.swift in Sources */,
 				1A57FEA2BCB63A0691680521 /* CategoryChip.swift in Sources */,
+				1A7BA782ECC63DC98933A63A /* PlusFeature.swift in Sources */,
+				2C03B956BA894037B8B31130 /* NoteEditorSheet.swift in Sources */,
+				2EA55067F038930D99FA1934 /* ShareCardSheet.swift in Sources */,
 				30DC1167F132F2A4C3EC3DD3 /* AuthorDetailView.swift in Sources */,
 				33EF386FCA0634210F790544 /* Formatters.swift in Sources */,
 				3E6A55054D28D9F84F8933A7 /* Quote.swift in Sources */,
 				4730F9757A07E3B91A3A7686 /* ClayTheme.swift in Sources */,
 				4AE0697B1039CE2285796789 /* CalendarViewModel.swift in Sources */,
 				4D3473BCA45CD1A27F8F1AD3 /* WidgetSnapshot.swift in Sources */,
+				502D4DF22951B28133F5383B /* NotePDFExporter.swift in Sources */,
 				56A6E646A60B69B5B93458BA /* QuoteDetailView.swift in Sources */,
 				57637725F7B19FA9A01C258B /* RemoteQuoteService.swift in Sources */,
 				590A70C51E3A0296F2295B81 /* CalendarDayCell.swift in Sources */,
+				5DE75781AC2C6C34B7125C2C /* NoteStore.swift in Sources */,
 				5DEF99A272929AD81056A110 /* HomeView.swift in Sources */,
 				67F88D13F3EA196CC8254AE4 /* AppCategory.swift in Sources */,
 				685D1738D98794E66BA4C7C9 /* QuoteBrowserView.swift in Sources */,
@@ -1101,19 +1330,29 @@
 				80FCDC78CD1EC2EDEAC32B8D /* ScheduleStore.swift in Sources */,
 				82EED4E43C9EBCF04F529395 /* AppEnvironment.swift in Sources */,
 				84EE7C5F90BB712DC963D8BC /* StableIdentifier.swift in Sources */,
+				88C5EB04B41FBEC1776591E5 /* PaywallView.swift in Sources */,
+				8C7632D473701A2C99D81CDC /* SupportOption.swift in Sources */,
+				971D00BB73121F8149108710 /* BehindStoryLibrary.swift in Sources */,
 				99F344420C5988238B2BBED4 /* AppSettings.swift in Sources */,
 				9A18AB2F56FD7DE300151D28 /* Author.swift in Sources */,
 				9AA3D50A8A3F3B6C7B7FDB41 /* CalendarView.swift in Sources */,
+				A028CA9ACBD697CAA9152658 /* QuoteShareCard.swift in Sources */,
+				A3D90B6FADFCC61019998A1C /* PlusLockedCard.swift in Sources */,
 				A3EFD6A913446758F74885C6 /* RecurrencePicker.swift in Sources */,
 				B2A65AB6AA7F9C3D6377A514 /* DeepLink.swift in Sources */,
 				B36E03D938949E98FEE3A7B3 /* QuoteLibraryData.swift in Sources */,
 				BC3E8BCB2ABD0370A9F91A47 /* CalendarService.swift in Sources */,
+				BCED74CC6E4E2CAA677470FE /* PlusStore.swift in Sources */,
+				BEB0DE8C449B2C0F9374542D /* ShareCardTheme.swift in Sources */,
 				C0344652D1E0D3C7BE60D901 /* SharedStore.swift in Sources */,
+				C33D6DCAD6ABCACE80630E9E /* QuoteNote.swift in Sources */,
 				C64F40DB2035491678ED700C /* ScheduleEditorView.swift in Sources */,
 				D616B44D16A20DA67A7DFB2A /* AppRouter.swift in Sources */,
 				D8CB689BAD87EF2D5E9469AE /* QuoteService.swift in Sources */,
 				DAA768F6F31A5C0EBA6294CB /* QuoteCategoryOption.swift in Sources */,
 				DCA55805BBE9BC0E0FD3F6E8 /* ScheduleItem.swift in Sources */,
+				E5700511C07D47B95A0AE516 /* BehindStory.swift in Sources */,
+				EB3AF8A833DA6BC3C99ABD06 /* QuoteCardRenderer.swift in Sources */,
 				EE747B0B97D3D751FC62FDC8 /* HomeViewModel.swift in Sources */,
 				EF1C01EDDF6569CB6FBF05CB /* Persistence.swift in Sources */,
 				F01FF9526EF3C15B534C0096 /* RootTabView.swift in Sources */,
@@ -1129,6 +1368,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0DCF303893655CEE25F591F6 /* PlusTests.swift in Sources */,
 				A611F1A0E3957787978AA87E /* ScheduleAndNavigationTests.swift in Sources */,
 				E90E1911D37099FEB85CD56F /* QuoteEngineTests.swift in Sources */,
 				EA127D7DA9AF5DD3A378C517 /* RecurrenceTests.swift in Sources */,
@@ -1146,18 +1386,23 @@
 				1636DA45079004ACF7CDFD69 /* StableIdentifier.swift in Sources */,
 				1CBE485ACA40E29F814B9188 /* Quote.swift in Sources */,
 				274FC7CEDF1B1B6D57664751 /* ClayTheme.swift in Sources */,
+				3421DBB93FFB148B06D39C56 /* BehindStoryLibrary.swift in Sources */,
 				3B4F33BFA3D0EB1D44B7D95E /* AuthorLibrary.swift in Sources */,
 				3E9ACAD08D64C3B230BE8CC3 /* DeepLink.swift in Sources */,
+				4F287646E538AD5343972CFE /* PlusFeature.swift in Sources */,
 				78D93F5FDAA1480D7AE3E7A7 /* RemoteQuoteService.swift in Sources */,
 				7BB212837B646C2E0BD5F9DD /* Author.swift in Sources */,
 				8403B7B2D91BB070B87ED12B /* ClayStyle.swift in Sources */,
+				A79992568A0CD208629EE516 /* SupportOption.swift in Sources */,
 				A978B4F4E853643057590D68 /* QuoteCategoryOption.swift in Sources */,
 				B61EF751E16F2543F4AA2BD7 /* SharedStore.swift in Sources */,
 				D2668C38DF3F4E13A526C718 /* QuoteWidget.swift in Sources */,
 				DE6EA08B4E53C3E261437D33 /* LockScreenWidget.swift in Sources */,
 				E0F2D8D9B1C678E99C20443E /* Formatters.swift in Sources */,
+				E5A30A7FE7C04554AB7114DD /* ShareCardTheme.swift in Sources */,
 				EAE6423D6315601DD5B8C259 /* QuoteLibraryData.swift in Sources */,
 				F0198F0B08D2E24E555D431D /* QuoteService.swift in Sources */,
+				F36722AB805F041C420331F6 /* BehindStory.swift in Sources */,
 				FD41707ABC8F0F23C40EDD40 /* QuoteLibrary.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1183,9 +1428,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -1201,7 +1446,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -1209,7 +1454,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1224,7 +1469,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -1232,7 +1477,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1279,7 +1524,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -1289,7 +1534,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1328,9 +1573,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -1346,7 +1591,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -1356,7 +1601,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

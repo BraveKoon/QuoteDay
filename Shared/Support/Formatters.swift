@@ -40,6 +40,14 @@ enum Formatters {
         return formatter
     }()
 
+    /// 파일 이름에 넣는 "20260904-1530". 로캘과 무관하게 같은 모양이어야 한다.
+    static let fileStamp: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyyMMdd-HHmm"
+        return formatter
+    }()
+
     static func timeRange(_ start: Date, _ end: Date) -> String {
         let startText = time.string(from: start)
         guard end > start else { return startText }

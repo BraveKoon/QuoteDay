@@ -14,14 +14,25 @@ public enum AppGroup {
     /// 일정이 바뀌었을 때 함께 갱신해야 하는 위젯 종류.
     public static let allWidgetKinds = [widgetKind, lockScreenWidgetKind]
 
-    /// App Group 이 아직 프로비저닝되지 않았으면 `standard` 로 자연스럽게 내려간다.
-    /// (개발 초기에 팀 설정 없이도 앱이 동작하도록.)
-    public static var defaults: UserDefaults {
-        UserDefaults(suiteName: identifier) ?? .standard
-    }
+    /// App Group 컨테이너가 실제로 존재하는지.
+    ///
+    /// `UserDefaults(suiteName:)` 로는 판별할 수 없다. 엔타이틀먼트가 없어도
+    /// **객체는 정상적으로 돌아오고**, 나중에 값을 읽거나 쓰는 순간
+    /// `Unable to find App Group Container in Entitlements` 로 프로세스가 죽는다.
+    /// 그래서 컨테이너 경로가 잡히는지로 확인한다 — 이쪽은 없으면 조용히 nil 이다.
+    ///
+    /// 프로세스 수명 동안 바뀌지 않는 값이라 한 번만 계산한다.
+    public static let isConfigured: Bool = {
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier) != nil
+    }()
 
-    public static var isConfigured: Bool {
-        UserDefaults(suiteName: identifier) != nil
+    /// App Group 이 아직 프로비저닝되지 않았으면 `standard` 로 자연스럽게 내려간다.
+    /// (개발 초기에 팀 설정 없이도, CI 의 서명 없는 빌드에서도 앱이 동작하도록.)
+    public static var defaults: UserDefaults {
+        guard isConfigured, let shared = UserDefaults(suiteName: identifier) else {
+            return .standard
+        }
+        return shared
     }
 }
 
@@ -32,6 +43,8 @@ public enum AppLog {
     public static let notifications = Logger(subsystem: subsystem, category: "notifications")
     public static let calendar = Logger(subsystem: subsystem, category: "calendar")
     public static let widget = Logger(subsystem: subsystem, category: "widget")
+    public static let plus = Logger(subsystem: subsystem, category: "plus")
+    public static let notes = Logger(subsystem: subsystem, category: "notes")
 }
 
 /// `UserDefaults` 에 저장되는 모든 키. 앱과 위젯이 같은 정의를 본다.
@@ -48,6 +61,10 @@ public enum SharedDefaultsKey {
     public static let remoteQuote = "remoteQuote.cache.v1"
     public static let remoteQuoteLastAttempt = "remoteQuote.lastAttempt"
     public static let remoteQuoteLastError = "remoteQuote.lastError"
+    /// 개발용 Plus 잠금 해제 토글. 릴리스 빌드에서는 켤 방법이 없다.
+    public static let plusDebugUnlocked = "plus.debugUnlocked"
+    /// 공유 카드에서 마지막으로 고른 테마.
+    public static let shareCardTheme = "share.cardTheme"
 }
 
 /// 위젯 스냅샷의 읽기/쓰기 담당.

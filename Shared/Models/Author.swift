@@ -19,6 +19,11 @@ public struct Author: Identifiable, Hashable, Codable, Sendable {
     public let biography: String
     /// 주요 업적.
     public let achievements: [String]
+    /// 활동한 시대의 배경 (예: "두 차례 세계대전과 대영제국의 쇠퇴기").
+    /// Quote Plus 프로필 카드에서 쓴다. 비어 있으면 그 줄을 그리지 않는다.
+    public let era: String?
+    /// 대표 저서. Quote Plus 의 "관련 저서" 추천에 쓴다.
+    public let notableWorks: [String]
     /// `Assets.xcassets` 에 초상 이미지를 추가하면 여기에 이름을 넣는다.
     public let portraitAssetName: String?
 
@@ -32,6 +37,8 @@ public struct Author: Identifiable, Hashable, Codable, Sendable {
         nationality: String,
         biography: String,
         achievements: [String] = [],
+        era: String? = nil,
+        notableWorks: [String] = [],
         portraitAssetName: String? = nil
     ) {
         self.id = id
@@ -43,6 +50,8 @@ public struct Author: Identifiable, Hashable, Codable, Sendable {
         self.nationality = nationality
         self.biography = biography
         self.achievements = achievements
+        self.era = era
+        self.notableWorks = notableWorks
         self.portraitAssetName = portraitAssetName
     }
 

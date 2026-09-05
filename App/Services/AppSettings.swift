@@ -40,6 +40,7 @@ final class AppSettings {
     @ObservationIgnored private var storedAppearance: Appearance
     @ObservationIgnored private var storedMirrorsToSystemCalendar: Bool
     @ObservationIgnored private var storedUsesRemoteQuote: Bool
+    @ObservationIgnored private var storedShareCardTheme: String
 
     init(defaults: UserDefaults = AppGroup.defaults) {
         self.defaults = defaults
@@ -54,6 +55,22 @@ final class AppSettings {
         self.storedMirrorsToSystemCalendar = defaults.bool(forKey: SharedDefaultsKey.mirrorToSystemCalendar)
         // 값이 없으면 켜 둔 상태로 시작한다.
         self.storedUsesRemoteQuote = defaults.object(forKey: SharedDefaultsKey.remoteQuoteEnabled) as? Bool ?? true
+        self.storedShareCardTheme = defaults.string(forKey: SharedDefaultsKey.shareCardTheme) ?? ShareCardTheme.paper.rawValue
+    }
+
+    /// 공유 카드에서 마지막으로 고른 테마의 `rawValue`.
+    /// 값 자체는 검증하지 않는다 — 읽는 쪽에서 `ShareCardTheme(storedValue:)` 로 떨어뜨린다.
+    var shareCardTheme: String {
+        get {
+            access(keyPath: \.shareCardTheme)
+            return storedShareCardTheme
+        }
+        set {
+            withMutation(keyPath: \.shareCardTheme) {
+                storedShareCardTheme = newValue
+                defaults.set(newValue, forKey: SharedDefaultsKey.shareCardTheme)
+            }
+        }
     }
 
     var isDailyQuoteEnabled: Bool {

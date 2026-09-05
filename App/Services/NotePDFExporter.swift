@@ -154,7 +154,10 @@ private struct NotePDFPage: View {
             .foregroundStyle(Color(hex: 0x9AA1B8))
         }
         .padding(56)
-        .frame(width: NotePDFExporter.pageWidth, minHeight: NotePDFExporter.pageHeight, alignment: .topLeading)
+        // 폭은 고정, 높이는 최소값만 준다. SwiftUI 의 .frame 은 고정 치수와
+        // 유연 치수를 한 호출에 섞을 수 없어 두 번에 나눠 건다.
+        .frame(width: NotePDFExporter.pageWidth, alignment: .topLeading)
+        .frame(minHeight: NotePDFExporter.pageHeight, alignment: .topLeading)
         .background(Color.white)
     }
 }

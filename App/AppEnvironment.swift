@@ -20,6 +20,7 @@ final class AppEnvironment {
     let quoteService: QuoteService
     let plusStore: PlusStore
     let noteStore: NoteStore
+    let challengeStore: ChallengeStore
 
     /// `UNUserNotificationCenter` 는 delegate 를 약하게 붙잡으므로 여기서 소유한다.
     private let notificationDelegate: NotificationDelegate
@@ -44,6 +45,7 @@ final class AppEnvironment {
         )
         self.plusStore = PlusStore(defaults: defaults)
         self.noteStore = NoteStore(context: container.mainContext)
+        self.challengeStore = ChallengeStore(defaults: defaults)
 
         self.notificationDelegate = NotificationDelegate(router: router)
         UNUserNotificationCenter.current().delegate = notificationDelegate
@@ -159,6 +161,7 @@ extension View {
             .environment(environment.scheduleStore)
             .environment(environment.plusStore)
             .environment(environment.noteStore)
+            .environment(environment.challengeStore)
             .modelContainer(environment.container)
     }
 }

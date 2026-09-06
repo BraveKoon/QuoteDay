@@ -569,7 +569,7 @@ enum QuoteSeed {
               authorID: "cicero", category: .daily, secondaryCategories: [.relationship]),
         Quote(slug: "obama-m-becoming",
               text: "된다는 것은 어딘가에 도착하는 일이 아니다. 그것은 앞으로 나아가는 방법을 뜻한다.",
-              originalText: "Becoming is never giving up on the idea that there's more growing to be done.",
+              originalText: "Becoming isn't about arriving somewhere or achieving a certain aim. I see it instead as forward motion.",
               authorID: "obama_m", category: .daily, secondaryCategories: [.growth])
     ]
 

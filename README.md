@@ -45,6 +45,7 @@ xcodegen generate                    # brew install xcodegen 이 있다면
 | 🏠 홈 | 오늘 날짜, 오늘의 명언(큰 카드), 다음 일정까지 남은 시간, 오늘의 일정 목록 |
 | 📅 캘린더 | 월간 격자(일정 있는 날은 카테고리 색 점), 선택한 날짜의 일정, iOS 캘린더 일정 |
 | 💬 명언 | 전체 명언 검색 + 카테고리 필터 |
+| 🏆 챌린지 | 명언 퀴즈. 유형 2가지 × 난이도 5단계, 한 판 10문제, 단계별 최고 기록 |
 | ⚙️ 설정 | 알림/매일의 명언/기본 카테고리/화면 모드/캘린더 연동/위젯 안내/앱 정보 |
 
 명언 상세는 시트로 열리며 인물 초상·생몰년·직업·국적·생애·주요 업적과
@@ -58,8 +59,11 @@ xcodegen generate                    # brew install xcodegen 이 있다면
 QuoteDay/
 ├── Shared/              앱 + 위젯이 함께 쓰는 코드
 │   ├── Models/          AppCategory, Quote, Author, DeepLink, WidgetSnapshot, StableHash
+│   │                    ChallengeMode/Difficulty, ChallengeQuestion (퀴즈 값 타입)
 │   ├── Data/            QuoteLibrary(색인) + QuoteLibraryData(원본 130편) + AuthorLibrary(87명)
+│   │                    BehindStoryLibrary(41편) + DisputedAttribution(귀속 미확인 30편)
 │   ├── Services/        QuoteService(선택 알고리즘), RemoteQuoteService(ZenQuotes), SharedStore
+│   │                    ChallengeGenerator(문제 생성) + BlankMaker(어절 빈칸)
 │   ├── Design/          ClayTheme(색·치수 토큰) + ClayStyle(.clayCard/.clayButton/.clayBackground)
 │   ├── Support/         Formatters
 │   └── AppIntents/      위젯 구성 인텐트
@@ -69,12 +73,14 @@ QuoteDay/
 │   │                    QuoteNote(필사 노트 @Model)
 │   ├── Services/        Persistence, ScheduleStore, NotificationService, CalendarService, AppSettings
 │   │                    PlusStore(구매 상태), NoteStore, QuoteCardRenderer, NotePDFExporter
+│   │                    ChallengeSession(한 판 진행) + ChallengeStore(단계별 기록)
 │   ├── ViewModels/      HomeViewModel, CalendarViewModel
 │   ├── Components/      QuoteCard, CategoryChip, RecurrencePicker, ScheduleRow, CalendarDayCell,
 │   │                    AuthorPortrait, EmptyState
-│   └── Views/           Home / Calendar / Schedule / Quote / Notes / Plus / Settings / RootTabView
+│   └── Views/           Home / Calendar / Schedule / Quote / Notes / Plus / Challenge /
+│                         Settings / RootTabView
 ├── Widget/              홈 화면(Small·Medium·Large) + 잠금화면(accessory) 위젯
-├── Tests/               XCTest 98개
+├── Tests/               XCTest 147개
 └── tools/               프로젝트 생성기 + 정적 검증기 + CHANGELOG 절 추출기
 ```
 
@@ -143,8 +149,60 @@ DEBUG 빌드의 설정 화면에는 **결제 없이 유료 화면을 확인하�
 - 귀속이 논쟁 중인 명언(예: 링컨의 "도끼를 갈겠다")에는 배경을 달지 않는다.
 - 확인하지 못했으면 비워 둔다. UI 는 배경 없는 명언을 정상으로 다룬다.
 
-지금은 검증된 3편(잡스 2005 스탠퍼드, 만델라 1990 보스턴, 아인슈타인 1936「On Education」)만
-들어 있다. 나머지는 출처를 확인하는 대로 배열에 추가하면 되고 코드는 손댈 필요가 없다.
+지금은 **41편**이 들어 있다. 모두 특정 책·편지·연설·방송으로 자리를 짚을 수 있는 것만 골랐다
+(예: 베토벤이 1801년 11월 16일 베겔러에게 보낸 편지, 마르쿠스 아우렐리우스 『명상록』 5권 1장,
+1997년 나이키 「Failure」 광고). 나머지 89편은 비워 두었고, UI 는 그것을 정상으로 다룬다.
+
+확인해 본 결과 **일부러 뺀 것**들도 있다. 처칠의 "성공은 최종적인 것이 아니다"는 처칠이 말했다는
+기록이 없고 1938년 버드와이저 광고 문안이 가장 이른 형태다. 마리 퀴리의 "두려워할 것은 없다"도
+1952년 이전 출처가 확인되지 않는다. 이런 명언 30편은 `DisputedAttribution.slugs` 에 모아 두었다.
+
+### 귀속이 확인되지 않은 명언 (`DisputedAttribution`)
+명언집이 조용히 틀린 역사를 가르치는 가장 흔한 경로가 오귀속이다. 특히 챌린지의
+"누가 말했을까"는 정답을 하나로 못 박는 형식이라, 이런 명언을 문제로 내면 앱이
+확인되지 않은 귀속을 정답이라고 가르치게 된다. 그래서 그 유형에서만 제외한다.
+
+**명언 자체는 지우지 않는다.** 문장이 나쁜 것이 아니라 꼬리표가 불확실할 뿐이고,
+인물을 묻지 않는 "빈칸 채우기"에는 그대로 쓸 수 있다. 목록에 넣는 기준은 하나다 —
+1차 출처를 찾지 못했다. 출처가 확인되면 목록에서 빼고 배경을 채우면 된다.
+
+### 챌린지 — 난이도를 무엇으로 나눴나
+명언 퀴즈다. 유형은 두 가지다.
+
+| 유형 | 문제 |
+|---|---|
+| 빈칸 채우기 | 명언에서 낱말 1~2개를 지우고 보기에서 고른다 |
+| 누가 말했을까 | 문장만 보고 말한 사람을 고른다 |
+
+난이도를 나누는 손잡이는 네 개인데, **어느 것도 "정답을 덜 알려 주는" 방식이 아니다.**
+모두 찍어서 맞힐 확률을 낮추는 쪽으로만 움직인다.
+
+| 단계 | 보기 | 빈칸 | 힌트 | 오답의 출처 | 제한 시간 |
+|---|---|---|---|---|---|
+| 1 입문 | 3개 | 1개 | 인물 이름 | 전체에서 무작위 | — |
+| 2 보통 | 4개 | 1개 | 인물 이름 | 같은 주제의 명언 | — |
+| 3 어려움 | 4개 | 1개 | 없음 | 같은 인물 · 비슷한 길이 | — |
+| 4 매우 어려움 | 5개 | 2개 | 없음 | 같은 인물 · 비슷한 길이 | 20초 |
+| 5 극한 | 6개 | 2개 | 없음 | 같은 인물 · 비슷한 길이 | 15초 |
+
+4단계부터 빈칸이 둘이 되면 보기도 낱말 **한 쌍**이 된다. 이때 오답의 절반은
+정답과 한 낱말만 다르게 만든다 — `못하면 · 수도` 옆에 `못하면 · 없다` 가 놓이는 식이다.
+
+**모든 단계는 처음부터 열려 있다.** 잠가 두면 진도를 강제하게 되는데, 이 앱은 학습지가 아니다.
+진행감은 단계별 최고 기록으로 보여 준다.
+
+구현에서 눈여겨볼 곳이 두 군데 있다.
+
+- **한국어 낱말 자르기** (`BlankMaker`) — 형태소로 자르려면 사전이 필요해서, **어절**을
+  통째로 뚫는다. "인생은"에서 "인생"만 뽑으면 남은 조사가 답을 절반쯤 알려 준다.
+  앞뒤 따옴표·마침표는 빈칸 밖에 남긴다.
+- **오답 풀을 배열째 나눠 두는 것** (`ChallengeGenerator`) — 후보 낱말을 한 배열에
+  이어 붙이면 안 된다. 전체 낱말이 1,000개가 넘어서, 앞에 붙인 수십 개짜리 "같은 인물"
+  후보는 뽑힐 확률이 사실상 0이 되고 난이도 차이가 통째로 사라진다. 우선순위가 다른
+  풀은 배열째 나눠 두고 순서대로 시도한다. (처음에 이렇게 만들었다가 고쳤다.)
+
+문제 생성은 **결정적**이다. 같은 seed 는 같은 문제를 만든다. 테스트가 "이 seed 면 이 보기가
+나온다"를 그대로 검증할 수 있고, 화면이 다시 그려질 때 보기 순서가 뒤바뀌는 사고도 막는다.
 
 ### 화면을 단색으로만 그리는 이유
 표면에 그라데이션·블러·광택을 쓰지 않는다. 층은 두 가지로만 나눈다.
@@ -295,6 +353,8 @@ PR 과 `main` 푸시에서 돈다. 두 단계로 나눠 두었다.
 - 명언 **130편**, 인물 **87명**. 카테고리별 최소 12편 이상(보조 카테고리 포함 시 더 많다).
 - 실존 인물이 남긴 것으로 널리 확인된 문장만 사용했고, 출처가 불분명한 인터넷 문구는 배제했다.
   가능한 경우 원문(`originalText`)을 함께 담았다.
+- 비하인드 스토리 **41편**(`BehindStoryLibrary`), 귀속이 확인되지 않아 인물 문제에서 빼는 명언
+  **30편**(`DisputedAttribution`).
 - 명언을 추가하려면 `Shared/Data/QuoteLibraryData.swift` 의 해당 카테고리 배열에 항목을 넣고,
   새 인물이면 `AuthorLibrary.all` 에 추가한다. `slug` 는 전체에서 유일해야 하며
   한 번 출시한 뒤에는 바꾸지 않는다(딥링크 기준).
@@ -307,7 +367,8 @@ PR 과 `main` 푸시에서 돈다. 두 단계로 나눠 두었다.
 - iOS 캘린더 연동은 **읽기 + 내보내기**만 지원한다. 기기 캘린더에서 수정한 내용이
   앱 일정으로 돌아오지는 않는다.
 - 반복 일정에 "이 회차만 수정/삭제" 는 없다. 회차 하나를 건너뛰려면 반복 종료일을 조정해야 한다.
-- 비하인드 스토리는 3편만 채워져 있다. 나머지는 출처 확인 후 채워야 한다.
+- 비하인드 스토리는 130편 중 41편만 채워져 있다. 나머지는 출처 확인 후 채워야 한다.
+- 챌린지 기록은 이 기기에만 남는다. iCloud 동기화도, 다른 사람과의 비교도 없다.
 - 후원처(`SupportOption.all`)는 실제 값이다. 고칠 일이 생기면 두 번 확인할 것 —
   계좌번호가 한 자리만 틀려도 후원금이 남에게 간다.
 - 상품 식별자는 App Store Connect 에 등록해야 가격이 뜬다. 등록 전에는 페이월이 안내 문구만 보여 준다.

@@ -45,6 +45,7 @@ public enum AppLog {
     public static let widget = Logger(subsystem: subsystem, category: "widget")
     public static let plus = Logger(subsystem: subsystem, category: "plus")
     public static let notes = Logger(subsystem: subsystem, category: "notes")
+    public static let challenge = Logger(subsystem: subsystem, category: "challenge")
 }
 
 /// `UserDefaults` 에 저장되는 모든 키. 앱과 위젯이 같은 정의를 본다.
@@ -65,6 +66,10 @@ public enum SharedDefaultsKey {
     public static let plusDebugUnlocked = "plus.debugUnlocked"
     /// 공유 카드에서 마지막으로 고른 테마.
     public static let shareCardTheme = "share.cardTheme"
+    /// 챌린지 단계별 기록(JSON 한 덩어리).
+    public static let challengeRecords = "challenge.records.v1"
+    /// 챌린지 화면에서 마지막으로 고른 모드.
+    public static let challengeMode = "challenge.lastMode"
 }
 
 /// 위젯 스냅샷의 읽기/쓰기 담당.

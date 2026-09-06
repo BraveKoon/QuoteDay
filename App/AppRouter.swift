@@ -8,7 +8,7 @@ import SwiftUI
 @Observable
 final class AppRouter {
     enum Tab: String, CaseIterable, Identifiable {
-        case home, calendar, quotes, settings
+        case home, calendar, quotes, challenge, settings
 
         var id: String { rawValue }
 
@@ -17,6 +17,7 @@ final class AppRouter {
             case .home: "홈"
             case .calendar: "캘린더"
             case .quotes: "명언"
+            case .challenge: "챌린지"
             case .settings: "설정"
             }
         }
@@ -26,6 +27,7 @@ final class AppRouter {
             case .home: "house.fill"
             case .calendar: "calendar"
             case .quotes: "quote.bubble.fill"
+            case .challenge: "trophy.fill"
             case .settings: "gearshape.fill"
             }
         }

@@ -35,6 +35,8 @@ struct RootTabView: View {
             CalendarView().transition(screenTransition)
         case .quotes:
             QuoteBrowserView().transition(screenTransition)
+        case .challenge:
+            ChallengeHomeView().transition(screenTransition)
         case .settings:
             SettingsView().transition(screenTransition)
         }

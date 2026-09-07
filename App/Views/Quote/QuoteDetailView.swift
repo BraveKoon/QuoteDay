@@ -53,6 +53,7 @@ struct QuoteDetailView: View {
             VStack(spacing: ClayTheme.Spacing.l) {
                 header(for: presentation)
                 quoteCard(for: presentation)
+                heartSection(for: presentation)
                 behindStorySection(for: presentation)
                 noteSection(for: presentation)
                 authorProfileSection(for: presentation)
@@ -418,6 +419,35 @@ struct QuoteDetailView: View {
         }
     }
 
+    // MARK: - 하트 (무료)
+
+    /// 하트와 전체 개수. 숫자는 모든 사용자의 합계다.
+    private func heartSection(for presentation: QuotePresentation) -> some View {
+        VStack(spacing: ClayTheme.Spacing.xs) {
+            HStack(spacing: ClayTheme.Spacing.m) {
+                HeartButton(slug: presentation.quote.slug)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("이 문장이 좋았다면")
+                        .font(ClayFont.callout())
+                        .foregroundStyle(ClayTheme.textPrimary)
+                    Text("하트는 모든 사용자의 것을 함께 셉니다.")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 0)
+            }
+
+            HeartSyncNotice()
+        }
+        .padding(ClayTheme.Spacing.m)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .clayCard()
+        .clayAppear(delay: 0.06)
+    }
+
     // MARK: - 공유 (무료)
 
     private func shareSection(for presentation: QuotePresentation) -> some View {
@@ -425,7 +455,7 @@ struct QuoteDetailView: View {
             Button {
                 showsShareCard = true
             } label: {
-                Label("카드로 공유하기", systemImage: "photo.on.rectangle.angled")
+                Label("카드 만들기", systemImage: "photo.on.rectangle.angled")
                     .frame(maxWidth: .infinity)
             }
             .clayButton(.primary, fullWidth: true)

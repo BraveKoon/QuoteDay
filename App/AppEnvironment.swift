@@ -21,11 +21,16 @@ final class AppEnvironment {
     let plusStore: PlusStore
     let noteStore: NoteStore
     let challengeStore: ChallengeStore
+    let heartStore: HeartStore
 
     /// `UNUserNotificationCenter` 는 delegate 를 약하게 붙잡으므로 여기서 소유한다.
     private let notificationDelegate: NotificationDelegate
 
-    init(container: ModelContainer = Persistence.shared, defaults: UserDefaults = AppGroup.defaults) {
+    init(
+        container: ModelContainer = Persistence.shared,
+        defaults: UserDefaults = AppGroup.defaults,
+        heartSync: HeartSyncing = AppEnvironment.makeHeartSync()
+    ) {
         self.container = container
         let settings = AppSettings(defaults: defaults)
         let notifications = NotificationService()
@@ -46,6 +51,7 @@ final class AppEnvironment {
         self.plusStore = PlusStore(defaults: defaults)
         self.noteStore = NoteStore(context: container.mainContext)
         self.challengeStore = ChallengeStore(defaults: defaults)
+        self.heartStore = HeartStore(sync: heartSync, defaults: defaults)
 
         self.notificationDelegate = NotificationDelegate(router: router)
         UNUserNotificationCenter.current().delegate = notificationDelegate
@@ -57,6 +63,8 @@ final class AppEnvironment {
         calendarService.refreshAuthorizationStatus()
         // 다른 기기에서 구매했거나 환불된 경우를 여기서 따라잡는다.
         await plusStore.refreshEntitlements()
+        // 밀린 하트를 올리고 최신 합계를 받아 온다. 실패해도 화면은 캐시로 채워진다.
+        await heartStore.refresh()
         await refreshRemoteQuote()
     }
 
@@ -76,12 +84,26 @@ final class AppEnvironment {
         return updated
     }
 
-    /// 프리뷰/테스트용 인메모리 환경.
+    /// 하트 동기화 통로를 고른다.
+    ///
+    /// `CloudKitHeartService` 는 컨테이너 식별자가 없으면 **만들어지지 않는다**(실패 가능 이니셜라이저).
+    /// 그래서 CloudKit 이 설정되지 않은 빌드에서는 컨테이너를 건드리는 코드가 아예 실행되지 않는다.
+    ///
+    /// `nonisolated` 인 이유: 이 클래스는 `@MainActor` 라서 static 메서드도 함께 격리되는데,
+    /// 기본 인자 식은 격리되지 않은 문맥에서 평가되므로 그대로 두면 호출할 수 없다.
+    /// 여기서 만지는 것은 정적 상수와 값 타입뿐이라 격리가 필요 없다.
+    nonisolated static func makeHeartSync() -> HeartSyncing {
+        CloudKitHeartService(containerIdentifier: CloudKitConfiguration.containerIdentifier)
+            ?? OfflineHeartSync()
+    }
+
+    /// 프리뷰/테스트용 인메모리 환경. 네트워크를 타지 않는다.
     static func preview() -> AppEnvironment {
         let container = (try? Persistence.makeInMemoryContainer()) ?? Persistence.shared
         let environment = AppEnvironment(
             container: container,
-            defaults: UserDefaults(suiteName: "preview.quoteday") ?? .standard
+            defaults: UserDefaults(suiteName: "preview.quoteday") ?? .standard,
+            heartSync: OfflineHeartSync()
         )
         environment.seedPreviewData()
         return environment
@@ -162,6 +184,7 @@ extension View {
             .environment(environment.plusStore)
             .environment(environment.noteStore)
             .environment(environment.challengeStore)
+            .environment(environment.heartStore)
             .modelContainer(environment.container)
     }
 }

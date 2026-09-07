@@ -27,6 +27,7 @@ WIDGET_TARGET = "QuoteDayWidgetExtension"
 TEST_TARGET = "QuoteDayTests"
 
 APP_BUNDLE_ID = "com.quoteday.QuoteDay"
+CLOUDKIT_CONTAINER = "iCloud.com.quoteday.app"
 WIDGET_BUNDLE_ID = "com.quoteday.QuoteDay.Widget"
 TEST_BUNDLE_ID = "com.quoteday.QuoteDayTests"
 DEPLOYMENT_TARGET = "17.0"
@@ -498,6 +499,11 @@ def main() -> int:
         ("MARKETING_VERSION", MARKETING_VERSION),
         ("PRODUCT_BUNDLE_IDENTIFIER", APP_BUNDLE_ID),
         ("PRODUCT_NAME", quote("$(TARGET_NAME)")),
+        # 하트 동기화용 CloudKit 컨테이너. Info.plist 가 이 값을 치환해 받는다.
+        # 빈 값으로 덮어쓰면 앱이 CKContainer 를 아예 만들지 않는다 —
+        # 엔타이틀먼트 없이 만들면 프로세스가 죽기 때문에, 서명 없는 빌드(CI)와
+        # CloudKit 을 켤 수 없는 계정은 이 값을 비워서 끈다.
+        ("QD_CLOUDKIT_CONTAINER", quote(CLOUDKIT_CONTAINER)),
         ("SWIFT_EMIT_LOC_STRINGS", "YES"),
         ("TARGETED_DEVICE_FAMILY", quote("1,2")),
     ]

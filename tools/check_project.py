@@ -447,12 +447,55 @@ def check_resources() -> None:
         fail("Info.plist 에 quoteday URL 스킴이 없습니다.")
     if "NSCalendarsFullAccessUsageDescription" not in info:
         fail("Info.plist 에 캘린더 권한 설명이 없습니다.")
+    if "NSPhotoLibraryAddUsageDescription" not in info:
+        # 문구가 없으면 사진 앱에 저장하는 순간 앱이 죽는다.
+        fail("Info.plist 에 사진 추가 권한 설명이 없습니다.")
+
+    check_cloudkit(info)
 
     widget_info = (ROOT / "Widget/Info.plist").read_text(encoding="utf-8")
     if "com.apple.widgetkit-extension" not in widget_info:
         fail("위젯 Info.plist 의 확장 포인트가 잘못되었습니다.")
 
     check_app_icon()
+
+
+def check_cloudkit(info: str) -> None:
+    """하트 동기화용 CloudKit 설정이 서로 맞물려 있는지.
+
+    식별자가 세 곳에 나뉘어 있다 — 빌드 설정 `QD_CLOUDKIT_CONTAINER`,
+    그 값을 치환해 받는 Info.plist, 그리고 entitlements.
+    한 곳만 고치면 앱은 빌드도 되고 실행도 되다가 **실기기에서만** 조용히
+    동기화가 안 되거나, 더 나쁘게는 시작하자마자 죽는다.
+    """
+    key = "QDCloudKitContainer"
+    setting = "QD_CLOUDKIT_CONTAINER"
+    entitlements = (ROOT / "App/Resources/QuoteDay.entitlements").read_text(encoding="utf-8")
+    pbxproj = (ROOT / "QuoteDay.xcodeproj/project.pbxproj").read_text(encoding="utf-8")
+
+    if key not in info:
+        warn(f"Info.plist 에 {key} 가 없습니다. 하트가 기기 안에만 저장됩니다.")
+        return
+
+    # Info.plist 는 값을 직접 적지 않고 빌드 설정을 치환해 받아야 한다.
+    # 직접 적어 두면 CI 처럼 CloudKit 을 끌 수 없는 빌드에서 끌 방법이 없어진다.
+    if f"$({setting})" not in info:
+        fail(f"Info.plist 의 {key} 는 $({setting}) 를 치환해 받아야 합니다.")
+
+    match = re.search(rf'{setting} = "?([^";\n]*)"?;', pbxproj)
+    if not match:
+        fail(f"프로젝트에 {setting} 빌드 설정이 없습니다.")
+        return
+
+    identifier = match.group(1).strip()
+    if not identifier:
+        warn(f"{setting} 가 비어 있습니다. 하트가 기기 안에만 저장됩니다.")
+        return
+
+    if identifier not in entitlements:
+        fail(f"CloudKit 컨테이너({identifier})가 entitlements 에 없습니다.")
+    if "com.apple.developer.icloud-services" not in entitlements:
+        fail("entitlements 에 iCloud 서비스(CloudKit) 선언이 없습니다.")
 
 
 def check_app_icon() -> None:

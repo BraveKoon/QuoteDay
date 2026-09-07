@@ -16,6 +16,7 @@ lines only.
 - The quote of the day can optionally refresh from [ZenQuotes](https://zenquotes.io/) `/today` (turn it off and the app is fully offline)
 - Per-version changes live in [CHANGELOG.md](CHANGELOG.md)
 - **No ads.** Revenue comes from exactly one place: the **Quote Plus** paid plan (StoreKit 2)
+- Quote **hearts** are tallied across every user through the CloudKit public database (no sign-up)
 
 ---
 
@@ -36,6 +37,17 @@ Open it in Xcode 15 or later. Two settings and it runs.
    (The app still runs without an App Group. The widget just won't show your events —
    see "Failing safely" below.)
 
+3. **CloudKit** (for heart sync) — turn on iCloud > CloudKit under Signing &
+   Capabilities and create the `iCloud.com.quoteday.app` container.
+   **This requires a paid Apple Developer Program membership.**
+
+   If you can't enable it, leave the **`QD_CLOUDKIT_CONTAINER` build setting empty**
+   (in `project.yml` or Xcode's Build Settings). The app then never constructs a
+   `CKContainer` and hearts stay on the device. That switch exists because
+   **constructing a container without the entitlement crashes the app** — CI builds
+   without signing, so it turns it off the same way. If the identifier drifts between
+   the build setting, Info.plist, and the entitlements, `check_project.py` catches it.
+
 To regenerate the project file, either way works:
 
 ```bash
@@ -51,7 +63,7 @@ xcodegen generate                    # if you have brew install xcodegen
 |---|---|
 | 🏠 Home | Today's date, the quote of the day (large card), time until the next event, today's schedule |
 | 📅 Calendar | Monthly grid (days with events get a category-colored dot), the selected day's events, iOS Calendar events |
-| 💬 Quotes | Search across all quotes + category filter |
+| 💬 Quotes | Search across all quotes + category filter, with a heart and a card button per quote |
 | 🏆 Challenge | Quote quiz. 2 modes × 5 difficulty levels, 10 questions per round, best score per level |
 | ⚙️ Settings | Notifications / daily quote / default category / appearance / calendar sync / widget guide / about |
 
@@ -67,27 +79,31 @@ QuoteDay/
 ├── Shared/              Code the app and the widget both use
 │   ├── Models/          AppCategory, Quote, Author, DeepLink, WidgetSnapshot, StableHash
 │   │                    ChallengeMode/Difficulty, ChallengeQuestion (quiz value types)
+│   │                    HeartSnapshot (total count + whether I tapped it)
 │   ├── Data/            QuoteLibrary (index) + QuoteLibraryData (130 quotes) + AuthorLibrary (87 people)
 │   │                    BehindStoryLibrary (41) + DisputedAttribution (30 unverified attributions)
 │   ├── Services/        QuoteService (selection), RemoteQuoteService (ZenQuotes), SharedStore
 │   │                    ChallengeGenerator (question building) + BlankMaker (Korean word blanks)
+│   │                    HeartSyncing (sync protocol) + CloudKitConfiguration
 │   ├── Design/          ClayTheme (color and size tokens) + ClayStyle (.clayCard/.clayButton/.clayBackground)
 │   ├── Support/         Formatters
 │   └── AppIntents/      Widget configuration intent
 ├── App/
 │   ├── Models/          ScheduleItem (SwiftData @Model) + ScheduleValidator
+│   │                    ShareCardDesign (card background, note, watermark)
 │   │                    RecurrenceRule (rules and occurrence math) + ScheduleOccurrence
 │   │                    QuoteNote (journaling note, @Model)
 │   ├── Services/        Persistence, ScheduleStore, NotificationService, CalendarService, AppSettings
 │   │                    PlusStore (purchase state), NoteStore, QuoteCardRenderer, NotePDFExporter
 │   │                    ChallengeSession (one round) + ChallengeStore (records per level)
+│   │                    HeartStore (local state + pending queue) + CloudKitHeartService
 │   ├── ViewModels/      HomeViewModel, CalendarViewModel
 │   ├── Components/      QuoteCard, CategoryChip, RecurrencePicker, ScheduleRow, CalendarDayCell,
-│   │                    AuthorPortrait, EmptyState
+│   │                    AuthorPortrait, EmptyState, HeartButton
 │   └── Views/           Home / Calendar / Schedule / Quote / Notes / Plus / Challenge /
 │                         Settings / RootTabView
 ├── Widget/              Home screen (Small·Medium·Large) + lock screen (accessory) widgets
-├── Tests/               147 XCTest cases
+├── Tests/               169 XCTest cases
 └── tools/               Project generator + static checker + CHANGELOG section extractor
 ```
 
@@ -185,6 +201,66 @@ excluded from that mode only.
 label is uncertain, and "fill in the blank" — which never asks who said it — can use them
 as they are. The bar for the list is one thing: **no primary source found.** When a source
 turns up, remove it from the list and write the story.
+
+### How hearts are counted
+Any quote can be hearted, and the number under the heart is the **total across every user**.
+This is the first write-capable backend QuoteDay has, and it runs on the CloudKit **public
+database** — no server to operate, and people are told apart by their iCloud account with
+no sign-up of their own.
+
+**It never issues a query.** Record names are derived deterministically from the values:
+
+    one heart   QuoteHeart       "<quote slug>|<my user record name>"
+    the tally   QuoteHeartTally  "tally|<quote slug>"
+
+So every read is a fetch by ID (`records(for:)`). Using a CloudKit query means turning on
+an index per field in the dashboard, and forgetting that setting leaves an app that builds
+fine, runs fine, and then fails silently **only on a real device**. Going through IDs
+removes that trap entirely. It also means one person cannot heart the same quote twice —
+the record name would be identical.
+
+**The screen never waits on the network.** Tapping a heart fills it in and bumps the number
+right there. The server write happens behind it, and a failure does **not** roll it back —
+it stays queued for the next attempt. Undoing a tap because the network failed makes the
+user's action vanish for no reason they can see. In the other direction, freshly fetched
+server values **never overwrite something still queued**, which is what stops a heart you
+just tapped from visibly un-filling itself.
+
+**About accuracy, plainly.** CloudKit has no atomic increment. The tally record is read,
+modified and written back; if someone else writes first, `serverRecordChanged` comes back
+and it retries. With enough simultaneous taps a few can be lost. That is an acceptable
+error for a heart count, and removing it would mean running a server.
+
+**Hearts work without sync too.** With no iCloud account, or in a build where CloudKit
+isn't configured, hearts stay on the device and one line on screen says why. A heart that
+isn't counted beats a heart that does nothing when tapped.
+
+The `HeartSyncing` protocol keeps this behind one seam. CloudKit can't be verified in the
+simulator or in CI, so tests run against a fake, and swapping the backend later leaves the
+screens untouched.
+
+### The share card
+A quote becomes a 1080×1080 image you can **save to Photos** or share. It opens straight
+from each quote in the Quotes tab, and from the quote detail.
+
+| What you choose | |
+|---|---|
+| Background color | 8 swatches plus a free color picker. **Defaults to QuoteDay purple (`#5A64D8`)** |
+| Photo | Pick one from the library as the background; 45% black goes over it so text stays legible |
+| Your note | Up to 90 characters, set under the quote behind a vertical rule. Leave it empty and it doesn't appear |
+| Preset | The existing 6 themes, serif included. Picking one steps over a color you chose |
+| QuoteDay mark | At the bottom of the card. On by default |
+
+**Text color is computed, not chosen.** Once people can pick any background, "black text on
+dark purple" becomes a real failure. The background's WCAG relative luminance is measured
+and, against a 0.179 threshold, either white or dark text wins on contrast. A test keeps
+all 8 swatches readable.
+
+The preview and the exported image are the **same view** (`QuoteShareCard`), handed a
+different size — there is no room for "it came out different from the preview".
+
+Saving asks for `.addOnly` permission. The app only ever puts photos in and never reads
+them, so requesting the whole library would be asking for more than it needs.
 
 ### Challenge — what actually makes a level harder
 A quote quiz, in two modes.
@@ -336,6 +412,10 @@ Turn it on in Settings (on by default) and the quote of the day comes from ZenQu
 | Stale deep link | "Quote not found" empty state |
 | No network | Only the ZenQuotes refresh is skipped; bundled quotes are shown. Nothing else is affected |
 | ZenQuotes quota exceeded | The notice text is rejected rather than stored as a quote; bundled quotes stay |
+| Not signed in to iCloud | Hearts stay on the device, with one line on screen explaining why |
+| CloudKit container not configured | No `CKContainer` is ever constructed (failable init); hearts stay local |
+| A heart fails to upload | Not rolled back — queued and retried on the next launch |
+| Photo access denied | The card still builds and shares; only saving is blocked, with an explanation |
 
 ---
 
@@ -353,6 +433,9 @@ python tools/check_project.py
 - **Target boundary violations** — fails if the widget references an app-only type (different modules, so it would be a real compile error)
 - That there is exactly one `@main` per target
 - That entitlements / Info.plist / App Group identifiers agree
+- That the **CloudKit container identifier** matches in both Info.plist and the entitlements
+  (fix one without the other and sync fails silently, only on a device)
+- That the photo-add usage description exists (without it, saving crashes the app)
 - That the app icon is 1024x1024 with no alpha channel (alpha gets rejected by the App Store)
 
 On macOS, additionally:
@@ -416,6 +499,12 @@ that's the guard against an empty release. To preview the notes, run
   the recurrence end date.
 - 41 of 130 quotes have a behind-the-quote story. The rest need their sources confirmed first.
 - Challenge records stay on this device. No iCloud sync, no comparison with anyone else.
+- Heart sync needs a **paid Apple Developer Program** membership (that's what enables
+  CloudKit). Without one, hearts are stored only on the device.
+- Heart totals can lose a few taps under heavy concurrency (see "How hearts are counted").
+- Un-hearting reaches the server immediately, but other people's screens only catch up the
+  next time they open the app.
+- The photo on a share card isn't kept. Close the sheet and you pick it again.
 - The donation details in `SupportOption.all` are real values. Check twice before editing
   them — one wrong digit in an account number sends someone else the money.
 - Product identifiers must be registered in App Store Connect before prices appear. Until

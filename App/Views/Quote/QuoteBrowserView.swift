@@ -6,6 +6,8 @@ struct QuoteBrowserView: View {
 
     @State private var selectedCategory: AppCategory?
     @State private var searchText = ""
+    /// 카드를 만들 명언. 값이 들어오면 시트가 올라온다.
+    @State private var cardTarget: QuotePresentation?
 
     private let quoteService = QuoteService.shared
 
@@ -36,14 +38,9 @@ struct QuoteBrowserView: View {
                     }
                     .clayCard()
                 } else {
-                    LazyVStack(spacing: ClayTheme.Spacing.s) {
+                    LazyVStack(spacing: ClayTheme.Spacing.m) {
                         ForEach(results) { quote in
-                            QuoteCard(
-                                presentation: quoteService.presentation(for: quote),
-                                style: .compact
-                            ) {
-                                router.showQuote(quote)
-                            }
+                            row(for: quoteService.presentation(for: quote))
                         }
                     }
                 }
@@ -54,6 +51,38 @@ struct QuoteBrowserView: View {
         }
         .scrollIndicators(.hidden)
         .clayBackground()
+        .sheet(item: $cardTarget) { target in
+            ShareCardSheet(presentation: target)
+        }
+    }
+
+    /// 명언 카드 + 그 아래 작은 동작 줄.
+    ///
+    /// 하트와 카드 버튼을 카드 **안에** 넣지 않는 이유: 카드 전체가 이미 버튼이라
+    /// 그 안에 버튼을 겹치면 탭이 어느 쪽으로 갈지 알 수 없어진다.
+    private func row(for presentation: QuotePresentation) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            QuoteCard(presentation: presentation, style: .compact) {
+                router.showQuote(presentation.quote)
+            }
+
+            HStack(spacing: ClayTheme.Spacing.s) {
+                HeartButton(slug: presentation.quote.slug, size: .small)
+
+                Spacer(minLength: 0)
+
+                Button {
+                    cardTarget = presentation
+                } label: {
+                    Label("카드 만들기", systemImage: "photo.on.rectangle.angled")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.accent)
+                }
+                .buttonStyle(.plain)
+                .frame(minHeight: 44)
+            }
+            .padding(.horizontal, ClayTheme.Spacing.xs)
+        }
     }
 
     private var header: some View {

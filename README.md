@@ -13,6 +13,7 @@ UI 는 파스텔 팔레트를 유지하되 그라데이션·블러 없이 단색
 - 오늘의 명언은 선택적으로 [ZenQuotes](https://zenquotes.io/) `/today` 에서 갱신 (끄면 완전 오프라인)
 - 버전별 변경 사항은 [CHANGELOG.md](CHANGELOG.md) 에 정리한다
 - **광고 없음.** 수익은 유료 플랜 **Quote Plus**(StoreKit 2) 하나에서만 나온다
+- 명언 **하트**는 CloudKit 공개 데이터베이스로 모든 사용자와 함께 집계된다(로그인 불필요)
 
 ---
 
@@ -31,6 +32,13 @@ Xcode 15 이상에서 열고 다음 두 가지만 설정하면 바로 실행된�
    `Shared/Services/SharedStore.swift` 의 `AppGroup.identifier` 도 같이 바꾼다.
    (App Group 이 없어도 앱은 동작한다. 위젯에 일정이 안 보일 뿐이다 — 아래 "안전한 실패" 참고)
 
+3. **CloudKit**(하트 동기화용) — 두 곳이 맞물려 있다.
+   `App/Resources/Info.plist` 의 `QDCloudKitContainer` 와 entitlements 의 컨테이너 식별자다.
+   Signing & Capabilities 에서 iCloud > CloudKit 을 켜고 컨테이너를 만들면 된다.
+   **유료 Apple Developer Program 이 있어야 켤 수 있다.** 없으면
+   `QDCloudKitContainer` 값을 지우면 되고, 그러면 하트는 이 기기에만 저장된다
+   (아래 "하트를 어떻게 세는가" 참고). 두 값이 어긋나면 `check_project.py` 가 잡는다.
+
 프로젝트 파일을 다시 만들어야 한다면 둘 중 아무 방법이나 쓰면 된다.
 
 ```bash
@@ -46,7 +54,7 @@ xcodegen generate                    # brew install xcodegen 이 있다면
 |---|---|
 | 🏠 홈 | 오늘 날짜, 오늘의 명언(큰 카드), 다음 일정까지 남은 시간, 오늘의 일정 목록 |
 | 📅 캘린더 | 월간 격자(일정 있는 날은 카테고리 색 점), 선택한 날짜의 일정, iOS 캘린더 일정 |
-| 💬 명언 | 전체 명언 검색 + 카테고리 필터 |
+| 💬 명언 | 전체 명언 검색 + 카테고리 필터, 명언마다 하트와 카드 만들기 |
 | 🏆 챌린지 | 명언 퀴즈. 유형 2가지 × 난이도 5단계, 한 판 10문제, 단계별 최고 기록 |
 | ⚙️ 설정 | 알림/매일의 명언/기본 카테고리/화면 모드/캘린더 연동/위젯 안내/앱 정보 |
 
@@ -62,27 +70,31 @@ QuoteDay/
 ├── Shared/              앱 + 위젯이 함께 쓰는 코드
 │   ├── Models/          AppCategory, Quote, Author, DeepLink, WidgetSnapshot, StableHash
 │   │                    ChallengeMode/Difficulty, ChallengeQuestion (퀴즈 값 타입)
+│   │                    HeartSnapshot (하트 수 + 내가 눌렀는지)
 │   ├── Data/            QuoteLibrary(색인) + QuoteLibraryData(원본 130편) + AuthorLibrary(87명)
 │   │                    BehindStoryLibrary(41편) + DisputedAttribution(귀속 미확인 30편)
 │   ├── Services/        QuoteService(선택 알고리즘), RemoteQuoteService(ZenQuotes), SharedStore
 │   │                    ChallengeGenerator(문제 생성) + BlankMaker(어절 빈칸)
+│   │                    HeartSyncing(동기화 프로토콜) + CloudKitConfiguration
 │   ├── Design/          ClayTheme(색·치수 토큰) + ClayStyle(.clayCard/.clayButton/.clayBackground)
 │   ├── Support/         Formatters
 │   └── AppIntents/      위젯 구성 인텐트
 ├── App/
 │   ├── Models/          ScheduleItem (SwiftData @Model) + ScheduleValidator
+│   │                    ShareCardDesign(카드 배경·감상·워터마크)
 │   │                    RecurrenceRule(반복 규칙·회차 계산) + ScheduleOccurrence(회차)
 │   │                    QuoteNote(필사 노트 @Model)
 │   ├── Services/        Persistence, ScheduleStore, NotificationService, CalendarService, AppSettings
 │   │                    PlusStore(구매 상태), NoteStore, QuoteCardRenderer, NotePDFExporter
 │   │                    ChallengeSession(한 판 진행) + ChallengeStore(단계별 기록)
+│   │                    HeartStore(로컬 + 대기열) + CloudKitHeartService
 │   ├── ViewModels/      HomeViewModel, CalendarViewModel
 │   ├── Components/      QuoteCard, CategoryChip, RecurrencePicker, ScheduleRow, CalendarDayCell,
-│   │                    AuthorPortrait, EmptyState
+│   │                    AuthorPortrait, EmptyState, HeartButton
 │   └── Views/           Home / Calendar / Schedule / Quote / Notes / Plus / Challenge /
 │                         Settings / RootTabView
 ├── Widget/              홈 화면(Small·Medium·Large) + 잠금화면(accessory) 위젯
-├── Tests/               XCTest 147개
+├── Tests/               XCTest 169개
 └── tools/               프로젝트 생성기 + 정적 검증기 + CHANGELOG 절 추출기
 ```
 
@@ -167,6 +179,62 @@ DEBUG 빌드의 설정 화면에는 **결제 없이 유료 화면을 확인하�
 **명언 자체는 지우지 않는다.** 문장이 나쁜 것이 아니라 꼬리표가 불확실할 뿐이고,
 인물을 묻지 않는 "빈칸 채우기"에는 그대로 쓸 수 있다. 목록에 넣는 기준은 하나다 —
 1차 출처를 찾지 못했다. 출처가 확인되면 목록에서 빼고 배경을 채우면 된다.
+
+### 하트를 어떻게 세는가
+명언마다 하트를 누를 수 있고, 하트 아래 숫자는 **모든 사용자의 합계**다.
+QuoteDay 에 붙은 첫 번째 쓰기 가능한 백엔드이고, CloudKit **공개 데이터베이스**를 쓴다.
+서버를 직접 운영하지 않고, 사용자는 별도 회원가입 없이 iCloud 계정으로 자동 구분된다.
+
+**쿼리를 한 번도 쓰지 않는다.** 레코드 이름을 값에서 결정적으로 만들기 때문이다.
+
+    하트 하나  QuoteHeart       "<명언 slug>|<내 사용자 레코드 이름>"
+    합계        QuoteHeartTally  "tally|<명언 slug>"
+
+그래서 모든 읽기가 ID 로 가져오기(`records(for:)`)로 끝난다. CloudKit 에서 쿼리를 쓰려면
+대시보드에서 필드마다 인덱스를 켜 줘야 하는데, 그 설정을 잊으면 앱은 빌드도 되고 실행도
+되다가 **실기기에서만** 조용히 실패한다. ID 로만 접근하면 그 함정이 통째로 사라진다.
+덤으로 한 사람이 같은 명언에 하트를 두 번 남길 수 없다 — 레코드 이름이 같기 때문이다.
+
+**화면은 네트워크를 기다리지 않는다.** 하트를 누르면 그 자리에서 색이 채워지고 숫자가
+하나 오른다. 서버 반영은 뒤에서 하고, 실패하면 **되돌리지 않고** 대기열에 남겨 다음
+기회에 올린다. 실패했다고 하트를 풀어 버리면 사용자가 누른 것이 이유 없이 사라진다.
+반대로 새로 받아 온 서버 값도 **아직 못 올린 것은 덮어쓰지 않는다** — 방금 누른 하트가
+화면에서 되풀려 보이는 것을 막는 장치다.
+
+**정확도는 정직하게 말해 두자.** CloudKit 에는 원자적 증가가 없다. 합계 레코드를 읽고
+고쳐 다시 쓰며, 그 사이에 남이 먼저 쓰면 `serverRecordChanged` 가 와서 다시 시도한다.
+동시에 누르는 사람이 아주 많으면 몇 개가 누락될 수 있다. 하트 수에는 감당할 만한
+오차이고, 이것을 없애려면 서버를 직접 두어야 한다.
+
+**동기화가 없어도 하트는 눌린다.** iCloud 에 로그인하지 않았거나 이 빌드에 CloudKit 이
+설정되지 않았으면 하트는 기기에만 남고, 화면에 그 이유가 한 줄 뜬다. 눌러도 아무 일도
+일어나지 않는 하트보다는 세지 않는 하트가 낫다.
+
+`HeartSyncing` 프로토콜로 통로를 끊어 두었다. CloudKit 은 시뮬레이터·CI 에서 검증할 수
+없어서 테스트는 가짜 구현으로 돌리고, 나중에 서버를 바꾸더라도 화면은 그대로 둔다.
+
+### 공유 카드
+명언을 1080×1080 이미지로 만들어 **사진 앱에 저장**하거나 공유한다.
+명언 탭의 각 명언 아래에서 바로 열리고, 명언 상세에서도 열린다.
+
+| 고를 수 있는 것 | |
+|---|---|
+| 배경색 | 견본 8종 + 색 고르개로 자유 선택. **기본값은 QuoteDay 보라(`#5A64D8`)** |
+| 사진 | 앨범에서 골라 배경으로. 글자가 묻히지 않게 45% 검정을 덮는다 |
+| 느낀 점 | 90자까지. 명언 아래에 세로선과 함께 붙는다. 비워 두면 나오지 않는다 |
+| 프리셋 | 기존 테마 6종(세리프 서체 포함). 고르면 직접 정한 색이 물러난다 |
+| QuoteDay 표시 | 카드 맨 아래. 기본으로 켜져 있다 |
+
+**글자색은 계산으로 정한다.** 사용자가 배경색을 자유롭게 고를 수 있게 되면서
+"어두운 보라에 검은 글씨"가 실제 위험이 되었다. 배경의 WCAG 상대 휘도를 재서
+0.179 를 기준으로 흰 글자와 진한 글자 중 대비가 큰 쪽을 고른다. 견본 8종이 모두
+읽히는지는 테스트가 지킨다.
+
+미리보기와 내보내는 이미지는 **같은 뷰**(`QuoteShareCard`)다. 크기만 다르게 넘긴다 —
+"미리보기와 다르게 나온다"가 생길 자리를 없앤다.
+
+사진 앱 저장은 `.addOnly` 권한만 요청한다. 앱은 사진을 넣기만 하고 읽을 일이 없어서,
+전체 라이브러리 접근을 요구하면 필요 이상을 달라고 하는 것이 된다.
 
 ### 챌린지 — 난이도를 무엇으로 나눴나
 명언 퀴즈다. 유형은 두 가지다.
@@ -297,6 +365,10 @@ Swift 의 `Hasher` 는 프로세스마다 시드가 달라 쓸 수 없다.
 | 오래된 딥링크 | "명언을 찾을 수 없어요" 빈 상태 |
 | 네트워크 없음 | ZenQuotes 갱신만 건너뛰고 내장 명언으로 표시. 나머지 기능은 영향 없음 |
 | ZenQuotes 사용량 초과 | 안내 문구를 명언으로 저장하지 않고 거부, 내장 명언 유지 |
+| iCloud 미로그인 | 하트는 기기에만 저장, 화면에 이유 한 줄 표시 |
+| CloudKit 컨테이너 미설정 | `CKContainer` 를 아예 만들지 않는다(실패 가능 이니셜라이저), 하트는 로컬 |
+| 하트 전송 실패 | 되돌리지 않고 대기열에 남겨 다음 실행에 다시 올림 |
+| 사진 접근 거부 | 카드는 그대로 만들고 공유는 되며, 저장만 막히고 이유를 안내 |
 
 ---
 
@@ -314,6 +386,9 @@ python tools/check_project.py
 - **타겟 경계 위반** — 위젯이 앱 전용 타입을 참조하면 실패 (모듈이 다르므로 실제 컴파일 오류가 됨)
 - `@main` 이 타겟당 정확히 하나인지
 - entitlements / Info.plist / App Group 식별자 일치
+- **CloudKit 컨테이너 식별자**가 Info.plist 와 entitlements 양쪽에서 같은지
+  (한쪽만 고치면 실기기에서만 조용히 동기화가 안 된다)
+- 사진 추가 권한 문구가 있는지 (없으면 저장하는 순간 앱이 죽는다)
 - 앱 아이콘이 1024x1024 이고 알파 채널이 없는지 (알파가 있으면 App Store 가 거부한다)
 
 macOS 에서는 여기에 더해:
@@ -371,6 +446,11 @@ PR 과 `main` 푸시에서 돈다. 두 단계로 나눠 두었다.
 - 반복 일정에 "이 회차만 수정/삭제" 는 없다. 회차 하나를 건너뛰려면 반복 종료일을 조정해야 한다.
 - 비하인드 스토리는 130편 중 41편만 채워져 있다. 나머지는 출처 확인 후 채워야 한다.
 - 챌린지 기록은 이 기기에만 남는다. iCloud 동기화도, 다른 사람과의 비교도 없다.
+- 하트 동기화에는 **유료 Apple Developer Program** 이 필요하다(CloudKit 을 켜려면).
+  없으면 하트가 기기 안에만 저장된다.
+- 하트 합계는 동시 접속이 아주 많을 때 몇 개가 누락될 수 있다(위 "하트를 어떻게 세는가").
+- 하트를 취소해도 서버에서 즉시 반영되지만, 다른 사람 화면은 그쪽이 앱을 다시 열 때 갱신된다.
+- 공유 카드의 사진은 저장되지 않는다. 시트를 닫으면 다시 골라야 한다.
 - 후원처(`SupportOption.all`)는 실제 값이다. 고칠 일이 생기면 두 번 확인할 것 —
   계좌번호가 한 자리만 틀려도 후원금이 남에게 간다.
 - 상품 식별자는 App Store Connect 에 등록해야 가격이 뜬다. 등록 전에는 페이월이 안내 문구만 보여 준다.

@@ -35,6 +35,10 @@
 			</array>
 		</dict>
 	</array>
+	<key>QDCloudKitContainer</key>
+	<string>iCloud.com.quoteday.app</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>만든 명언 카드를 사진 앱에 저장하기 위해 사용합니다. 기존 사진을 읽지는 않습니다.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>기기 캘린더의 일정을 함께 보여 드리기 위해 사용합니다. 허용하지 않아도 앱 내부 일정 기능은 그대로 사용할 수 있습니다.</string>
 	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>

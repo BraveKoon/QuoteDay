@@ -88,7 +88,11 @@ final class AppEnvironment {
     ///
     /// `CloudKitHeartService` 는 컨테이너 식별자가 없으면 **만들어지지 않는다**(실패 가능 이니셜라이저).
     /// 그래서 CloudKit 이 설정되지 않은 빌드에서는 컨테이너를 건드리는 코드가 아예 실행되지 않는다.
-    static func makeHeartSync() -> HeartSyncing {
+    ///
+    /// `nonisolated` 인 이유: 이 클래스는 `@MainActor` 라서 static 메서드도 함께 격리되는데,
+    /// 기본 인자 식은 격리되지 않은 문맥에서 평가되므로 그대로 두면 호출할 수 없다.
+    /// 여기서 만지는 것은 정적 상수와 값 타입뿐이라 격리가 필요 없다.
+    nonisolated static func makeHeartSync() -> HeartSyncing {
         CloudKitHeartService(containerIdentifier: CloudKitConfiguration.containerIdentifier)
             ?? OfflineHeartSync()
     }

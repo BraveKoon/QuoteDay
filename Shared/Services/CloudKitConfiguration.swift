@@ -2,14 +2,21 @@ import Foundation
 
 /// CloudKit 컨테이너 설정.
 ///
-/// 식별자를 코드에 박지 않고 **Info.plist 에서 읽는다.** 이유는 하나다 —
-/// 엔타이틀먼트 없이 `CKContainer` 를 건드리면 앱이 죽을 수 있는데,
-/// CloudKit 프로비저닝은 유료 개발자 계정이 있어야 켤 수 있어서
-/// 프로젝트를 그냥 열어 본 사람에게는 없을 수 있다.
+/// 식별자를 코드에 박지 않고 **빌드 설정 → Info.plist** 를 거쳐 읽는다.
+/// 이유는 하나다 — 엔타이틀먼트 없이 `CKContainer` 를 만들면 프로세스가 죽는다.
+/// 그리고 CloudKit 엔타이틀먼트는 서명할 때 붙으므로, 서명을 끈 빌드에는 없다.
 ///
-/// 그런 빌드에서는 `QDCloudKitContainer` 키를 비우거나 지우면 된다.
-/// 그러면 컨테이너 객체 자체가 만들어지지 않고, 하트는 기기 안에만 남는다.
-/// (App Group 때 같은 실수를 했다 — 객체는 멀쩡히 만들어지고 나중에 죽었다.)
+///     Info.plist   QDCloudKitContainer = $(QD_CLOUDKIT_CONTAINER)
+///     빌드 설정     QD_CLOUDKIT_CONTAINER = iCloud.com.quoteday.app
+///
+/// 그래서 끄는 방법이 한 줄이다. `QD_CLOUDKIT_CONTAINER=""` 로 덮어쓰면
+/// 이 값이 nil 이 되고, 컨테이너 객체 자체가 만들어지지 않는다.
+/// CI 가 정확히 그렇게 한다(서명 없이 빌드하므로 켤 수가 없다).
+/// CloudKit 을 켤 수 없는 계정도 같은 방법으로 끄면 된다.
+///
+/// **처음에는 Info.plist 에 값을 직접 적어 두었다가 CI 에서 앱이 시작하자마자
+/// 죽었다.** 키가 있다는 것과 기능이 실제로 프로비저닝되었다는 것은 다르다 —
+/// App Group 때 배운 것과 같은 교훈이고, 옷만 바꿔 입고 다시 나타났다.
 public enum CloudKitConfiguration {
     /// Info.plist 키 이름.
     public static let infoKey = "QDCloudKitContainer"

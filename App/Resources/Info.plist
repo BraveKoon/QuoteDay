@@ -36,7 +36,7 @@
 		</dict>
 	</array>
 	<key>QDCloudKitContainer</key>
-	<string>iCloud.com.quoteday.app</string>
+	<string>$(QD_CLOUDKIT_CONTAINER)</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>만든 명언 카드를 사진 앱에 저장하기 위해 사용합니다. 기존 사진을 읽지는 않습니다.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>

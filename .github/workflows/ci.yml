@@ -80,6 +80,11 @@ jobs:
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
           xcrun simctl list devices | grep "$UDID"
 
+      # CloudKit 은 여기서 켤 수 없다. 서명을 끄고 빌드하므로 엔타이틀먼트가 붙지
+      # 않는데, 엔타이틀먼트 없이 CKContainer 를 만들면 프로세스가 죽는다.
+      # 앱은 시작하자마자 AppEnvironment 를 만들기 때문에 테스트가 시작도 못 하고
+      # 죽는다(실제로 그렇게 실패했다). QD_CLOUDKIT_CONTAINER 를 비우면 컨테이너
+      # 자체를 만들지 않으므로, CI 는 하트가 로컬로만 동작하는 경로를 검증한다.
       - name: 빌드
         run: |
           set -o pipefail
@@ -91,6 +96,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
+            QD_CLOUDKIT_CONTAINER="" \
             | xcbeautify
 
       - name: 테스트
@@ -104,4 +110,5 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
+            QD_CLOUDKIT_CONTAINER="" \
             | xcbeautify

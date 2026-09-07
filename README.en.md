@@ -37,12 +37,16 @@ Open it in Xcode 15 or later. Two settings and it runs.
    (The app still runs without an App Group. The widget just won't show your events —
    see "Failing safely" below.)
 
-3. **CloudKit** (for heart sync) — two places have to agree: `QDCloudKitContainer` in
-   `App/Resources/Info.plist` and the container identifier in the entitlements. Turn on
-   iCloud > CloudKit under Signing & Capabilities and create the container.
-   **This requires a paid Apple Developer Program membership.** Without one, clear the
-   `QDCloudKitContainer` value and hearts stay on the device (see "How hearts are counted"
-   below). If the two values drift apart, `check_project.py` catches it.
+3. **CloudKit** (for heart sync) — turn on iCloud > CloudKit under Signing &
+   Capabilities and create the `iCloud.com.quoteday.app` container.
+   **This requires a paid Apple Developer Program membership.**
+
+   If you can't enable it, leave the **`QD_CLOUDKIT_CONTAINER` build setting empty**
+   (in `project.yml` or Xcode's Build Settings). The app then never constructs a
+   `CKContainer` and hearts stay on the device. That switch exists because
+   **constructing a container without the entitlement crashes the app** — CI builds
+   without signing, so it turns it off the same way. If the identifier drifts between
+   the build setting, Info.plist, and the entitlements, `check_project.py` catches it.
 
 To regenerate the project file, either way works:
 

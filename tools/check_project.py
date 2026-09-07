@@ -463,22 +463,33 @@ def check_resources() -> None:
 def check_cloudkit(info: str) -> None:
     """하트 동기화용 CloudKit 설정이 서로 맞물려 있는지.
 
-    식별자가 Info.plist · entitlements · 두 곳에 나뉘어 있어서 한 곳만 고치면
-    앱은 빌드도 되고 실행도 되다가 **실기기에서만** 조용히 동기화가 안 된다.
+    식별자가 세 곳에 나뉘어 있다 — 빌드 설정 `QD_CLOUDKIT_CONTAINER`,
+    그 값을 치환해 받는 Info.plist, 그리고 entitlements.
+    한 곳만 고치면 앱은 빌드도 되고 실행도 되다가 **실기기에서만** 조용히
+    동기화가 안 되거나, 더 나쁘게는 시작하자마자 죽는다.
     """
     key = "QDCloudKitContainer"
+    setting = "QD_CLOUDKIT_CONTAINER"
     entitlements = (ROOT / "App/Resources/QuoteDay.entitlements").read_text(encoding="utf-8")
+    pbxproj = (ROOT / "QuoteDay.xcodeproj/project.pbxproj").read_text(encoding="utf-8")
 
     if key not in info:
         warn(f"Info.plist 에 {key} 가 없습니다. 하트가 기기 안에만 저장됩니다.")
         return
 
-    match = re.search(
-        rf"<key>{key}</key>\s*<string>([^<]*)</string>", info
-    )
-    identifier = (match.group(1).strip() if match else "")
+    # Info.plist 는 값을 직접 적지 않고 빌드 설정을 치환해 받아야 한다.
+    # 직접 적어 두면 CI 처럼 CloudKit 을 끌 수 없는 빌드에서 끌 방법이 없어진다.
+    if f"$({setting})" not in info:
+        fail(f"Info.plist 의 {key} 는 $({setting}) 를 치환해 받아야 합니다.")
+
+    match = re.search(rf'{setting} = "?([^";\n]*)"?;', pbxproj)
+    if not match:
+        fail(f"프로젝트에 {setting} 빌드 설정이 없습니다.")
+        return
+
+    identifier = match.group(1).strip()
     if not identifier:
-        warn(f"{key} 가 비어 있습니다. 하트가 기기 안에만 저장됩니다.")
+        warn(f"{setting} 가 비어 있습니다. 하트가 기기 안에만 저장됩니다.")
         return
 
     if identifier not in entitlements:

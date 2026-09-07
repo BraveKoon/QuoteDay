@@ -32,12 +32,16 @@ Xcode 15 이상에서 열고 다음 두 가지만 설정하면 바로 실행된�
    `Shared/Services/SharedStore.swift` 의 `AppGroup.identifier` 도 같이 바꾼다.
    (App Group 이 없어도 앱은 동작한다. 위젯에 일정이 안 보일 뿐이다 — 아래 "안전한 실패" 참고)
 
-3. **CloudKit**(하트 동기화용) — 두 곳이 맞물려 있다.
-   `App/Resources/Info.plist` 의 `QDCloudKitContainer` 와 entitlements 의 컨테이너 식별자다.
-   Signing & Capabilities 에서 iCloud > CloudKit 을 켜고 컨테이너를 만들면 된다.
-   **유료 Apple Developer Program 이 있어야 켤 수 있다.** 없으면
-   `QDCloudKitContainer` 값을 지우면 되고, 그러면 하트는 이 기기에만 저장된다
-   (아래 "하트를 어떻게 세는가" 참고). 두 값이 어긋나면 `check_project.py` 가 잡는다.
+3. **CloudKit**(하트 동기화용) — Signing & Capabilities 에서 iCloud > CloudKit 을 켜고
+   `iCloud.com.quoteday.app` 컨테이너를 만들면 된다.
+   **유료 Apple Developer Program 이 있어야 켤 수 있다.**
+
+   못 켜는 경우에는 빌드 설정 **`QD_CLOUDKIT_CONTAINER` 를 빈 값으로** 두면 된다
+   (`project.yml` 또는 Xcode 의 Build Settings). 그러면 앱이 `CKContainer` 를 아예
+   만들지 않고 하트는 이 기기에만 저장된다. **엔타이틀먼트 없이 컨테이너를 만들면
+   앱이 죽기 때문에** 이 스위치가 필요하다 — CI 도 서명을 끄고 빌드하므로 같은
+   방법으로 끈다. 식별자가 빌드 설정·Info.plist·entitlements 사이에서 어긋나면
+   `check_project.py` 가 잡는다.
 
 프로젝트 파일을 다시 만들어야 한다면 둘 중 아무 방법이나 쓰면 된다.
 

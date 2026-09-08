@@ -57,6 +57,14 @@ final class ChallengeStore {
         return storedRecords.values.contains { $0.hasPlayed }
     }
 
+    /// 랭킹에 올라가는 총점. 모드·단계별 최고 기록에 단계 배점을 곱해 더한다.
+    var rankingTotal: Int {
+        access(keyPath: \.records)
+        return ChallengeScore.total { mode, difficulty in
+            storedRecords[Self.key(mode, difficulty)]?.bestScore ?? 0
+        }
+    }
+
     /// 모드 전체의 최고 정답 수 합계. 홈 화면 요약에 쓴다.
     func totalBestScore(mode: ChallengeMode) -> Int {
         access(keyPath: \.records)

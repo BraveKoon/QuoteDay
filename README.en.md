@@ -56,7 +56,7 @@ xcodegen generate                    # if you have brew install xcodegen
 | 🏠 Home | Today's date, the quote of the day (large card), time until the next event, today's schedule |
 | 📅 Calendar | Monthly grid (days with events get a category-colored dot), the selected day's events, iOS Calendar events |
 | 💬 Quotes | Search across all quotes + category filter, with a heart and a card button per quote |
-| 🏆 Challenge | Quote quiz. 2 modes × 5 difficulty levels, 10 questions per round, best score per level |
+| 🏆 Challenge | Quote quiz. 2 modes × 5 difficulty levels, 10 questions per round, best score per level, and ranking |
 | ⚙️ Settings | Notifications / daily quote / default category / appearance / calendar sync / widget guide / about |
 
 Quote detail opens as a sheet: portrait, birth and death years, occupation, nationality,
@@ -72,11 +72,12 @@ QuoteDay/
 │   ├── Models/          AppCategory, Quote, Author, DeepLink, WidgetSnapshot, StableHash
 │   │                    ChallengeMode/Difficulty, ChallengeQuestion (quiz value types)
 │   │                    HeartSnapshot (total count + whether I tapped it)
+│   │                    ChallengeScore / RankBucket / RankStanding (points and rank)
 │   ├── Data/            QuoteLibrary (index) + QuoteLibraryData (130 quotes) + AuthorLibrary (87 people)
 │   │                    BehindStoryLibrary (41) + DisputedAttribution (30 unverified attributions)
 │   ├── Services/        QuoteService (selection), RemoteQuoteService (ZenQuotes), SharedStore
 │   │                    ChallengeGenerator (question building) + BlankMaker (Korean word blanks)
-│   │                    HeartSyncing (sync protocol) + CloudKitConfiguration
+│   │                    HeartSyncing · RankSyncing (sync protocols) + CloudKitConfiguration
 │   ├── Design/          ClayTheme (color and size tokens) + ClayStyle (.clayCard/.clayButton/.clayBackground)
 │   ├── Support/         Formatters
 │   └── AppIntents/      Widget configuration intent
@@ -89,13 +90,14 @@ QuoteDay/
 │   │                    PlusStore (purchase state), NoteStore, QuoteCardRenderer, NotePDFExporter
 │   │                    ChallengeSession (one round) + ChallengeStore (records per level)
 │   │                    HeartStore (local state + pending queue) + CloudKitHeartService
+│   │                    RankStore + CloudKitRankService (rank from bucket counts)
 │   ├── ViewModels/      HomeViewModel, CalendarViewModel
 │   ├── Components/      QuoteCard, CategoryChip, RecurrencePicker, ScheduleRow, CalendarDayCell,
 │   │                    AuthorPortrait, EmptyState, HeartButton
 │   └── Views/           Home / Calendar / Schedule / Quote / Notes / Plus / Challenge /
 │                         Settings / RootTabView
 ├── Widget/              Home screen (Small·Medium·Large) + lock screen (accessory) widgets
-├── Tests/               169 XCTest cases
+├── Tests/               186 XCTest cases
 └── tools/               Project generator + static checker + CHANGELOG section extractor
 ```
 
@@ -289,13 +291,13 @@ A quote quiz, in two modes.
 Five knobs separate the levels, and **none of them work by telling you less.** All of them
 work by lowering the odds of guessing right.
 
-| Level | Choices | Blanks | Hint | Where wrong answers come from | Time limit |
-|---|---|---|---|---|---|
-| 1 Beginner | 3 | 1 | Author's name | Anywhere, at random | — |
-| 2 Normal | 4 | 1 | Author's name | Quotes on the same topic | — |
-| 3 Hard | 4 | 1 | None | Same author · similar length | — |
-| 4 Very hard | 5 | 2 | None | Same author · similar length | 20s |
-| 5 Extreme | 6 | 2 | None | Same author · similar length | 15s |
+| Level | Points | Choices | Blanks | Hint | Where wrong answers come from | Time limit |
+|---|---|---|---|---|---|---|
+| 1 Beginner | 10 | 3 | 1 | Author's name | Anywhere, at random | — |
+| 2 Normal | 20 | 4 | 1 | Author's name | Quotes on the same topic | — |
+| 3 Hard | 35 | 4 | 1 | None | Same author · similar length | — |
+| 4 Very hard | 55 | 5 | 2 | None | Same author · similar length | 20s |
+| 5 Extreme | 80 | 6 | 2 | None | Same author · similar length | 15s |
 
 From level 4 there are two blanks, so each choice becomes a **pair** of words. Half the
 wrong answers then differ from the correct one by a single word — `못하면 · 없다` sitting
@@ -321,6 +323,44 @@ Two parts of the implementation are worth a look.
 Question generation is **deterministic**. The same seed produces the same question. Tests
 can assert "this seed yields these choices" exactly, and the choices never reshuffle
 themselves when the view redraws.
+
+### Ranking — how points are counted and rank is derived
+Every correct answer is worth its level's points (table above). They rise steeply for one
+reason: **if grinding an easy level beats attempting a hard one, the ranking stops
+measuring skill and starts measuring hours logged.** A perfect level 1 round is 100 points;
+half of a level 5 round is 400. There is a reason to try the harder thing.
+
+Your total is **the sum of your best score per mode and level, not a running tally**
+(4,000 max). A running tally can be raised by replaying the same round, and that is time
+spent, not skill. Best-per-level means replaying gains nothing while trying an untouched
+level gains a lot.
+
+#### How rank is counted
+Giving every player a score record and **counting** them to derive a rank needs a filtered
+query, and a CloudKit query needs a per-field index turned on in the dashboard. Forget that
+setting and it fails silently, only on a real device — the same trap hearts avoid.
+
+So the distribution is kept as **counts per 200-point bucket**.
+
+    my score       ChallengePlayerScore  "<my user record name>"
+    distribution   ChallengeRankBucket   "rank-bucket|<bucket index>"
+
+There are only 21 buckets and their names are fixed, so they come back in **one fetch by
+ID**. No query. Your exact position inside your own bucket is unknowable, so it is taken as
+**the middle of the bucket** — the front would flatter you, the back would shortchange you.
+
+That a higher score never ranks worse is guaranteed by the arithmetic: moving from bucket b
+to b+1 changes rank by `-⌊counts[b+1]/2⌋ - ⌈counts[b]/2⌉ ≤ 0`. It was also checked against
+3,000 random distributions.
+
+**No rank is shown until 20 players exist.** One person in three being "top 33%" is a
+number without a meaning; below that threshold it says so instead.
+
+**No other player's name or score is ever shown.** The only thing worth knowing is where
+you stand, and collecting more than that only adds something to protect.
+
+With sync off, **the score still shows and only the rank is missing.** Hiding the score too
+would leave you unable to see what you scored at all.
 
 ### Why surfaces are flat
 No gradients, blur, or gloss. Depth comes from two things only.
@@ -514,7 +554,9 @@ that's the guard against an empty release. To preview the notes, run
 - Recurring events have no "edit/delete just this occurrence". Skipping one means adjusting
   the recurrence end date.
 - 41 of 130 quotes have a behind-the-quote story. The rest need their sources confirmed first.
-- Challenge records stay on this device. No iCloud sync, no comparison with anyone else.
+- Challenge records themselves stay on this device; only one total and its bucket leave it.
+- Ranking rides the same CloudKit switch as hearts. Off, the score shows and the rank does not.
+- Rank is counted from buckets, so it is approximate — meaningful only at "top N%" resolution.
 - Heart sync **ships off.** Turning it on needs a paid Apple Developer Program membership;
   a personal (free) team cannot use the iCloud capability at all. Left off, hearts are
   stored only on the device.

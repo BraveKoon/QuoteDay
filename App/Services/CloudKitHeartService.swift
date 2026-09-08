@@ -66,7 +66,7 @@ struct CloudKitHeartService: HeartSyncing, @unchecked Sendable {
 
     // MARK: - 상태
 
-    func availability() async -> HeartSyncAvailability {
+    func availability() async -> CloudSyncAvailability {
         do {
             switch try await container.accountStatus() {
             case .available:

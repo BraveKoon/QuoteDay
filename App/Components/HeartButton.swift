@@ -63,7 +63,7 @@ struct HeartSyncNotice: View {
     @Environment(HeartStore.self) private var hearts
 
     var body: some View {
-        if let message = hearts.availability.message {
+        if let message = hearts.availability.message(subject: "하트") {
             Label(message, systemImage: "icloud.slash")
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)

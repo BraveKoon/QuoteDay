@@ -113,6 +113,27 @@ public enum ChallengeDifficulty: Int, CaseIterable, Identifiable, Codable, Senda
         }
     }
 
+    /// 맞힌 문제 하나에 주는 점수.
+    ///
+    /// 랭킹은 이 값으로 계산한다. 단계가 오를수록 배점이 가파르게 오르는 이유는
+    /// **쉬운 단계를 여러 번 도는 것이 어려운 단계를 한 번 도는 것보다 유리해지면
+    /// 랭킹이 성실함이 아니라 시간을 재는 자가 되기 때문**이다.
+    ///
+    /// 1단계를 다 맞혀도 100점, 5단계를 절반만 맞히면 400점이다.
+    /// 어려운 쪽을 시도할 이유가 생긴다.
+    public var pointsPerQuestion: Int {
+        switch self {
+        case .beginner: 10
+        case .normal: 20
+        case .hard: 35
+        case .veryHard: 55
+        case .extreme: 80
+        }
+    }
+
+    /// 한 판을 다 맞혔을 때의 점수.
+    public var perfectScore: Int { pointsPerQuestion * ChallengeGenerator.questionsPerRound }
+
     /// 문제당 제한 시간. nil 이면 시간 제한이 없다.
     public var timeLimit: Int? {
         switch self {
@@ -124,7 +145,7 @@ public enum ChallengeDifficulty: Int, CaseIterable, Identifiable, Codable, Senda
 
     /// 목록 화면에 한 줄로 요약해 보여 줄 조건.
     public func detail(for mode: ChallengeMode) -> String {
-        var parts = ["보기 \(choiceCount)개"]
+        var parts = ["문제당 \(pointsPerQuestion)점", "보기 \(choiceCount)개"]
         if mode == .fillInTheBlank && blankCount > 1 {
             parts.append("빈칸 \(blankCount)개")
         }

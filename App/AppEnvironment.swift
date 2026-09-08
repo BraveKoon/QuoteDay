@@ -22,6 +22,7 @@ final class AppEnvironment {
     let noteStore: NoteStore
     let challengeStore: ChallengeStore
     let heartStore: HeartStore
+    let rankStore: RankStore
 
     /// `UNUserNotificationCenter` 는 delegate 를 약하게 붙잡으므로 여기서 소유한다.
     private let notificationDelegate: NotificationDelegate
@@ -29,7 +30,8 @@ final class AppEnvironment {
     init(
         container: ModelContainer = Persistence.shared,
         defaults: UserDefaults = AppGroup.defaults,
-        heartSync: HeartSyncing = AppEnvironment.makeHeartSync()
+        heartSync: HeartSyncing = AppEnvironment.makeHeartSync(),
+        rankSync: RankSyncing = AppEnvironment.makeRankSync()
     ) {
         self.container = container
         let settings = AppSettings(defaults: defaults)
@@ -52,6 +54,7 @@ final class AppEnvironment {
         self.noteStore = NoteStore(context: container.mainContext)
         self.challengeStore = ChallengeStore(defaults: defaults)
         self.heartStore = HeartStore(sync: heartSync, defaults: defaults)
+        self.rankStore = RankStore(sync: rankSync, defaults: defaults)
 
         self.notificationDelegate = NotificationDelegate(router: router)
         UNUserNotificationCenter.current().delegate = notificationDelegate
@@ -97,13 +100,20 @@ final class AppEnvironment {
             ?? OfflineHeartSync()
     }
 
+    /// 랭킹 통로. 하트와 같은 컨테이너를 쓰고 같은 이유로 nonisolated 다.
+    nonisolated static func makeRankSync() -> RankSyncing {
+        CloudKitRankService(containerIdentifier: CloudKitConfiguration.containerIdentifier)
+            ?? OfflineRankSync()
+    }
+
     /// 프리뷰/테스트용 인메모리 환경. 네트워크를 타지 않는다.
     static func preview() -> AppEnvironment {
         let container = (try? Persistence.makeInMemoryContainer()) ?? Persistence.shared
         let environment = AppEnvironment(
             container: container,
             defaults: UserDefaults(suiteName: "preview.quoteday") ?? .standard,
-            heartSync: OfflineHeartSync()
+            heartSync: OfflineHeartSync(),
+            rankSync: OfflineRankSync()
         )
         environment.seedPreviewData()
         return environment
@@ -185,6 +195,7 @@ extension View {
             .environment(environment.noteStore)
             .environment(environment.challengeStore)
             .environment(environment.heartStore)
+            .environment(environment.rankStore)
             .modelContainer(environment.container)
     }
 }

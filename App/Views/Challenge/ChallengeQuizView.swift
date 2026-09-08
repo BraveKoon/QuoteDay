@@ -3,6 +3,7 @@ import SwiftUI
 /// 문제를 푸는 화면. 판이 끝나면 같은 자리에서 결과로 넘어간다.
 struct ChallengeQuizView: View {
     @Environment(ChallengeStore.self) private var store
+    @Environment(RankStore.self) private var rank
 
     let session: ChallengeSession
     /// 닫기. 부모가 시트를 내린다.
@@ -58,6 +59,9 @@ struct ChallengeQuizView: View {
                 questionCount: session.questionCount,
                 bestStreak: session.bestStreak
             )
+            // 기록이 갱신된 뒤의 총점을 올린다. 실패해도 판 결과에는 영향이 없다.
+            let total = store.rankingTotal
+            Task { await rank.submit(total: total) }
         }
     }
 

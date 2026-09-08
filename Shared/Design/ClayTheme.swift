@@ -86,12 +86,18 @@ public enum ClayTheme {
     public static let danger = Color.clay(light: 0xD65A5A, dark: 0xE58686)
 
     // 치수
+    /// 모서리 반경.
+    ///
+    /// v1.2 에서 32/40/24 → 16/20/12 로 줄였다가 v1.6 에서 다시 키웠다.
+    /// 처음 값이 컸던 것은 그라데이션·광택과 함께여서 물렁해 보였기 때문이지,
+    /// 반경 자체가 문제는 아니었다. 면이 단색이 된 지금은 더 둥글어도
+    /// 형태가 흐려지지 않는다.
     public enum Radius {
-        public static let card: CGFloat = 16
-        public static let hero: CGFloat = 20
-        public static let control: CGFloat = 12
-        public static let chip: CGFloat = 8
-        public static let tiny: CGFloat = 8
+        public static let card: CGFloat = 22
+        public static let hero: CGFloat = 28
+        public static let control: CGFloat = 16
+        public static let chip: CGFloat = 12
+        public static let tiny: CGFloat = 10
     }
 
     public enum Spacing {

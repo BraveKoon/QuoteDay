@@ -29,7 +29,7 @@ final class HeartStore {
     /// 아직 서버에 올리지 못한 slug → 원하는 상태.
     @ObservationIgnored private var storedPending: [String: Bool]
 
-    private(set) var availability: HeartSyncAvailability = .notConfigured
+    private(set) var availability: CloudSyncAvailability = .notConfigured
     private(set) var isRefreshing = false
 
     init(

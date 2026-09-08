@@ -38,6 +38,17 @@ struct QuoteDetailView: View {
             .navigationTitle("오늘의 명언")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // 카드 만들기를 좌측 상단에도 둔다. 아래까지 내려가야 보이는 버튼은
+                // 있는 줄 모르고 지나치기 쉽다.
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showsShareCard = true
+                    } label: {
+                        Label("카드 만들기", systemImage: "photo.on.rectangle.angled")
+                    }
+                    .disabled(quoteService.presentation(id: quoteID) == nil)
+                    .accessibilityLabel("카드 만들기")
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("닫기") { dismiss() }
                 }

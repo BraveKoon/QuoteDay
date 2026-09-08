@@ -79,6 +79,10 @@ public enum SharedDefaultsKey {
     public static let heartMine = "hearts.mine.v1"
     /// 아직 서버에 올리지 못한 하트 변경.
     public static let heartPending = "hearts.pending.v1"
+    /// 마지막으로 확인한 챌린지 랭킹.
+    public static let rankTotal = "rank.total"
+    public static let rankPercentile = "rank.percentile"
+    public static let rankPlayerCount = "rank.playerCount"
 }
 
 /// 위젯 스냅샷의 읽기/쓰기 담당.

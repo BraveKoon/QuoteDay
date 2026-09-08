@@ -56,21 +56,16 @@ struct QuoteBrowserView: View {
         }
     }
 
-    /// 명언 카드 + 그 아래 작은 동작 줄.
+    /// 작은 동작 줄 + 그 아래 명언 카드.
     ///
-    /// 하트와 카드 버튼을 카드 **안에** 넣지 않는 이유: 카드 전체가 이미 버튼이라
-    /// 그 안에 버튼을 겹치면 탭이 어느 쪽으로 갈지 알 수 없어진다.
+    /// 동작 줄이 **카드 위**에 있다. 아래에 두었더니 카드에 가려 눈에 잘 띄지 않았다.
+    /// 읽기 전에 보이는 자리가 "이 명언으로 뭘 할 수 있는지"를 알려 주기에 낫다.
+    ///
+    /// 하트와 카드 버튼을 카드 **안에** 넣지 않는 이유는 따로 있다: 카드 전체가 이미
+    /// 버튼이라 그 안에 버튼을 겹치면 탭이 어느 쪽으로 갈지 알 수 없어진다.
     private func row(for presentation: QuotePresentation) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            QuoteCard(presentation: presentation, style: .compact) {
-                router.showQuote(presentation.quote)
-            }
-
             HStack(spacing: ClayTheme.Spacing.s) {
-                HeartButton(slug: presentation.quote.slug, size: .small)
-
-                Spacer(minLength: 0)
-
                 Button {
                     cardTarget = presentation
                 } label: {
@@ -80,8 +75,16 @@ struct QuoteBrowserView: View {
                 }
                 .buttonStyle(.plain)
                 .frame(minHeight: 44)
+
+                Spacer(minLength: 0)
+
+                HeartButton(slug: presentation.quote.slug, size: .small)
             }
             .padding(.horizontal, ClayTheme.Spacing.xs)
+
+            QuoteCard(presentation: presentation, style: .compact) {
+                router.showQuote(presentation.quote)
+            }
         }
     }
 

@@ -7,7 +7,7 @@ import Foundation
 /// - 나중에 서버를 바꾸더라도 `HeartStore` 와 화면은 그대로 둘 수 있다.
 public protocol HeartSyncing: Sendable {
     /// 지금 주고받을 수 있는 상태인지. 네트워크를 타므로 async 다.
-    func availability() async -> HeartSyncAvailability
+    func availability() async -> CloudSyncAvailability
 
     /// 여러 명언의 **전체 하트 수**를 한 번에 읽는다. 없는 명언은 결과에서 빠진다.
     func counts(for slugs: [String]) async throws -> [String: Int]
@@ -28,7 +28,7 @@ public protocol HeartSyncing: Sendable {
 public struct OfflineHeartSync: HeartSyncing {
     public init() {}
 
-    public func availability() async -> HeartSyncAvailability { .notConfigured }
+    public func availability() async -> CloudSyncAvailability { .notConfigured }
 
     public func counts(for slugs: [String]) async throws -> [String: Int] { [:] }
 

@@ -74,6 +74,10 @@ struct ChallengeResultView: View {
         HStack(spacing: ClayTheme.Spacing.s) {
             statBox(title: "정답률", value: percentText(result.accuracy))
             statBox(title: "최고 연속", value: "\(result.bestStreak)")
+            statBox(
+                title: "점수",
+                value: "\(ChallengeScore.points(correctCount: result.correctCount, difficulty: result.difficulty))"
+            )
         }
     }
 
@@ -107,6 +111,10 @@ struct ChallengeResultView: View {
             recordLine("최고 연속", "\(record.bestStreak)")
             recordLine("푼 판", "\(record.playCount)판")
             recordLine("누적 정답률", percentText(record.accuracy))
+            recordLine(
+                "이 단계 최고 점수",
+                "\(ChallengeScore.points(correctCount: record.bestScore, difficulty: result.difficulty))점"
+            )
         }
         .padding(ClayTheme.Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)

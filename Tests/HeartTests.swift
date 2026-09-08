@@ -19,7 +19,7 @@ final class HeartTests: XCTestCase {
         var serverMine: Set<String>
         /// 다음 호출을 실패시킬지.
         var shouldFail = false
-        var status: HeartSyncAvailability = .ready
+        var status: CloudSyncAvailability = .ready
         private(set) var writes: [(slug: String, isOn: Bool)] = []
 
         init(counts: [String: Int] = [:], mine: Set<String> = []) {
@@ -28,12 +28,12 @@ final class HeartTests: XCTestCase {
         }
 
         func setFailure(_ value: Bool) { shouldFail = value }
-        func setStatus(_ value: HeartSyncAvailability) { status = value }
+        func setStatus(_ value: CloudSyncAvailability) { status = value }
         func writeCount(for slug: String) -> Int { writes.filter { $0.slug == slug }.count }
 
         struct Failure: Error {}
 
-        func availability() -> HeartSyncAvailability { status }
+        func availability() -> CloudSyncAvailability { status }
 
         func counts(for slugs: [String]) throws -> [String: Int] {
             if shouldFail { throw Failure() }
@@ -239,7 +239,7 @@ final class HeartTests: XCTestCase {
         let sync = OfflineHeartSync()
         let availability = await sync.availability()
         XCTAssertEqual(availability, .notConfigured)
-        XCTAssertNotNil(availability.message, "왜 이 기기에만 남는지 알려 줘야 한다.")
+        XCTAssertNotNil(availability.message(subject: "하트"), "왜 이 기기에만 남는지 알려 줘야 한다.")
 
         // 눌러도 아무 일도 일어나지 않는 하트보다는, 세지 않는 하트가 낫다.
         let total = try? await sync.setHeart(true, slug: "a")

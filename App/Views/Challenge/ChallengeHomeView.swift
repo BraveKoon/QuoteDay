@@ -5,6 +5,7 @@ struct ChallengeHomeView: View {
     @Environment(ChallengeStore.self) private var store
 
     @State private var session: ChallengeSession?
+    @State private var showsRanking = false
 
     private var mode: ChallengeMode { store.lastMode }
 
@@ -33,21 +34,38 @@ struct ChallengeHomeView: View {
         .fullScreenCover(item: $session) { session in
             ChallengeQuizView(session: session) { self.session = nil }
         }
+        .sheet(isPresented: $showsRanking) {
+            RankingSheet()
+        }
     }
 
     // MARK: - 헤더
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("얼마나 기억하고 있나요")
-                .font(ClayFont.caption())
-                .foregroundStyle(ClayTheme.textSecondary)
-            Text("챌린지")
-                .font(ClayFont.hero())
-                .foregroundStyle(ClayTheme.textPrimary)
+        HStack(alignment: .center, spacing: ClayTheme.Spacing.s) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("얼마나 기억하고 있나요")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+                Text("챌린지")
+                    .font(ClayFont.hero())
+                    .foregroundStyle(ClayTheme.textPrimary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .combine)
+
+            Button {
+                showsRanking = true
+            } label: {
+                Image(systemName: "chart.bar.fill")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(ClayTheme.accent)
+                    .frame(width: 44, height: 44)
+                    .clayCard(cornerRadius: ClayTheme.Radius.control)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("랭킹 보기")
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
     }
 
     // MARK: - 모드
@@ -189,6 +207,7 @@ struct ChallengeHomeView: View {
             ruleLine("단계가 올라가면 보기가 늘고, 힌트가 사라지고, 오답이 정답과 비슷해집니다.")
             ruleLine("4단계부터는 제한 시간이 있습니다. 시간을 넘기면 오답으로 칩니다.")
             ruleLine("모든 단계는 처음부터 열려 있습니다. 아무 데서나 시작하세요.")
+            ruleLine("맞힌 문제마다 단계 배점이 붙고, 그 합이 랭킹 점수가 됩니다. 오른쪽 위 아이콘에서 볼 수 있어요.")
 
             if mode == .guessTheAuthor {
                 ClayDivider()

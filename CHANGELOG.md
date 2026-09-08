@@ -8,6 +8,28 @@
 릴리스할 때는 그 값을 올리고, `python tools/generate_xcodeproj.py` 로
 프로젝트 파일을 다시 만든 뒤 `v<버전>` 태그를 단다.
 
+## [1.5.1] - 2026-09-08
+
+### 고침
+- **하트 동기화를 기본으로 꺼 둔다.** v1.5 는 entitlements 에 iCloud 를 선언한 채로 나갔는데,
+  **개인(무료) 개발자 팀은 그 선언만으로 프로비저닝 프로파일이 만들어지지 않아 빌드가
+  통째로 막힌다.**
+
+      Personal development teams do not support the iCloud capability.
+      Cannot create a iOS App Development provisioning profile.
+
+  iCloud 는 유료 Apple Developer Program 에서만 켤 수 있으므로, 켜는 쪽을 선택으로 돌렸다.
+  entitlements 에서 iCloud 키를 빼고 `QD_CLOUDKIT_CONTAINER` 기본값을 비웠다.
+  앱은 그대로 동작하고 하트는 기기에만 저장된다 — 화면에 그 이유가 한 줄 뜬다.
+  켜는 방법은 README 의 "하트 동기화 켜기"에 세 단계로 적었다.
+
+  v1.5 문서는 "`QD_CLOUDKIT_CONTAINER` 를 비우면 된다"고만 적었는데 그것으로는 부족했다.
+  빌드를 막는 것은 빌드 설정이 아니라 **entitlements 의 선언**이었다.
+- `check_project.py` 가 그 상태를 잡는다 — 동기화가 꺼져 있는데 entitlements 에 iCloud
+  선언이 남아 있으면 실패시킨다. 반대 방향(식별자를 넣었는데 entitlements 에 없음)도 그대로 본다.
+- 정적 검사에 **안내** 단계를 더했다. 동기화가 꺼진 것은 정상 기본값이라 경고가 아니다 —
+  매번 뜨는 경고는 사람이 경고를 무시하게 만든다.
+
 ## [1.5] - 2026-09-07
 
 ### 추가

@@ -20,8 +20,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "1.5"
-    CURRENT_PROJECT_VERSION: "6"
+    MARKETING_VERSION: "1.5.1"
+    CURRENT_PROJECT_VERSION: "7"
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: "YES"
     TARGETED_DEVICE_FAMILY: "1,2"
@@ -38,8 +38,9 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.quoteday.QuoteDay
         INFOPLIST_FILE: App/Resources/Info.plist
         CODE_SIGN_ENTITLEMENTS: App/Resources/QuoteDay.entitlements
-        # 하트 동기화용 CloudKit 컨테이너. 비우면 CKContainer 를 만들지 않는다.
-        QD_CLOUDKIT_CONTAINER: iCloud.com.quoteday.app
+        # 하트 동기화용 CloudKit 컨테이너. 기본값은 비어 있다(= 하트가 기기에만 저장).
+        # 유료 개발자 계정으로 iCloud capability 를 켠 뒤에만 값을 채운다.
+        QD_CLOUDKIT_CONTAINER: ""
         GENERATE_INFOPLIST_FILE: "NO"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor

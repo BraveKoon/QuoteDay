@@ -32,16 +32,8 @@ Xcode 15 이상에서 열고 다음 두 가지만 설정하면 바로 실행된�
    `Shared/Services/SharedStore.swift` 의 `AppGroup.identifier` 도 같이 바꾼다.
    (App Group 이 없어도 앱은 동작한다. 위젯에 일정이 안 보일 뿐이다 — 아래 "안전한 실패" 참고)
 
-3. **CloudKit**(하트 동기화용) — Signing & Capabilities 에서 iCloud > CloudKit 을 켜고
-   `iCloud.com.quoteday.app` 컨테이너를 만들면 된다.
-   **유료 Apple Developer Program 이 있어야 켤 수 있다.**
-
-   못 켜는 경우에는 빌드 설정 **`QD_CLOUDKIT_CONTAINER` 를 빈 값으로** 두면 된다
-   (`project.yml` 또는 Xcode 의 Build Settings). 그러면 앱이 `CKContainer` 를 아예
-   만들지 않고 하트는 이 기기에만 저장된다. **엔타이틀먼트 없이 컨테이너를 만들면
-   앱이 죽기 때문에** 이 스위치가 필요하다 — CI 도 서명을 끄고 빌드하므로 같은
-   방법으로 끈다. 식별자가 빌드 설정·Info.plist·entitlements 사이에서 어긋나면
-   `check_project.py` 가 잡는다.
+**하트 동기화(CloudKit)는 기본으로 꺼져 있다.** 그대로 두면 하트는 기기에만 저장되고
+나머지는 전부 동작한다. 켜는 방법은 아래 "하트 동기화 켜기" 참고.
 
 프로젝트 파일을 다시 만들어야 한다면 둘 중 아무 방법이나 쓰면 된다.
 
@@ -216,6 +208,29 @@ QuoteDay 에 붙은 첫 번째 쓰기 가능한 백엔드이고, CloudKit **공�
 
 `HeartSyncing` 프로토콜로 통로를 끊어 두었다. CloudKit 은 시뮬레이터·CI 에서 검증할 수
 없어서 테스트는 가짜 구현으로 돌리고, 나중에 서버를 바꾸더라도 화면은 그대로 둔다.
+
+### 하트 동기화 켜기
+기본값은 **꺼짐**이다. 켜지 않아도 하트는 눌리고, 숫자는 내가 누른 것만 센다.
+화면에는 왜 기기에만 남는지 한 줄이 뜬다.
+
+켜려면 **유료 Apple Developer Program($99/년)** 이 필요하다.
+개인(무료) 팀은 iCloud capability 를 쓸 수 없고, entitlements 에 선언만 있어도
+프로비저닝 프로파일이 만들어지지 않아 **빌드가 통째로 막힌다.**
+
+    Personal development teams do not support the iCloud capability.
+
+그래서 켜는 쪽을 선택으로 두었다. 유료 계정이 생기면 세 가지를 하면 된다.
+
+1. Xcode → 두 타겟 중 `QuoteDay` → **Signing & Capabilities → + Capability → iCloud**,
+   **CloudKit** 체크. 컨테이너 목록에서 `iCloud.com.quoteday.app` 을 만든다.
+   (이 단계가 `App/Resources/QuoteDay.entitlements` 에 iCloud 키를 대신 써 준다)
+2. 빌드 설정 **`QD_CLOUDKIT_CONTAINER`** 에 그 컨테이너 식별자를 넣는다.
+   `project.yml` 을 고치고 `python tools/generate_xcodeproj.py` 를 다시 돌리면 된다.
+3. 배포 전에 CloudKit 대시보드에서 **Development → Production 스키마 배포**를 한 번 누른다.
+   레코드 타입은 첫 저장 때 자동으로 만들어지므로 미리 짤 필요는 없다.
+
+두 값이 어긋나면 `check_project.py` 가 잡는다 — 식별자를 넣었는데 entitlements 에 없거나,
+반대로 꺼 두었는데 iCloud 선언이 남아 있으면(= 위의 빌드 실패) 실패시킨다.
 
 ### 공유 카드
 명언을 1080×1080 이미지로 만들어 **사진 앱에 저장**하거나 공유한다.
@@ -450,8 +465,8 @@ PR 과 `main` 푸시에서 돈다. 두 단계로 나눠 두었다.
 - 반복 일정에 "이 회차만 수정/삭제" 는 없다. 회차 하나를 건너뛰려면 반복 종료일을 조정해야 한다.
 - 비하인드 스토리는 130편 중 41편만 채워져 있다. 나머지는 출처 확인 후 채워야 한다.
 - 챌린지 기록은 이 기기에만 남는다. iCloud 동기화도, 다른 사람과의 비교도 없다.
-- 하트 동기화에는 **유료 Apple Developer Program** 이 필요하다(CloudKit 을 켜려면).
-  없으면 하트가 기기 안에만 저장된다.
+- 하트 동기화는 **기본으로 꺼져 있다.** 켜려면 유료 Apple Developer Program 이 필요하고,
+  개인(무료) 팀은 iCloud capability 자체를 쓸 수 없다. 꺼 두면 하트는 기기 안에만 저장된다.
 - 하트 합계는 동시 접속이 아주 많을 때 몇 개가 누락될 수 있다(위 "하트를 어떻게 세는가").
 - 하트를 취소해도 서버에서 즉시 반영되지만, 다른 사람 화면은 그쪽이 앱을 다시 열 때 갱신된다.
 - 공유 카드의 사진은 저장되지 않는다. 시트를 닫으면 다시 골라야 한다.

@@ -27,7 +27,12 @@ WIDGET_TARGET = "QuoteDayWidgetExtension"
 TEST_TARGET = "QuoteDayTests"
 
 APP_BUNDLE_ID = "com.quoteday.QuoteDay"
-CLOUDKIT_CONTAINER = "iCloud.com.quoteday.app"
+# 하트 동기화용 CloudKit 컨테이너. **기본값은 비어 있다.**
+# iCloud capability 는 유료 Apple Developer Program 이 있어야 켤 수 있고,
+# 개인(무료) 팀에서는 entitlements 에 선언만 있어도 프로비저닝 프로파일이
+# 만들어지지 않아 빌드가 통째로 막힌다. 그래서 켜는 쪽을 선택으로 둔다.
+# 켜는 방법은 README 의 "하트 동기화 켜기" 참고.
+CLOUDKIT_CONTAINER = ""
 WIDGET_BUNDLE_ID = "com.quoteday.QuoteDay.Widget"
 TEST_BUNDLE_ID = "com.quoteday.QuoteDayTests"
 DEPLOYMENT_TARGET = "17.0"
@@ -500,9 +505,7 @@ def main() -> int:
         ("PRODUCT_BUNDLE_IDENTIFIER", APP_BUNDLE_ID),
         ("PRODUCT_NAME", quote("$(TARGET_NAME)")),
         # 하트 동기화용 CloudKit 컨테이너. Info.plist 가 이 값을 치환해 받는다.
-        # 빈 값으로 덮어쓰면 앱이 CKContainer 를 아예 만들지 않는다 —
-        # 엔타이틀먼트 없이 만들면 프로세스가 죽기 때문에, 서명 없는 빌드(CI)와
-        # CloudKit 을 켤 수 없는 계정은 이 값을 비워서 끈다.
+        # 비어 있으면 앱이 CKContainer 를 아예 만들지 않고 하트는 기기에만 남는다.
         ("QD_CLOUDKIT_CONTAINER", quote(CLOUDKIT_CONTAINER)),
         ("SWIFT_EMIT_LOC_STRINGS", "YES"),
         ("TARGETED_DEVICE_FAMILY", quote("1,2")),

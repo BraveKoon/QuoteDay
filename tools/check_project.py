@@ -33,6 +33,9 @@ TARGET_ROOTS = {
 
 errors: list[str] = []
 warnings: list[str] = []
+# 문제가 아니라 "지금 이렇게 설정되어 있다"는 안내. 경고 수에 넣지 않는다 —
+# 매번 뜨는 경고는 사람이 경고를 무시하게 만든다.
+notes: list[str] = []
 
 
 def fail(message: str) -> None:
@@ -41,6 +44,10 @@ def fail(message: str) -> None:
 
 def warn(message: str) -> None:
     warnings.append(message)
+
+
+def note(message: str) -> None:
+    notes.append(message)
 
 
 # --------------------------------------------------------------------------
@@ -489,7 +496,14 @@ def check_cloudkit(info: str) -> None:
 
     identifier = match.group(1).strip()
     if not identifier:
-        warn(f"{setting} 가 비어 있습니다. 하트가 기기 안에만 저장됩니다.")
+        # 기본 상태다. iCloud capability 는 유료 계정에서만 켜지므로
+        # 켜는 쪽을 선택으로 두었다(README "하트 동기화 켜기").
+        note(f"{setting} 가 비어 있어 하트 동기화가 꺼져 있습니다. 하트는 기기에만 저장됩니다.")
+        if "com.apple.developer.icloud" in entitlements:
+            fail(
+                "동기화는 꺼져 있는데 entitlements 에 iCloud 선언이 남아 있습니다. "
+                "개인(무료) 개발자 팀에서는 이 선언만으로 프로비저닝 프로파일 생성이 실패합니다."
+            )
         return
 
     if identifier not in entitlements:
@@ -611,6 +625,8 @@ def main() -> int:
     check_quote_data()
 
     print("-" * 46)
+    for message in notes:
+        print(f"  안내: {message}")
     for message in warnings:
         print(f"  경고: {message}")
     if errors:

@@ -30,7 +30,7 @@ public struct ChallengeGenerator: Sendable {
     public static let questionsPerRound = 10
 
     private let library: QuoteLibrary
-    /// slug → 빈칸 후보 낱말. 문제 하나를 만들 때마다 130편을 다시 자르지 않기 위해
+    /// slug → 빈칸 후보 낱말. 문제 하나를 만들 때마다 200편 넘는 문장을 다시 자르지 않기 위해
     /// 생성기를 만들 때 한 번만 계산한다.
     private let wordsBySlug: [String: [String]]
 
@@ -268,7 +268,7 @@ public struct ChallengeGenerator: Sendable {
         let author = library.author(for: quote)
         guard author.id != Author.unknown.id else { return nil }
 
-        // 낱말 풀과 같은 이유로 배열을 이어 붙이지 않는다. 전체 인물 87명 뒤에
+        // 낱말 풀과 같은 이유로 배열을 이어 붙이지 않는다. 전체 인물 백여 명 뒤에
         // 붙인 "같은 시대 · 같은 직업" 몇 명은 뽑힐 확률이 거의 없어진다.
         let others = AuthorLibrary.all.filter { $0.id != author.id && $0.id != Author.unknown.id }
         var pools: [[Author]] = []

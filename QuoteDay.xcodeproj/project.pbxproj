@@ -23,6 +23,10 @@
 			isa = PBXBuildFile;
 			fileRef = 0BB2796F07DA2C7345006812 /* ChallengeGenerator.swift */;
 		};
+		0A6F4E37C647050960521F68 = {
+			isa = PBXBuildFile;
+			fileRef = 2DF738E3E3185302E795EF07 /* NameKey.swift */;
+		};
 		0BC92BE8C6F0A38AFCD2EA41 = {
 			isa = PBXBuildFile;
 			fileRef = 5FD4E6400472C4F80BB49F9A /* ChallengeScore.swift */;
@@ -122,6 +126,10 @@
 		3B6CBB5E521603BCC47AF2C7 = {
 			isa = PBXBuildFile;
 			fileRef = C57382ACDE7F6EFD114A98DC /* RankingSheet.swift */;
+		};
+		3B92E8E1B1A15327B90354DD = {
+			isa = PBXBuildFile;
+			fileRef = 1626CA185D5265345E8A5A43 /* ForeignNameLibrary.swift */;
 		};
 		3E6A55054D28D9F84F8933A7 = {
 			isa = PBXBuildFile;
@@ -283,6 +291,10 @@
 			isa = PBXBuildFile;
 			fileRef = A038F65A8FD7C5DB5E8BEC9C /* AppFeatureFlags.swift */;
 		};
+		904ADDA682459CCDC085FCEF = {
+			isa = PBXBuildFile;
+			fileRef = 2DF738E3E3185302E795EF07 /* NameKey.swift */;
+		};
 		90F37D2D13732953542CCCDB = {
 			isa = PBXBuildFile;
 			fileRef = E6766A2934C231BEE76E3480 /* BlankMaker.swift */;
@@ -338,6 +350,10 @@
 		A611F1A0E3957787978AA87E = {
 			isa = PBXBuildFile;
 			fileRef = ECB8A315BC81E2AB5F7AD82D /* ScheduleAndNavigationTests.swift */;
+		};
+		A793BC4FEE3EFDCFECF03852 = {
+			isa = PBXBuildFile;
+			fileRef = 1626CA185D5265345E8A5A43 /* ForeignNameLibrary.swift */;
 		};
 		A79992568A0CD208629EE516 = {
 			isa = PBXBuildFile;
@@ -620,6 +636,12 @@
 			path = AppCategory.swift;
 			sourceTree = "<group>";
 		};
+		1626CA185D5265345E8A5A43 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ForeignNameLibrary.swift;
+			sourceTree = "<group>";
+		};
 		16FBAC84771CF89D20788E56 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -691,6 +713,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = QuoteTranslationTask.swift;
+			sourceTree = "<group>";
+		};
+		2DF738E3E3185302E795EF07 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = NameKey.swift;
 			sourceTree = "<group>";
 		};
 		330BE87998E53C7D80CFB185 = {
@@ -1352,6 +1380,8 @@
 				1E5C87233090C8CFDB8B803C /* AuthorLibrary.swift */,
 				9B0DEE8D640A384D6F87D320 /* BehindStoryLibrary.swift */,
 				59B6C17D3DA747A1AEC34046 /* DisputedAttribution.swift */,
+				1626CA185D5265345E8A5A43 /* ForeignNameLibrary.swift */,
+				2DF738E3E3185302E795EF07 /* NameKey.swift */,
 				78432620EB5EAAD902F01C15 /* QuoteLibrary.swift */,
 				2B5CC22705DFC11BC2CCAF19 /* QuoteLibraryData.swift */,
 			);
@@ -1677,6 +1707,7 @@
 				30DC1167F132F2A4C3EC3DD3 /* AuthorDetailView.swift in Sources */,
 				33EF386FCA0634210F790544 /* Formatters.swift in Sources */,
 				3B6CBB5E521603BCC47AF2C7 /* RankingSheet.swift in Sources */,
+				3B92E8E1B1A15327B90354DD /* ForeignNameLibrary.swift in Sources */,
 				3E6A55054D28D9F84F8933A7 /* Quote.swift in Sources */,
 				4730F9757A07E3B91A3A7686 /* ClayTheme.swift in Sources */,
 				4AE0697B1039CE2285796789 /* CalendarViewModel.swift in Sources */,
@@ -1705,6 +1736,7 @@
 				88C5EB04B41FBEC1776591E5 /* PaywallView.swift in Sources */,
 				8C7632D473701A2C99D81CDC /* SupportOption.swift in Sources */,
 				8E12D4ADCD33426481595F82 /* AppFeatureFlags.swift in Sources */,
+				904ADDA682459CCDC085FCEF /* NameKey.swift in Sources */,
 				971D00BB73121F8149108710 /* BehindStoryLibrary.swift in Sources */,
 				979A927D09E6ACE92AA261AD /* BlankMaker.swift in Sources */,
 				99F344420C5988238B2BBED4 /* AppSettings.swift in Sources */,
@@ -1769,6 +1801,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				04CF373CAA31F6A3444EADED /* WidgetSnapshot.swift in Sources */,
+				0A6F4E37C647050960521F68 /* NameKey.swift in Sources */,
 				0BC92BE8C6F0A38AFCD2EA41 /* ChallengeScore.swift in Sources */,
 				1314A0A9DED7C01BB9141B24 /* AppCategory.swift in Sources */,
 				134479D26EC3823B9CA59EA5 /* QuoteWidgetViews.swift in Sources */,
@@ -1790,6 +1823,7 @@
 				867B398C21FA03611D5E66A7 /* AppFeatureFlags.swift in Sources */,
 				90F37D2D13732953542CCCDB /* BlankMaker.swift in Sources */,
 				9D8B8228667C4747765B1F70 /* CloudKitConfiguration.swift in Sources */,
+				A793BC4FEE3EFDCFECF03852 /* ForeignNameLibrary.swift in Sources */,
 				A79992568A0CD208629EE516 /* SupportOption.swift in Sources */,
 				A978B4F4E853643057590D68 /* QuoteCategoryOption.swift in Sources */,
 				B61EF751E16F2543F4AA2BD7 /* SharedStore.swift in Sources */,
@@ -1827,9 +1861,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -1845,7 +1879,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -1853,7 +1887,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				QD_CLOUDKIT_CONTAINER = "";
@@ -1869,7 +1903,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -1877,7 +1911,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				QD_CLOUDKIT_CONTAINER = "";
@@ -1925,7 +1959,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -1935,7 +1969,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1974,9 +2008,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -1992,7 +2026,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -2002,7 +2036,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

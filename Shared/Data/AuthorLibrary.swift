@@ -614,6 +614,233 @@ public enum AuthorLibrary {
             occupation: "정치인 · 변론가 · 철학자", nationality: "로마",
             biography: "로마 공화정 말기의 변론가로, 라틴 산문의 표준을 만들었다.",
             achievements: ["《의무론》", "로마 수사학의 정점"]
+        ),
+        // MARK: 1.7.1 에서 추가
+        Author(
+            id: "sun_tzu", name: "Sun Tzu", koreanName: "손자",
+            birthYear: -544, deathYear: -496,
+            occupation: "병법가 · 장군", nationality: "중국",
+            biography: "춘추시대의 병법가로 《손자병법》을 남겼다. 싸움을 잘하는 법이 아니라 싸우지 않고 이기는 법을 먼저 이야기한 것으로 오늘까지 읽힌다.",
+            achievements: ["《손자병법》"],
+            notableWorks: ["손자병법"]
+        ),
+        Author(
+            id: "montaigne", name: "Michel de Montaigne", koreanName: "미셸 드 몽테뉴",
+            birthYear: 1533, deathYear: 1592,
+            occupation: "수필가 · 사상가", nationality: "프랑스",
+            biography: "법관 자리를 내려놓고 성의 탑에 들어앉아 자기 자신을 관찰한 기록을 남겼다. 그 글이 '에세이'라는 형식 자체를 만들었다.",
+            achievements: ["《수상록》", "에세이 장르의 창시"],
+            notableWorks: ["수상록"]
+        ),
+        Author(
+            id: "kant", name: "Immanuel Kant", koreanName: "이마누엘 칸트",
+            birthYear: 1724, deathYear: 1804,
+            occupation: "철학자", nationality: "독일",
+            biography: "쾨니히스베르크를 거의 떠나지 않고 평생 같은 시각에 산책하며 근대 철학의 판을 바꾼 사람이다. 아는 것과 해야 하는 것의 경계를 새로 그었다.",
+            achievements: ["《순수이성비판》", "《실천이성비판》"],
+            notableWorks: ["순수이성비판", "실천이성비판"]
+        ),
+        Author(
+            id: "kierkegaard", name: "Soren Kierkegaard", koreanName: "쇠렌 키르케고르",
+            birthYear: 1813, deathYear: 1855,
+            occupation: "철학자 · 신학자", nationality: "덴마크",
+            biography: "불안과 절망을 회피하지 않고 정면으로 다룬 덴마크의 사상가다. 실존주의의 출발점으로 꼽힌다.",
+            achievements: ["《죽음에 이르는 병》", "《이것이냐 저것이냐》"],
+            notableWorks: ["죽음에 이르는 병", "불안의 개념"]
+        ),
+        Author(
+            id: "schopenhauer", name: "Arthur Schopenhauer", koreanName: "아르투어 쇼펜하우어",
+            birthYear: 1788, deathYear: 1860,
+            occupation: "철학자", nationality: "독일",
+            biography: "삶을 의지와 고통의 문제로 본 철학자다. 비관적이라는 평을 들었지만 건강과 일상의 지혜를 아주 구체적으로 적어 두었다.",
+            achievements: ["《의지와 표상으로서의 세계》", "《인생론》"],
+            notableWorks: ["의지와 표상으로서의 세계", "인생론"]
+        ),
+        Author(
+            id: "russell", name: "Bertrand Russell", koreanName: "버트런드 러셀",
+            birthYear: 1872, deathYear: 1970,
+            occupation: "철학자 · 수학자", nationality: "영국",
+            biography: "수학의 기초를 다시 세우려 한 논리학자이자, 전쟁에 반대하다 감옥에도 갔던 사회 비평가다. 쉬는 것의 가치를 진지하게 옹호했다.",
+            achievements: ["《수학 원리》", "1950년 노벨문학상 수상"],
+            notableWorks: ["행복의 정복", "게으름에 대한 찬양"]
+        ),
+        Author(
+            id: "newton", name: "Isaac Newton", koreanName: "아이작 뉴턴",
+            birthYear: 1643, deathYear: 1727,
+            occupation: "물리학자 · 수학자", nationality: "영국",
+            biography: "운동 법칙과 만유인력으로 하늘과 땅을 같은 수식 안에 넣었다. 역병으로 대학이 닫힌 1년 반 동안 그 대부분을 생각해 냈다.",
+            achievements: ["《프린키피아》", "미적분학의 창시(라이프니츠와 독립적으로)"],
+            notableWorks: ["프린키피아"]
+        ),
+        Author(
+            id: "darwin", name: "Charles Darwin", koreanName: "찰스 다윈",
+            birthYear: 1809, deathYear: 1882,
+            occupation: "생물학자 · 지질학자", nationality: "영국",
+            biography: "비글호를 타고 5년을 항해한 뒤 20년 넘게 자료를 모으고서야 자연선택을 발표했다. 자기 가설을 스스로 의심하는 일에 그 시간을 썼다.",
+            achievements: ["《종의 기원》", "자연선택 이론"],
+            notableWorks: ["종의 기원", "인간의 유래"]
+        ),
+        Author(
+            id: "pasteur", name: "Louis Pasteur", koreanName: "루이 파스퇴르",
+            birthYear: 1822, deathYear: 1895,
+            occupation: "화학자 · 미생물학자", nationality: "프랑스",
+            biography: "발효와 부패가 미생물의 일이라는 것을 밝혀 저온살균법과 백신의 길을 열었다. 실험실에서 준비한 사람에게만 우연이 온다고 믿었다.",
+            achievements: ["저온살균법(파스퇴르법)", "광견병·탄저병 백신"]
+        ),
+        Author(
+            id: "goodall", name: "Jane Goodall", koreanName: "제인 구달",
+            birthYear: 1934,
+            occupation: "영장류학자 · 환경운동가", nationality: "영국",
+            biography: "정식 학위 없이 탄자니아 곰베로 들어가 침팬지가 도구를 쓴다는 것을 처음 관찰했다. 이후 평생을 자연 보전 활동에 썼다.",
+            achievements: ["침팬지의 도구 사용 발견", "제인 구달 연구소 설립"],
+            notableWorks: ["인간의 그늘에서", "희망의 이유"]
+        ),
+        Author(
+            id: "carson_r", name: "Rachel Carson", koreanName: "레이철 카슨",
+            birthYear: 1907, deathYear: 1964,
+            occupation: "해양생물학자 · 작가", nationality: "미국",
+            biography: "살충제가 생태계에 남기는 흔적을 조용한 문장으로 기록해 현대 환경운동을 시작시켰다. 책이 나온 지 2년 만에 세상을 떠났다.",
+            achievements: ["《침묵의 봄》", "미국 환경보호청 설립의 계기"],
+            notableWorks: ["침묵의 봄", "우리를 둘러싼 바다"]
+        ),
+        Author(
+            id: "hugo", name: "Victor Hugo", koreanName: "빅토르 위고",
+            birthYear: 1802, deathYear: 1885,
+            occupation: "소설가 · 시인", nationality: "프랑스",
+            biography: "가난과 사면을 이야기한 소설로 프랑스 문학의 한 시대를 대표했다. 정치적 망명 19년을 섬에서 보내며 대표작을 썼다.",
+            achievements: ["《레 미제라블》", "《파리의 노트르담》"],
+            notableWorks: ["레 미제라블", "파리의 노트르담"]
+        ),
+        Author(
+            id: "hesse", name: "Hermann Hesse", koreanName: "헤르만 헤세",
+            birthYear: 1877, deathYear: 1962,
+            occupation: "소설가 · 시인", nationality: "독일 · 스위스",
+            biography: "자기 자신에게 이르는 길을 계속 다시 쓴 작가다. 동양 사상을 서양 소설 안으로 끌어들였다.",
+            achievements: ["《데미안》, 《싯다르타》", "1946년 노벨문학상 수상"],
+            notableWorks: ["데미안", "싯다르타", "유리알 유희"]
+        ),
+        Author(
+            id: "hemingway", name: "Ernest Hemingway", koreanName: "어니스트 헤밍웨이",
+            birthYear: 1899, deathYear: 1961,
+            occupation: "소설가 · 종군기자", nationality: "미국",
+            biography: "짧고 군더더기 없는 문장으로 20세기 산문을 바꿔 놓았다. 두 번의 전쟁을 기자와 참전자로 겪었다.",
+            achievements: ["《노인과 바다》", "1954년 노벨문학상 수상"],
+            notableWorks: ["노인과 바다", "무기여 잘 있거라"]
+        ),
+        Author(
+            id: "coelho", name: "Paulo Coelho", koreanName: "파울로 코엘료",
+            birthYear: 1947,
+            occupation: "소설가", nationality: "브라질",
+            biography: "가수·작사가로 일하다 산티아고 순례길을 걷고 소설가가 되었다. 자기 길을 찾아가는 이야기를 반복해서 쓴다.",
+            achievements: ["《연금술사》", "80개 언어 이상으로 번역"],
+            notableWorks: ["연금술사", "순례자"]
+        ),
+        Author(
+            id: "tagore", name: "Rabindranath Tagore", koreanName: "라빈드라나트 타고르",
+            birthYear: 1861, deathYear: 1941,
+            occupation: "시인 · 사상가 · 교육자", nationality: "인도",
+            biography: "벵골어로 쓴 시로 아시아 최초의 노벨문학상을 받았다. 시험과 체벌 대신 자연 속 배움을 내세운 학교를 세웠다.",
+            achievements: ["《기탄잘리》", "1913년 노벨문학상 수상"],
+            notableWorks: ["기탄잘리", "길 잃은 새들"]
+        ),
+        Author(
+            id: "gibran", name: "Kahlil Gibran", koreanName: "칼릴 지브란",
+            birthYear: 1883, deathYear: 1931,
+            occupation: "시인 · 화가", nationality: "레바논 · 미국",
+            biography: "레바논에서 태어나 미국으로 건너간 시인이자 화가다. 결혼·아이·일·슬픔을 한 편씩 다룬 산문시가 오래 읽힌다.",
+            achievements: ["《예언자》"],
+            notableWorks: ["예언자", "부러진 날개"]
+        ),
+        Author(
+            id: "whitman", name: "Walt Whitman", koreanName: "월트 휘트먼",
+            birthYear: 1819, deathYear: 1892,
+            occupation: "시인", nationality: "미국",
+            biography: "정형시의 틀을 벗고 일상의 말로 쓴 자유시로 미국 시의 출발점이 되었다. 평생 한 권의 시집을 계속 고쳐 냈다.",
+            achievements: ["《풀잎》"],
+            notableWorks: ["풀잎"]
+        ),
+        Author(
+            id: "frost", name: "Robert Frost", koreanName: "로버트 프로스트",
+            birthYear: 1874, deathYear: 1963,
+            occupation: "시인", nationality: "미국",
+            biography: "뉴잉글랜드의 농장과 숲을 배경으로 쉬운 말과 어려운 질문을 함께 담은 시를 썼다. 퓰리처상을 네 번 받았다.",
+            achievements: ["퓰리처상 4회 수상", "〈가지 않은 길〉"],
+            notableWorks: ["가지 않은 길", "눈 내리는 저녁 숲가에 서서"]
+        ),
+        Author(
+            id: "oliver", name: "Mary Oliver", koreanName: "메리 올리버",
+            birthYear: 1935, deathYear: 2019,
+            occupation: "시인", nationality: "미국",
+            biography: "매일 아침 숲과 연못을 걸으며 본 것을 시로 옮겼다. 대단한 사건이 아니라 주의 깊게 바라보는 일 자체를 시의 주제로 삼았다.",
+            achievements: ["1984년 퓰리처상 수상", "〈여름날〉"],
+            notableWorks: ["기러기", "완벽한 날들"]
+        ),
+        Author(
+            id: "carnegie_a", name: "Andrew Carnegie", koreanName: "앤드루 카네기",
+            birthYear: 1835, deathYear: 1919,
+            occupation: "기업인 · 자선사업가", nationality: "스코틀랜드 · 미국",
+            biography: "13세에 방직공장 노동자로 시작해 미국 철강업을 세웠고, 은퇴 뒤 재산의 대부분을 도서관과 학교에 내놓았다.",
+            achievements: ["카네기 철강 설립", "전 세계 2,500여 곳 도서관 기증"],
+            notableWorks: ["부의 복음"]
+        ),
+        Author(
+            id: "gates", name: "Bill Gates", koreanName: "빌 게이츠",
+            birthYear: 1955,
+            occupation: "기업인 · 자선사업가", nationality: "미국",
+            biography: "마이크로소프트를 세워 개인용 컴퓨터를 집집마다 들여놓았고, 이후 재단을 통해 감염병과 빈곤 문제에 집중하고 있다.",
+            achievements: ["마이크로소프트 공동 창업", "빌&멀린다 게이츠 재단"],
+            notableWorks: ["미래로 가는 길"]
+        ),
+        Author(
+            id: "mother_teresa", name: "Mother Teresa", koreanName: "마더 테레사",
+            birthYear: 1910, deathYear: 1997,
+            occupation: "수녀 · 사회사업가", nationality: "알바니아 · 인도",
+            biography: "콜카타에서 거리의 병자와 죽어가는 사람들을 돌보는 일에 평생을 썼다. 큰일보다 작은 일을 큰 사랑으로 하라고 되풀이해 말했다.",
+            achievements: ["사랑의 선교회 설립", "1979년 노벨평화상 수상"]
+        ),
+        Author(
+            id: "kennedy", name: "John F. Kennedy", koreanName: "존 F. 케네디",
+            birthYear: 1917, deathYear: 1963,
+            occupation: "정치인 · 미국 대통령", nationality: "미국",
+            biography: "미국의 제35대 대통령으로 냉전의 한복판에서 우주 계획과 시민권 문제를 밀고 나갔다. 취임 3년 만에 암살당했다.",
+            achievements: ["아폴로 계획 선언", "평화봉사단 창설"]
+        ),
+        Author(
+            id: "roosevelt_f", name: "Franklin D. Roosevelt", koreanName: "프랭클린 D. 루스벨트",
+            birthYear: 1882, deathYear: 1945,
+            occupation: "정치인 · 미국 대통령", nationality: "미국",
+            biography: "39세에 소아마비로 두 다리를 잃은 뒤 대통령이 되어 대공황과 제2차 세계대전을 지나갔다. 미국에서 유일하게 네 번 당선되었다.",
+            achievements: ["뉴딜 정책", "4선 미국 대통령"]
+        ),
+        Author(
+            id: "parks", name: "Rosa Parks", koreanName: "로자 파크스",
+            birthYear: 1913, deathYear: 2005,
+            occupation: "인권 운동가 · 재봉사", nationality: "미국",
+            biography: "1955년 몽고메리에서 백인에게 자리를 내주기를 거부해 381일간의 버스 승차 거부 운동을 촉발했다.",
+            achievements: ["몽고메리 버스 보이콧의 계기", "미국 의회 명예 황금 훈장"],
+            notableWorks: ["로자 파크스 나의 이야기"]
+        ),
+        Author(
+            id: "pele", name: "Pele", koreanName: "펠레",
+            birthYear: 1940, deathYear: 2022,
+            occupation: "축구 선수", nationality: "브라질",
+            biography: "17세에 월드컵 무대에 올라 세 번의 우승을 함께한 축구 선수다. 가난한 동네에서 양말을 뭉친 공으로 시작했다.",
+            achievements: ["월드컵 3회 우승(1958·1962·1970)", "20세기 최고의 축구 선수 선정"]
+        ),
+        Author(
+            id: "berra", name: "Yogi Berra", koreanName: "요기 베라",
+            birthYear: 1925, deathYear: 2015,
+            occupation: "야구 선수 · 감독", nationality: "미국",
+            biography: "뉴욕 양키스의 포수로 월드시리즈 우승 반지를 열 개 받았다. 말이 안 되는 듯 말이 되는 그의 말들은 따로 '요기즘'이라 불린다.",
+            achievements: ["월드시리즈 10회 우승", "명예의 전당 헌액"]
+        ),
+        Author(
+            id: "bruce_lee", name: "Bruce Lee", koreanName: "브루스 리(이소룡)",
+            birthYear: 1940, deathYear: 1973,
+            occupation: "무술가 · 배우 · 철학 전공자", nationality: "미국 · 홍콩",
+            biography: "정해진 형(型)을 버리고 상황에 맞추는 절권도를 만들었다. 워싱턴대에서 철학을 공부했고, 32세에 세상을 떠났다.",
+            achievements: ["절권도 창시", "《용쟁호투》"],
+            notableWorks: ["절권도의 도"]
         )
     ]
 
@@ -628,30 +855,58 @@ public enum AuthorLibrary {
         byID[id] ?? .unknown
     }
 
-    /// 이름 → Author 색인. 영문명과 한글명을 모두 키로 넣는다.
+    /// 같은 인물을 가리키는 다른 표기. `별칭 → 인물 id`.
+    ///
+    /// 표기 차이(점·하이픈·발음 구별 기호)는 `NameKey` 가 이미 지우므로 여기에는
+    /// **철자가 실제로 다른** 이름만 넣는다. 외부 데이터가 이 이름으로 와도
+    /// 준비된 소개를 그대로 보여 주기 위한 것이다.
+    static let aliases: [String: String] = [
+        "Khalil Gibran": "gibran",
+        "Laozi": "laotzu",
+        "Lao Tsu": "laotzu",
+        "Gautama Buddha": "buddha",
+        "Siddhartha Gautama": "buddha",
+        "The Buddha": "buddha",
+        "Dalai Lama": "dalailama",
+        "Tenzin Gyatso": "dalailama",
+        "Seneca the Younger": "seneca",
+        "Lucius Annaeus Seneca": "seneca",
+        "Marcus Tullius Cicero": "cicero",
+        "Mohandas Gandhi": "gandhi",
+        "Mohandas Karamchand Gandhi": "gandhi",
+        "Gandhi": "gandhi",
+        "Martin Luther King": "king",
+        "Jalaluddin Rumi": "rumi",
+        "Jalal ad-Din Muhammad Rumi": "rumi",
+        "Teddy Roosevelt": "roosevelt_t",
+        "Mark Twain (Samuel Clemens)": "twain",
+        "Samuel Clemens": "twain",
+        "Nhat Hanh": "thich",
+        "Saint Exupery": "saint_exupery",
+        "Francois-Marie Arouet": "voltaire"
+    ]
+
+    /// 이름 → Author 색인. 영문명·한글명·별칭을 모두 키로 넣는다.
     ///
     /// ZenQuotes 처럼 이름만 주는 외부 데이터에 내장 인물 소개를 붙이는 데 쓴다.
     private static let byNormalizedName: [String: Author] = {
         var index: [String: Author] = [:]
         for author in all {
-            index[normalize(author.name)] = author
+            index[NameKey.normalize(author.name)] = author
             if let korean = author.koreanName {
-                index[normalize(korean)] = author
+                index[NameKey.normalize(korean)] = author
             }
+        }
+        for (alias, id) in aliases {
+            guard let author = byID[id] else { continue }
+            index[NameKey.normalize(alias)] = author
         }
         return index
     }()
 
-    /// 이름이 일치하는 인물. 대소문자·공백·마침표 차이는 무시한다.
-    /// (예: `"Martin Luther King, Jr."` → `"Martin Luther King Jr."`)
+    /// 이름이 일치하는 인물. 대소문자·구두점·발음 구별 기호 차이는 무시한다.
+    /// (예: `"C.S. Lewis"`, `"Martin Luther King, Jr."`)
     public static func author(matchingName name: String) -> Author? {
-        byNormalizedName[normalize(name)]
-    }
-
-    private static func normalize(_ name: String) -> String {
-        name.lowercased()
-            .filter { $0.isLetter || $0.isNumber || $0.isWhitespace }
-            .split(separator: " ", omittingEmptySubsequences: true)
-            .joined(separator: " ")
+        byNormalizedName[NameKey.normalize(name)]
     }
 }

@@ -3,7 +3,7 @@ import Foundation
 /// 명언이 나온 상황과 맥락. Quote Plus 전용 콘텐츠다.
 ///
 /// `Quote` 안에 넣지 않고 slug 로 참조하는 별도 타입으로 둔 이유:
-/// - 명언 130편 전부에 배경이 있는 것은 아니다. 확인된 것만 채워 넣는다.
+/// - 명언 201편 전부에 배경이 있는 것은 아니다. 확인된 것만 채워 넣는다.
 /// - 무료 화면(위젯·알림)이 읽을 일이 없어 번들 파싱 비용을 나눌 수 있다.
 public struct BehindStory: Identifiable, Hashable, Codable, Sendable {
     /// 대상 명언의 `Quote.slug`.

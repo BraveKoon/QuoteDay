@@ -75,16 +75,23 @@ public struct RemoteQuote: Codable, Hashable, Sendable {
     }
 
     /// 저자 이름이 내장 인물과 겹치면 소개·생몰년까지 함께 보여 줄 수 있다.
+    ///
+    /// 겹치지 않으면 `ForeignNameLibrary` 에서 한국어 표기를 찾는다. 문장은 기기에서
+    /// 번역해도 **이름은 번역기에 맡기지 않는다** — 기계 번역은 사람 이름을 뜻으로
+    /// 옮겨 버린다. 표에도 없으면 영어 이름을 그대로 둔다. 짐작해서 옮기는 것보다 낫다.
     public var resolvedAuthor: Author {
         if let known = AuthorLibrary.author(matchingName: authorName) {
             return known
         }
+        let foreign = ForeignNameLibrary.entry(matchingName: authorName)
         return Author(
+            // 이 id 는 노트·하트가 참조하므로 표를 채워도 바뀌면 안 된다.
             id: "remote:\(authorName.lowercased())",
             name: authorName,
+            koreanName: foreign?.korean,
             birthYear: nil,
-            occupation: "명언 저자",
-            nationality: "미상",
+            occupation: foreign?.occupation ?? "명언 저자",
+            nationality: foreign?.nationality ?? "미상",
             biography: "이 인물의 상세 소개는 아직 앱에 준비되어 있지 않습니다. ZenQuotes 에서 받아 온 오늘의 명언입니다.",
             achievements: []
         )

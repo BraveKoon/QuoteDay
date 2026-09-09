@@ -73,7 +73,7 @@ QuoteDay/
 │   │                    ChallengeMode/Difficulty, ChallengeQuestion (quiz value types)
 │   │                    HeartSnapshot (total count + whether I tapped it)
 │   │                    ChallengeScore / RankBucket / RankStanding (points and rank)
-│   ├── Data/            QuoteLibrary (index) + QuoteLibraryData (130 quotes) + AuthorLibrary (87 people)
+│   ├── Data/            QuoteLibrary (index) + QuoteLibraryData (201 quotes) + AuthorLibrary (116 people)
 │   │                    BehindStoryLibrary (41) + DisputedAttribution (30 unverified attributions)
 │   ├── Services/        QuoteService (selection), RemoteQuoteService (ZenQuotes), SharedStore
 │   │                    ChallengeGenerator (question building) + BlankMaker (Korean word blanks)
@@ -165,7 +165,7 @@ Donations (Toss bank transfer / Buy Me a Coffee) are separate and **unlock nothi
 Taking outside payment in exchange for features violates App Store policy, so donations
 stay pure encouragement. The account number is copy-on-tap information, not a link.
 
-### Why there are 41 behind-the-quote stories, not 130
+### Why there are 41 behind-the-quote stories, not 201
 Background notes are the easiest kind of writing to invent convincingly. Put in an
 unverified anecdote and the app quietly starts teaching false history. So
 `BehindStoryLibrary` has rules.
@@ -562,7 +562,10 @@ that's the guard against an empty release. To preview the notes, run
 
 ## 6. Data
 
-- **130 quotes**, **87 people**. At least 12 per category (more once secondary categories count).
+- **201 quotes**, **116 people**. At least 12 per category (more once secondary categories count).
+- **360 Korean spellings** for people outside the bundle (`ForeignNameLibrary`), used for the
+  ZenQuotes quote of the day. Names are never handed to the translator — machine translation
+  renders a person's name as its meaning. A name that is not in the table stays in English.
 - Only sentences widely confirmed as coming from a real person; internet text of unclear
   origin was left out. The original wording (`originalText`) is included where available.
 - **41** behind-the-quote stories (`BehindStoryLibrary`), and **30** quotes excluded from
@@ -581,7 +584,7 @@ that's the guard against an empty release. To preview the notes, run
   back to the app.
 - Recurring events have no "edit/delete just this occurrence". Skipping one means adjusting
   the recurrence end date.
-- 41 of 130 quotes have a behind-the-quote story. The rest need their sources confirmed first.
+- 41 of 201 quotes have a behind-the-quote story. The rest need their sources confirmed first.
 - Challenge records themselves stay on this device; only one total and its bucket leave it.
 - Ranking rides the same CloudKit switch as hearts. Off, the score shows and the rank does not.
 - Rank is counted from buckets, so it is approximate — meaningful only at "top N%" resolution.
@@ -601,4 +604,6 @@ that's the guard against an empty release. To preview the notes, run
 - No Live Activity / Dynamic Island yet.
 - There are no localization files. UI strings are hardcoded in Korean.
 - Quote-of-the-day translation works only on iOS 18 or later; below that the English shows.
-- It is machine translation, and does not match the quality of the 130 hand-translated bundled quotes.
+- It is machine translation, and does not match the quality of the 201 hand-translated bundled quotes.
+- Only the 360 names in the spelling table are shown in Korean. ZenQuotes draws on a far larger
+  cast, so anyone outside the table keeps their English name.

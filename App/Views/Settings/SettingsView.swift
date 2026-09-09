@@ -307,6 +307,14 @@ struct SettingsView: View {
 
     // MARK: - ZenQuotes
 
+    /// 번역 토글 아래에 붙이는 설명. 기기가 지원하지 않으면 그 사실을 먼저 말한다.
+    private var translationDescription: String {
+        guard QuoteTranslationSupport.isAvailable else {
+            return "기기에서 번역하려면 iOS 18 이상이 필요합니다. 지금은 영어 원문이 그대로 보입니다."
+        }
+        return "영어로 오는 명언을 기기 안에서 한국어로 옮깁니다. 기계 번역이라 어색할 수 있어 영어 원문도 함께 남겨 둡니다. 처음 한 번은 번역 자료를 내려받겠냐고 물어볼 수 있어요."
+    }
+
     private func remoteQuoteCard(settings: AppSettings) -> some View {
         @Bindable var settings = settings
 
@@ -335,8 +343,29 @@ struct SettingsView: View {
                 if settings.usesRemoteQuoteOfTheDay {
                     ClayDivider()
 
+                    Toggle(isOn: $settings.translatesRemoteQuote) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("한국어로 번역")
+                                .font(ClayFont.headline())
+                                .foregroundStyle(ClayTheme.textPrimary)
+                            Text(translationDescription)
+                                .font(ClayFont.caption())
+                                .foregroundStyle(ClayTheme.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    .tint(ClayTheme.accent)
+                    .disabled(!QuoteTranslationSupport.isAvailable)
+                    .onChange(of: settings.translatesRemoteQuote) { _, _ in
+                        appEnvironment.refreshTranslationTarget()
+                        remoteQuoteRefreshToken += 1
+                    }
+
+                    ClayDivider()
+
                     // remoteQuoteRefreshToken 을 참조해 갱신 후 다시 계산되게 한다.
                     let _ = remoteQuoteRefreshToken
+                    let _ = appEnvironment.remoteQuoteRevision
                     let store = RemoteQuoteStore.shared
 
                     if let presentation = store.presentation() {

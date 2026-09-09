@@ -97,7 +97,7 @@ QuoteDay/
 │   └── Views/           Home / Calendar / Schedule / Quote / Notes / Plus / Challenge /
 │                         Settings / RootTabView
 ├── Widget/              Home screen (Small·Medium·Large) + lock screen (accessory) widgets
-├── Tests/               186 XCTest cases
+├── Tests/               194 XCTest cases
 └── tools/               Project generator + static checker + CHANGELOG section extractor
 ```
 
@@ -422,9 +422,37 @@ Turn it on in Settings (on by default) and the quote of the day comes from ZenQu
   a failure won't retry within 15 minutes (the free tier allows 5 calls per 30 seconds).
 - If the author name matches someone in the bundle, their dates, biography and achievements
   are attached. If not, the name alone is shown.
+- **The English text is translated to Korean on device** (below). It can be turned off in Settings.
 - A remote quote's UUID is derived from the sentence itself, so deep links stay valid after
   the day passes.
 - Attribution is shown on the quote detail and in Settings, as the free tier requires.
+
+#### Translating the English quote
+ZenQuotes only returns English. To stop one English sentence sticking out of a Korean app,
+it is translated with **Apple's on-device translation** (the Translation framework).
+
+A translation API needs a key, and a key shipped in an app cannot be kept from anyone who
+wants it. A server would have to be run. On-device translation needs **no key, no server,
+no cost, and the sentence never leaves the device.**
+
+Two costs come with it.
+
+- **iOS 18 or later only.** That is where the programmatic translation API arrived (17.4
+  only presents a system sheet). The app's deployment target stays at 17.0 — dropping
+  existing users over one feature isn't worth it. On iOS 17 the English shows as before,
+  and Settings says why.
+- **It is machine translation.** Aphorisms are hard to translate well, so the English is
+  kept underneath rather than replaced (`Quote.originalText` — the same slot bundled quotes
+  use for their source text). If the Korean reads badly the original is right there, and
+  turning the setting off brings back English only.
+
+**Translating never changes the `slug` or the UUID.** Both derive from the English text, and
+notification and widget deep links hold them; changing them would break every link.
+
+The translation runs once, attached to the app's root view — one sentence a day is enough.
+The result goes into the App Group cache, so **the widget shows the same Korean** once the
+app has been opened. If the date rolls over to a different quote before the translation
+finishes, that translation is discarded.
 
 ### Notifications
 - Permission is requested **when the user turns quote notifications on**, not at launch.
@@ -572,3 +600,5 @@ that's the guard against an empty release. To preview the notes, run
   days", no rules like "the second Tuesday of each month").
 - No Live Activity / Dynamic Island yet.
 - There are no localization files. UI strings are hardcoded in Korean.
+- Quote-of-the-day translation works only on iOS 18 or later; below that the English shows.
+- It is machine translation, and does not match the quality of the 130 hand-translated bundled quotes.

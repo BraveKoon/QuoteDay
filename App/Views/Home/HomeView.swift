@@ -5,6 +5,7 @@ struct HomeView: View {
     @Environment(ScheduleStore.self) private var store
     @Environment(AppSettings.self) private var settings
     @Environment(AppRouter.self) private var router
+    @Environment(AppEnvironment.self) private var appEnvironment
 
     @State private var editorTarget: ScheduleEditorTarget?
 
@@ -60,6 +61,9 @@ struct HomeView: View {
     // MARK: - 오늘의 명언
 
     private var quoteSection: some View {
+        // 오늘의 명언이 바뀌거나 번역이 끝나면 이 값이 올라 화면이 다시 그려진다.
+        // (RemoteQuoteStore 는 UserDefaults 를 직접 읽는 값 타입이라 관찰되지 않는다)
+        _ = appEnvironment.remoteQuoteRevision
         let presentation = viewModel.quoteOfTheDay()
         return VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
             QuoteCard(presentation: presentation, style: .hero) {

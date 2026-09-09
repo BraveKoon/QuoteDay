@@ -521,6 +521,9 @@ python tools/check_project.py
   (fix one without the other and sync fails silently, only on a device)
 - That the photo-add usage description exists (without it, saving crashes the app)
 - That the app icon is 1024x1024 with no alpha channel (alpha gets rejected by the App Store)
+- **That the version agrees in three places** — `MARKETING_VERSION` in `project.yml`, the
+  newest entry in `CHANGELOG.md`, and the first entry of the generated `ReleaseHistory.swift`
+  (see "One source for the version" below)
 
 On macOS, additionally:
 
@@ -547,16 +550,39 @@ On a merge to `main`, it reads `MARKETING_VERSION` from `project.yml` and, if th
 doesn't exist yet, creates the tag and a GitHub Release. The notes come from the matching
 section of `CHANGELOG.md`.
 
-So releasing is **two lines inside a PR**.
+So releasing is **three lines inside a PR**.
 
 1. Bump `MARKETING_VERSION` in `project.yml` and re-run `generate_xcodeproj.py`
-2. Turn `## [Unreleased]` in `CHANGELOG.md` into a version and date, e.g. `## [1.4] - 2026-09-06`
-3. Merge → the tag and the release appear on their own
+2. Turn `## [Unreleased]` in `CHANGELOG.md` into a version and date, e.g. `## [1.8] - 2026-09-09`
+3. Run `python tools/generate_release_history.py` to rebuild the in-app changelog
+4. Merge → the tag and the release appear on their own
 
 A merge that doesn't bump the version passes quietly, since the tag already exists.
 Bumping the version without writing a CHANGELOG entry fails the release job on purpose —
 that's the guard against an empty release. To preview the notes, run
 `python tools/changelog_section.py 1.4`.
+
+### One source for the version
+If the version shown in the app disagrees with the GitHub release tag, nobody can tell which
+build they are actually running. So there is one source, and everything else is derived.
+
+```
+CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (Settings > Changelog)
+      │
+      └─ MARKETING_VERSION in project.yml ──▶ Info.plist ──▶ release.yml tags v<version>
+                                                  │
+                                                  └─▶ AppVersion.tag  (Settings > About)
+```
+
+- The "GitHub tag" row in the app is the bundle's `CFBundleShortVersionString` with a `v`
+  in front. The release workflow tags the same value, so there is no path for them to differ.
+- `Shared/Data/ReleaseHistory.swift` is **generated**. Don't edit it; edit `CHANGELOG.md`
+  and regenerate.
+- `check_project.py` fails CI when the three disagree, and a test separately checks that the
+  running build is the newest entry in the changelog.
+- The in-app changelog carries **top-level bullets only** — nested bullets and code blocks are
+  dropped — so write each CHANGELOG entry so its first paragraph stands on its own. The screen
+  links out to the GitHub release for the rest.
 
 ---
 

@@ -576,6 +576,9 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (S
 
 - The "GitHub tag" row in the app is the bundle's `CFBundleShortVersionString` with a `v`
   in front. The release workflow tags the same value, so there is no path for them to differ.
+- Both `Info.plist` files take `$(MARKETING_VERSION)` / `$(CURRENT_PROJECT_VERSION)` rather
+  than a literal. v1.1 through v1.7.1 actually shipped with `1.0` baked in, so
+  `check_project.py` now verifies the substitution is there.
 - `Shared/Data/ReleaseHistory.swift` is **generated**. Don't edit it; edit `CHANGELOG.md`
   and regenerate.
 - `check_project.py` fails CI when the three disagree, and a test separately checks that the

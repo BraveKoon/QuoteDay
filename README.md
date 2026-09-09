@@ -524,6 +524,9 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (�
 
 - 화면의 "깃허브 태그" 는 번들의 `CFBundleShortVersionString` 앞에 `v` 를 붙인 것이다.
   릴리스 워크플로도 같은 값으로 태그를 달기 때문에, 둘이 어긋날 경로가 없다.
+- 두 `Info.plist` 의 버전 키는 값을 박지 않고 `$(MARKETING_VERSION)` /
+  `$(CURRENT_PROJECT_VERSION)` 을 받는다. v1.1~v1.7.1 이 실제로 `1.0` 이 박힌 채
+  나갔던 적이 있어서, `check_project.py` 가 이 형태를 확인한다.
 - `Shared/Data/ReleaseHistory.swift` 는 **생성 파일이다.** 직접 고치지 말고
   `CHANGELOG.md` 를 고친 뒤 다시 생성한다.
 - `check_project.py` 가 세 값이 같은지 확인하고, 다르면 CI 를 실패시킨다.

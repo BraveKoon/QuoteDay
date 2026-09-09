@@ -641,6 +641,22 @@ def check_version() -> None:
         return
     marketing = match.group(1)
 
+    # Info.plist 는 값을 박아 넣지 말고 빌드 설정을 받아야 한다.
+    # 박아 두면 버전을 올려도 앱 화면과 App Store 에는 옛 값이 나간다.
+    # (v1.1~v1.7.1 이 실제로 "1.0" 으로 나갔다.)
+    for plist in ("App/Resources/Info.plist", "Widget/Info.plist"):
+        text = (ROOT / plist).read_text(encoding="utf-8")
+        for key, setting in (
+            ("CFBundleShortVersionString", "MARKETING_VERSION"),
+            ("CFBundleVersion", "CURRENT_PROJECT_VERSION"),
+        ):
+            expected = f"<key>{key}</key>\n\t<string>$({setting})</string>"
+            if expected not in text:
+                fail(
+                    f"{plist} 의 {key} 가 $({setting}) 이 아닙니다. "
+                    "값을 박아 두면 버전을 올려도 앱에는 옛 값이 나갑니다."
+                )
+
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     versions = re.findall(r"^## \[([0-9]+(?:\.[0-9]+)*)\] - (\d{4}-\d{2}-\d{2})\s*$",
                           changelog, re.M)

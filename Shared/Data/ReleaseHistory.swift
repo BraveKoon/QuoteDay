@@ -22,6 +22,13 @@ public extension ReleaseHistory {
                     ]
                 ),
                 ReleaseSection(
+                    title: "고침",
+                    items: [
+                        "앱이 보여 주던 버전이 계속 1.0 이었다. Info.plist 에 1.0 이 박혀 있어 project.yml 의 MARKETING_VERSION 을 아무리 올려도 앱 정보에는 그 값이 나가지 않았다. v1.1 부터 v1.7.1 까지 전부 그랬다 — 깃허브 태그는 올라갔는데 앱은 \"1.0 (1)\" 이라고 말하고 있었다. 이제 $(MARKETING_VERSION) 과 $(CURRENT_PROJECT_VERSION) 을 받는다. 앱과 위젯 둘 다 고쳤다. 이번에 넣은 테스트가 이 문제를 잡았다.",
+                        "check_project.py 가 두 Info.plist 의 버전 키가 빌드 설정을 받는지 확인한다. 값을 다시 박아 넣으면 실패한다.",
+                    ]
+                ),
+                ReleaseSection(
                     title: "변경",
                     items: [
                         "버전의 출처를 하나로 묶었다. 지금까지는 앱 화면·CHANGELOG·깃허브 태그가 각자 따로였다. 이제 tools/generate_release_history.py 가 이 파일을 읽어 Swift 파일을 만들고, tools/check_project.py 가 셋(이 파일의 최신 항목 · MARKETING_VERSION · 생성된 파일)이 같은지 확인한다. 하나라도 어긋나면 CI 가 실패한다.",

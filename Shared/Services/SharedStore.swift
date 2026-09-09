@@ -60,6 +60,8 @@ public enum SharedDefaultsKey {
     public static let hasRequestedNotifications = "settings.hasRequestedNotifications"
     public static let mirrorToSystemCalendar = "settings.mirrorToSystemCalendar"
     public static let remoteQuoteEnabled = "settings.remoteQuote.enabled"
+    /// ZenQuotes 영어 명언을 기기에서 한국어로 옮길지.
+    public static let remoteQuoteTranslate = "settings.remoteQuote.translate"
     public static let remoteQuote = "remoteQuote.cache.v1"
     public static let remoteQuoteLastAttempt = "remoteQuote.lastAttempt"
     public static let remoteQuoteLastError = "remoteQuote.lastError"

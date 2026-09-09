@@ -209,4 +209,101 @@ final class RemoteQuoteTests: XCTestCase {
         let resolved = QuoteService.shared.presentation(id: remote.quote().id, remote: store)
         XCTAssertEqual(resolved?.quote.text, "Linkable.")
     }
+
+    // MARK: - 번역
+
+    /// 번역이 없으면 영어 원문이 그대로 화면에 간다.
+    func testDisplayTextFallsBackToEnglish() {
+        let quote = RemoteQuote(text: "Keep going.", authorName: "Anon", dayKey: dayKey)
+        XCTAssertEqual(quote.displayText, "Keep going.")
+        XCTAssertTrue(quote.needsTranslation)
+        XCTAssertNil(quote.quote().originalText, "번역 전에는 같은 문장이 두 번 나오면 안 된다.")
+    }
+
+    func testTranslationBecomesTheBodyAndEnglishMovesToOriginal() {
+        let quote = RemoteQuote(text: "Keep going.", authorName: "Anon", dayKey: dayKey)
+            .withTranslation("계속 나아가라.")
+
+        XCTAssertEqual(quote.displayText, "계속 나아가라.")
+        XCTAssertFalse(quote.needsTranslation)
+        XCTAssertEqual(quote.quote().text, "계속 나아가라.")
+        XCTAssertEqual(quote.quote().originalText, "Keep going.")
+    }
+
+    /// **번역해도 slug 와 UUID 가 바뀌면 안 된다.**
+    /// 알림과 위젯 딥링크가 그 값을 들고 있어서, 바뀌면 링크가 통째로 끊긴다.
+    func testTranslationNeverChangesTheIdentity() {
+        let original = RemoteQuote(text: "Keep going.", authorName: "Anon", dayKey: dayKey)
+        let translated = original.withTranslation("계속 나아가라.")
+
+        XCTAssertEqual(translated.slug, original.slug)
+        XCTAssertEqual(translated.quote().id, original.quote().id)
+    }
+
+    func testSavedTranslationIsReadBack() {
+        let (store, _) = makeStore()
+        let quote = RemoteQuote(text: "Keep going.", authorName: "Anon", dayKey: dayKey)
+        store.save(quote)
+
+        store.saveTranslation("계속 나아가라.", forSourceText: "Keep going.")
+
+        XCTAssertEqual(store.cached()?.translatedText, "계속 나아가라.")
+        XCTAssertEqual(store.cached()?.text, "Keep going.", "원문은 그대로 남아야 한다.")
+    }
+
+    /// 번역이 끝나기 전에 날짜가 바뀌어 다른 명언을 받아 왔을 수 있다.
+    /// 그때 엉뚱한 문장에 번역이 붙으면 안 된다.
+    func testTranslationForAnotherQuoteIsIgnored() {
+        let (store, _) = makeStore()
+        store.save(RemoteQuote(text: "Today's quote.", authorName: "Anon", dayKey: dayKey))
+
+        store.saveTranslation("어제 명언의 번역", forSourceText: "Yesterday's quote.")
+
+        XCTAssertNil(store.cached()?.translatedText)
+    }
+
+    func testEmptyOrUnchangedTranslationIsIgnored() {
+        let (store, _) = makeStore()
+        store.save(RemoteQuote(text: "Keep going.", authorName: "Anon", dayKey: dayKey))
+
+        store.saveTranslation("   ", forSourceText: "Keep going.")
+        XCTAssertNil(store.cached()?.translatedText)
+
+        // 번역기가 원문을 그대로 돌려주면 번역하지 않은 것과 같다.
+        store.saveTranslation("Keep going.", forSourceText: "Keep going.")
+        XCTAssertNil(store.cached()?.translatedText)
+    }
+
+    func testPendingSourceOnlyForTodaysUntranslatedQuote() {
+        let (store, _) = makeStore()
+        let today = Date()
+        let todayKey = today.dayKey(calendar: .current)
+
+        XCTAssertNil(store.pendingTranslationSource(on: today), "캐시가 비어 있으면 할 일이 없다.")
+
+        store.save(RemoteQuote(text: "Keep going.", authorName: "Anon", dayKey: todayKey))
+        XCTAssertEqual(store.pendingTranslationSource(on: today), "Keep going.")
+
+        store.saveTranslation("계속 나아가라.", forSourceText: "Keep going.")
+        XCTAssertNil(store.pendingTranslationSource(on: today), "이미 번역했으면 다시 하지 않는다.")
+
+        // 어제 것은 어차피 화면에 안 나오므로 번역하지 않는다.
+        store.save(RemoteQuote(text: "Old one.", authorName: "Anon", dayKey: "1999-01-01"))
+        XCTAssertNil(store.pendingTranslationSource(on: today))
+    }
+
+    /// 번역 필드가 없던 예전 캐시도 그대로 읽혀야 한다. 마이그레이션은 두지 않았다.
+    func testCacheFromBeforeTranslationStillDecodes() throws {
+        let (store, defaults) = makeStore()
+        let legacy = Data("""
+        {"text":"Keep going.","authorName":"Anon","dayKey":"\(dayKey)","fetchedAt":"2026-08-15T00:00:00Z"}
+        """.utf8)
+        defaults.set(legacy, forKey: SharedDefaultsKey.remoteQuote)
+
+        let cached = try XCTUnwrap(store.cached())
+        XCTAssertEqual(cached.text, "Keep going.")
+        XCTAssertNil(cached.translatedText)
+        XCTAssertTrue(cached.needsTranslation)
+    }
+
 }

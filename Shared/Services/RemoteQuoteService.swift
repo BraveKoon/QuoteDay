@@ -6,17 +6,49 @@ import Foundation
 /// 저자 이름이 내장 인물 데이터와 일치하면 그 소개를 붙여 주고,
 /// 아니면 이름만 있는 최소한의 인물 정보를 만든다.
 public struct RemoteQuote: Codable, Hashable, Sendable {
+    /// API 가 준 영어 원문. **번역해도 이 값은 그대로 둔다** —
+    /// slug 를 이 문장에서 유도하므로 바뀌면 딥링크가 끊긴다.
     public let text: String
     public let authorName: String
     /// 이 명언이 "오늘"인 날짜 키(yyyy-MM-dd). 날짜가 바뀌면 캐시를 무효로 본다.
     public let dayKey: String
     public let fetchedAt: Date
+    /// 기기에서 번역한 한국어. 아직 번역하지 않았으면 nil.
+    ///
+    /// 옵셔널이라 이 필드가 없던 예전 캐시도 그대로 읽힌다(마이그레이션 없음).
+    public let translatedText: String?
 
-    public init(text: String, authorName: String, dayKey: String, fetchedAt: Date = .now) {
+    public init(
+        text: String,
+        authorName: String,
+        dayKey: String,
+        fetchedAt: Date = .now,
+        translatedText: String? = nil
+    ) {
         self.text = text
         self.authorName = authorName
         self.dayKey = dayKey
         self.fetchedAt = fetchedAt
+        self.translatedText = translatedText
+    }
+
+    /// 화면에 띄울 문장. 번역이 있으면 한국어, 없으면 영어 원문.
+    public var displayText: String { translatedText ?? text }
+
+    /// 아직 번역하지 않았는지.
+    public var needsTranslation: Bool {
+        translatedText == nil && !text.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    /// 번역을 붙인 사본.
+    public func withTranslation(_ korean: String?) -> RemoteQuote {
+        RemoteQuote(
+            text: text,
+            authorName: authorName,
+            dayKey: dayKey,
+            fetchedAt: fetchedAt,
+            translatedText: korean
+        )
     }
 
     /// 내장 명언과 구분하기 위한 slug 접두사.
@@ -32,7 +64,10 @@ public struct RemoteQuote: Codable, Hashable, Sendable {
     public func quote() -> Quote {
         Quote(
             slug: slug,
-            text: text,
+            text: displayText,
+            // 번역했을 때만 영어를 원문 자리에 넣는다. 번역 전에는 본문이 곧 영어라
+            // 같은 문장이 두 번 나오게 된다.
+            originalText: translatedText == nil ? nil : text,
             authorID: resolvedAuthor.id,
             // API 가 카테고리를 주지 않으므로 중립적인 '일상'으로 둔다.
             category: .daily
@@ -167,6 +202,25 @@ public struct RemoteQuoteStore: @unchecked Sendable {
             AppLog.quotes.error("ZenQuotes 갱신 실패: \(error.localizedDescription, privacy: .public)")
             return false
         }
+    }
+
+    /// 번역 결과를 캐시에 붙인다.
+    ///
+    /// 원문이 지금 캐시된 것과 다르면 무시한다 — 번역이 끝나기 전에 날짜가 바뀌어
+    /// 다른 명언을 받아 왔을 수 있고, 그때 엉뚱한 문장에 번역이 붙으면 안 된다.
+    public func saveTranslation(_ korean: String, forSourceText source: String) {
+        guard let cached = cached(), cached.text == source else { return }
+        let trimmed = korean.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed != source else { return }
+        save(cached.withTranslation(trimmed))
+    }
+
+    /// 지금 번역이 필요한 문장. 없으면 nil.
+    public func pendingTranslationSource(on date: Date = .now) -> String? {
+        guard let cached = cached(), cached.dayKey == date.dayKey(calendar: calendar) else {
+            return nil
+        }
+        return cached.needsTranslation ? cached.text : nil
     }
 
     public func save(_ quote: RemoteQuote) {

@@ -24,6 +24,9 @@ struct RootTabView: View {
         )) { identifier in
             QuoteDetailView(quoteID: identifier.id)
         }
+        // 영어로 온 오늘의 명언을 기기에서 한국어로 옮긴다.
+        // 화면마다 붙이지 않고 여기 한 번만 붙인다 — 하루에 한 문장이면 충분하다.
+        .translatingRemoteQuote()
     }
 
     @ViewBuilder

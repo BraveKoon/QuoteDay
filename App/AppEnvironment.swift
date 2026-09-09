@@ -24,6 +24,14 @@ final class AppEnvironment {
     let heartStore: HeartStore
     let rankStore: RankStore
 
+    /// 지금 번역이 필요한 영어 원문. 최상위 화면이 이 값을 보고 번역을 돌린다.
+    private(set) var pendingTranslationSource: String?
+    /// 오늘의 명언이 바뀔 때마다 오르는 값. 화면이 이것을 읽어 두면 다시 그려진다.
+    ///
+    /// `RemoteQuoteStore` 는 `UserDefaults` 를 직접 읽는 값 타입이라 관찰할 수 없다.
+    /// 번역이 끝나거나 새 명언을 받아 왔을 때 화면이 그대로 남지 않도록 신호를 하나 둔다.
+    private(set) var remoteQuoteRevision = 0
+
     /// `UNUserNotificationCenter` 는 delegate 를 약하게 붙잡으므로 여기서 소유한다.
     private let notificationDelegate: NotificationDelegate
 
@@ -58,6 +66,27 @@ final class AppEnvironment {
 
         self.notificationDelegate = NotificationDelegate(router: router)
         UNUserNotificationCenter.current().delegate = notificationDelegate
+
+        refreshTranslationTarget()
+    }
+
+    // MARK: - 오늘의 명언 번역
+
+    /// 번역할 것이 남아 있는지 다시 본다.
+    func refreshTranslationTarget() {
+        pendingTranslationSource = settings.translatesRemoteQuote
+            ? RemoteQuoteStore.shared.pendingTranslationSource()
+            : nil
+    }
+
+    /// 번역 결과를 캐시에 넣고 화면과 위젯을 갱신한다.
+    func applyTranslation(_ korean: String, for source: String) {
+        RemoteQuoteStore.shared.saveTranslation(korean, forSourceText: source)
+        remoteQuoteRevision += 1
+        refreshTranslationTarget()
+        for kind in AppGroup.allWidgetKinds {
+            WidgetCenter.shared.reloadTimelines(ofKind: kind)
+        }
     }
 
     /// 앱이 활성화될 때마다 호출한다.
@@ -79,11 +108,14 @@ final class AppEnvironment {
         let store = RemoteQuoteStore.shared
         let updated = force ? await store.refresh() : await store.refreshIfNeeded()
         if updated {
+            remoteQuoteRevision += 1
             // 위젯도 새 명언을 보여 주어야 한다.
             for kind in AppGroup.allWidgetKinds {
                 WidgetCenter.shared.reloadTimelines(ofKind: kind)
             }
         }
+        // 새 명언이든 예전 것이든, 아직 번역이 안 된 것이 있으면 여기서 잡힌다.
+        refreshTranslationTarget()
         return updated
     }
 

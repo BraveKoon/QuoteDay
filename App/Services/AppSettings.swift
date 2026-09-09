@@ -40,6 +40,7 @@ final class AppSettings {
     @ObservationIgnored private var storedAppearance: Appearance
     @ObservationIgnored private var storedMirrorsToSystemCalendar: Bool
     @ObservationIgnored private var storedUsesRemoteQuote: Bool
+    @ObservationIgnored private var storedTranslatesRemoteQuote: Bool
     @ObservationIgnored private var storedShareCardTheme: String
     @ObservationIgnored private var storedShareCardColor: String?
 
@@ -56,6 +57,8 @@ final class AppSettings {
         self.storedMirrorsToSystemCalendar = defaults.bool(forKey: SharedDefaultsKey.mirrorToSystemCalendar)
         // 값이 없으면 켜 둔 상태로 시작한다.
         self.storedUsesRemoteQuote = defaults.object(forKey: SharedDefaultsKey.remoteQuoteEnabled) as? Bool ?? true
+        self.storedTranslatesRemoteQuote =
+            defaults.object(forKey: SharedDefaultsKey.remoteQuoteTranslate) as? Bool ?? true
         self.storedShareCardTheme = defaults.string(forKey: SharedDefaultsKey.shareCardTheme) ?? ShareCardTheme.paper.rawValue
         self.storedShareCardColor = defaults.string(forKey: SharedDefaultsKey.shareCardColor)
     }
@@ -193,6 +196,23 @@ final class AppSettings {
             withMutation(keyPath: \.usesRemoteQuoteOfTheDay) {
                 storedUsesRemoteQuote = newValue
                 defaults.set(newValue, forKey: SharedDefaultsKey.remoteQuoteEnabled)
+            }
+        }
+    }
+
+    /// 영어로 오는 오늘의 명언을 기기에서 한국어로 옮길지.
+    ///
+    /// 기계 번역이라 잠언은 어색해질 수 있어서 끌 수 있게 두었다.
+    /// 켜 두어도 영어 원문은 번역문 아래에 그대로 남는다.
+    var translatesRemoteQuote: Bool {
+        get {
+            access(keyPath: \.translatesRemoteQuote)
+            return storedTranslatesRemoteQuote
+        }
+        set {
+            withMutation(keyPath: \.translatesRemoteQuote) {
+                storedTranslatesRemoteQuote = newValue
+                defaults.set(newValue, forKey: SharedDefaultsKey.remoteQuoteTranslate)
             }
         }
     }

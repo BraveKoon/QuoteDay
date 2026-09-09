@@ -10,6 +10,21 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.8.1",
+            date: "2026-09-09",
+            summary: nil,
+            sections: [
+                ReleaseSection(
+                    title: "변경",
+                    items: [
+                        "카드에서 QuoteDay 표시를 끄는 선택지를 없앴다. 카드가 어디까지 퍼지든 어디서 나온 것인지는 남아 있어야 한다. Quote Plus 의 \"워터마크 없는 공유\" 항목도 함께 지웠다 — 없는 기능을 팔 수는 없다.",
+                        "인물 이름을 영문으로 크게, 한국어 표기를 그 아래 작게 보여 준다. 명언을 눌러 들어가는 상세 화면과 인물 페이지 둘 다 같은 모양이다. 두 줄은 한 덩어리라 바짝 붙였다 — 사이가 벌어지면 서로 다른 정보처럼 보인다.",
+                        "공유 카드에는 영문 이름만 쓴다. 카드는 앱 밖으로 나가는 물건이라, 한국어를 읽지 않는 사람에게도 누구의 말인지 전해지는 편이 낫다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.8",
             date: "2026-09-09",
             summary: nil,

@@ -52,7 +52,9 @@ struct QuoteShareCard: View {
                 .frame(width: 64 * scale, height: 3 * scale)
                 .padding(.bottom, 20 * scale)
 
-            Text(presentation.author.displayName)
+            // 카드에는 영문 이름을 쓴다. 카드가 어디로 퍼지든 같은 사람을 가리키고,
+            // 한국어를 읽지 않는 사람에게도 누구의 말인지 전해진다.
+            Text(presentation.author.name)
                 .font(captionFont(size: 34 * scale))
                 .foregroundStyle(palette.text)
 
@@ -60,15 +62,14 @@ struct QuoteShareCard: View {
                 .font(captionFont(size: 24 * scale))
                 .foregroundStyle(palette.secondaryText)
 
-            if design.showsWatermark {
-                HStack(spacing: 6 * scale) {
-                    Image(systemName: "quote.bubble.fill")
-                    Text("QuoteDay")
-                }
-                .font(.system(size: 22 * scale, weight: .semibold, design: .rounded))
-                .foregroundStyle(palette.secondaryText)
-                .padding(.top, 28 * scale)
+            // 출처 표시는 끌 수 없다. 카드가 어디까지 퍼지든 어디서 나왔는지는 남는다.
+            HStack(spacing: 6 * scale) {
+                Image(systemName: "quote.bubble.fill")
+                Text("QuoteDay")
             }
+            .font(.system(size: 22 * scale, weight: .semibold, design: .rounded))
+            .foregroundStyle(palette.secondaryText)
+            .padding(.top, 28 * scale)
         }
         .padding(72 * scale)
         .frame(width: side, height: side, alignment: .topLeading)

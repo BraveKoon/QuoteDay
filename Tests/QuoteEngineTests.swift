@@ -60,6 +60,18 @@ final class QuoteEngineTests: XCTestCase {
         }
     }
 
+    /// 명언 상세·인물 페이지는 영문 이름을 크게, 한국어 표기를 그 아래 작게 그린다.
+    /// 공유 카드에는 영문 이름만 나간다. 둘 중 하나라도 비면 그 자리가 빈 줄이 된다.
+    func testEveryAuthorHasBothNames() {
+        for author in AuthorLibrary.all {
+            XCTAssertFalse(author.name.isEmpty, "\(author.id) 의 영문 이름이 비어 있다.")
+            XCTAssertFalse(
+                (author.koreanName ?? "").isEmpty,
+                "\(author.id) 에 한국어 표기가 없다."
+            )
+        }
+    }
+
     func testAuthorsHaveBiography() {
         for author in AuthorLibrary.all {
             XCTAssertFalse(author.biography.isEmpty, "\(author.id) 의 소개가 비어 있다.")

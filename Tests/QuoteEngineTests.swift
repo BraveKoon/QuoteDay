@@ -41,6 +41,25 @@ final class QuoteEngineTests: XCTestCase {
         }
     }
 
+    /// 카테고리를 골라 놓고 열었을 때 며칠 만에 같은 명언이 돌아오면 안 된다.
+    func testEveryCategoryHasEnoughQuotes() {
+        for category in AppCategory.selectableForQuotes {
+            XCTAssertGreaterThanOrEqual(
+                library.count(in: category), 12,
+                "\(category.title) 카테고리가 12편에 못 미친다."
+            )
+        }
+    }
+
+    /// 명언이 하나도 없는 인물은 화면 어디에도 나오지 않으면서
+    /// 챌린지의 오답 보기로만 등장한다. 그런 인물을 남겨 두지 않는다.
+    func testEveryAuthorHasAtLeastOneQuote() {
+        let used = Set(library.quotes.map(\.authorID))
+        for author in AuthorLibrary.all {
+            XCTAssertTrue(used.contains(author.id), "\(author.id) 를 인용한 명언이 없다.")
+        }
+    }
+
     func testAuthorsHaveBiography() {
         for author in AuthorLibrary.all {
             XCTAssertFalse(author.biography.isEmpty, "\(author.id) 의 소개가 비어 있다.")

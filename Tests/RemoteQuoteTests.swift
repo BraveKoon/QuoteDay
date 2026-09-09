@@ -306,4 +306,75 @@ final class RemoteQuoteTests: XCTestCase {
         XCTAssertTrue(cached.needsTranslation)
     }
 
+    // MARK: - 인물 이름의 한국어 표기
+
+    /// 점을 지우지 않고 공백으로 바꾸는 이유, 발음 구별 기호를 벗기는 이유.
+    /// 지우기만 하면 `C.S.` 가 `cs` 가 되어 `C. S.` 와 어긋난다.
+    func testAuthorMatchingIgnoresSpacingAndAccents() {
+        let cases = [
+            ("C.S. Lewis", "lewis"),
+            ("J.R.R. Tolkien", "tolkien"),
+            ("Antoine de Saint-Exupery", "saint_exupery"),
+            ("Antoine de Saint-Exupéry", "saint_exupery")
+        ]
+        for (given, expectedID) in cases {
+            let author = RemoteQuote(text: "…", authorName: given, dayKey: dayKey).resolvedAuthor
+            XCTAssertEqual(author.id, expectedID, "\(given) 를 알아보지 못했다.")
+        }
+    }
+
+    /// 철자가 아예 다른 별칭도 같은 인물로 이어져야 한다.
+    func testAliasesResolveToTheSamePerson() {
+        for alias in ["Laozi", "Gautama Buddha", "Seneca the Younger", "Teddy Roosevelt"] {
+            XCTAssertNotNil(
+                AuthorLibrary.author(matchingName: alias),
+                "\(alias) 가 별칭 표에 있는데도 이어지지 않았다."
+            )
+        }
+    }
+
+    /// 소개는 없어도 한국어 표기는 붙는다.
+    func testUnknownAuthorStillGetsKoreanName() {
+        let quote = RemoteQuote(text: "Keep going.", authorName: "Isaac Asimov", dayKey: dayKey)
+        let author = quote.resolvedAuthor
+
+        XCTAssertEqual(author.displayName, "아이작 아시모프")
+        XCTAssertEqual(author.name, "Isaac Asimov", "영어 원표기는 남겨 둔다.")
+        XCTAssertEqual(author.occupation, "소설가 · 생화학자")
+    }
+
+    /// 표에도 없으면 영어 이름을 그대로 둔다. 짐작해서 옮기지 않는다.
+    func testNameNotInTableIsLeftInEnglish() {
+        let quote = RemoteQuote(text: "…", authorName: "Zephyr Quillfeather", dayKey: dayKey)
+        let author = quote.resolvedAuthor
+
+        XCTAssertNil(author.koreanName)
+        XCTAssertEqual(author.displayName, "Zephyr Quillfeather")
+    }
+
+    /// 인물 id 는 노트·하트가 참조한다. 표를 채웠다고 바뀌면 안 된다.
+    func testResolvedAuthorIDDoesNotDependOnTheNameTable() {
+        let inTable = RemoteQuote(text: "…", authorName: "Isaac Asimov", dayKey: dayKey)
+        let notInTable = RemoteQuote(text: "…", authorName: "Zephyr Quillfeather", dayKey: dayKey)
+
+        XCTAssertEqual(inTable.resolvedAuthor.id, "remote:isaac asimov")
+        XCTAssertEqual(notInTable.resolvedAuthor.id, "remote:zephyr quillfeather")
+    }
+
+    /// 내장 인물과 겹치는 항목은 표에 남겨 두어도 절대 쓰이지 않는다.
+    /// 죽은 데이터가 쌓이면 어느 쪽이 맞는 표기인지 알 수 없게 된다.
+    func testNameTableDoesNotShadowBundledPeople() {
+        for entry in ForeignNameLibrary.all {
+            XCTAssertNil(
+                AuthorLibrary.author(matchingName: entry.english),
+                "\(entry.english) 는 AuthorLibrary 에 이미 있다. 표에서 빼야 한다."
+            )
+        }
+    }
+
+    func testNameTableHasNoDuplicateKeys() {
+        let keys = ForeignNameLibrary.all.map { NameKey.normalize($0.english) }
+        XCTAssertEqual(Set(keys).count, keys.count, "같은 이름이 두 번 들어가면 뒤엣것이 무시된다.")
+    }
+
 }

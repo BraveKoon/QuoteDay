@@ -18,6 +18,7 @@ struct SettingsView: View {
     @State private var showsPaywall = false
     /// 방금 복사한 후원 수단. 체크 표시를 잠깐 보여 주기 위한 값이다.
     @State private var copiedSupportID: String?
+    @State private var showsReleaseNotes = false
 
     var body: some View {
         @Bindable var settings = settings
@@ -49,6 +50,9 @@ struct SettingsView: View {
         .clayBackground()
         .sheet(isPresented: $showsPaywall) {
             PaywallView()
+        }
+        .sheet(isPresented: $showsReleaseNotes) {
+            ReleaseNotesSheet()
         }
         .task {
             await notifications.refreshAuthorizationStatus()
@@ -634,9 +638,34 @@ struct SettingsView: View {
         card(title: "앱 정보", symbol: "info.circle.fill") {
             VStack(alignment: .leading, spacing: ClayTheme.Spacing.xs) {
                 infoRow("이름", "QuoteDay")
-                infoRow("버전", appVersion)
+                infoRow("버전", AppVersion.display)
+                // 이 태그는 번들 버전에서 만든다. 릴리스 워크플로도 같은 값으로
+                // 태그를 달기 때문에 깃허브와 어긋날 수가 없다.
+                infoRow("깃허브 태그", AppVersion.tag)
                 infoRow("수록 명언", "\(QuoteService.shared.quoteCount)개")
                 infoRow("수록 인물", "\(AuthorLibrary.all.count)명")
+
+                ClayDivider().padding(.vertical, 2)
+
+                Button {
+                    showsReleaseNotes = true
+                } label: {
+                    HStack {
+                        Text("변경 이력")
+                            .font(ClayFont.callout())
+                            .foregroundStyle(ClayTheme.textPrimary)
+                        Spacer()
+                        Text(releaseNotesSubtitle)
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.textSecondary)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(ClayTheme.textSecondary)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
                 Text("모든 명언과 인물 정보는 앱에 내장되어 있어 네트워크 없이도 동작합니다.")
                     .font(ClayFont.caption())
                     .foregroundStyle(ClayTheme.textSecondary)
@@ -646,10 +675,10 @@ struct SettingsView: View {
         }
     }
 
-    private var appVersion: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
-        return "\(version) (\(build))"
+    /// "v1.0부터 11개". 목록이 비어 있으면 (있을 수 없지만) 아무것도 쓰지 않는다.
+    private var releaseNotesSubtitle: String {
+        guard let oldest = ReleaseHistory.all.last else { return "" }
+        return "v\(oldest.version)부터 \(ReleaseHistory.all.count)개"
     }
 
     private func infoRow(_ label: String, _ value: String) -> some View {

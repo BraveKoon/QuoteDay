@@ -14,6 +14,7 @@ macOS 에서 실제로 컴파일하기 전에 걸러 낼 수 있는 문제를 �
 
 from __future__ import annotations
 
+import importlib.util
 import re
 import sys
 from pathlib import Path
@@ -616,6 +617,102 @@ def check_quote_data() -> None:
     print(f"  명언 {len(slugs)}편 / 인물 {len(author_ids)}명 점검")
 
 
+# ---------------------------------------------------------------- 버전
+
+
+def check_version() -> None:
+    """앱 화면의 버전과 깃허브 태그가 어긋날 수 없게 묶어 둔다.
+
+    셋이 같아야 한다.
+
+    1. project.yml 의 MARKETING_VERSION — Info.plist 로 들어가고,
+       release.yml 이 이 값으로 v<버전> 태그를 단다. 앱 정보 화면이 보여 주는
+       "깃허브 태그" 도 이 값에서 만든다.
+    2. CHANGELOG.md 의 가장 위 버전.
+    3. 생성된 ReleaseHistory.swift 의 첫 항목 — 변경 이력 화면이 읽는 값.
+
+    어긋나면 사용자가 지금 쓰는 것이 어느 버전인지 알 수 없게 되고,
+    "변경 이력" 에서 자기 버전을 못 찾는다.
+    """
+    project = (ROOT / "project.yml").read_text(encoding="utf-8")
+    match = re.search(r'MARKETING_VERSION:\s*"([^"]+)"', project)
+    if not match:
+        fail("project.yml 에서 MARKETING_VERSION 을 찾지 못했습니다.")
+        return
+    marketing = match.group(1)
+
+    # Info.plist 는 값을 박아 넣지 말고 빌드 설정을 받아야 한다.
+    # 박아 두면 버전을 올려도 앱 화면과 App Store 에는 옛 값이 나간다.
+    # (v1.1~v1.7.1 이 실제로 "1.0" 으로 나갔다.)
+    for plist in ("App/Resources/Info.plist", "Widget/Info.plist"):
+        text = (ROOT / plist).read_text(encoding="utf-8")
+        for key, setting in (
+            ("CFBundleShortVersionString", "MARKETING_VERSION"),
+            ("CFBundleVersion", "CURRENT_PROJECT_VERSION"),
+        ):
+            expected = f"<key>{key}</key>\n\t<string>$({setting})</string>"
+            if expected not in text:
+                fail(
+                    f"{plist} 의 {key} 가 $({setting}) 이 아닙니다. "
+                    "값을 박아 두면 버전을 올려도 앱에는 옛 값이 나갑니다."
+                )
+
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    versions = re.findall(r"^## \[([0-9]+(?:\.[0-9]+)*)\] - (\d{4}-\d{2}-\d{2})\s*$",
+                          changelog, re.M)
+    if not versions:
+        fail("CHANGELOG.md 에서 버전 항목을 찾지 못했습니다.")
+        return
+    if versions[0][0] != marketing:
+        fail(
+            f"CHANGELOG.md 의 최신 항목은 {versions[0][0]} 인데 "
+            f"MARKETING_VERSION 은 {marketing} 입니다. 릴리스 태그가 어긋납니다."
+        )
+
+    history_path = ROOT / "Shared/Data/ReleaseHistory.swift"
+    if not history_path.exists():
+        fail("Shared/Data/ReleaseHistory.swift 가 없습니다. "
+             "python tools/generate_release_history.py 를 실행하세요.")
+        return
+    history = history_path.read_text(encoding="utf-8")
+    listed = re.findall(r'version: "([^"]+)",\n\s+date: "([^"]+)"', history)
+    if not listed:
+        fail("ReleaseHistory.swift 에서 릴리스를 하나도 찾지 못했습니다.")
+        return
+    if listed[0][0] != marketing:
+        fail(
+            f"ReleaseHistory.swift 의 최신 항목은 {listed[0][0]} 인데 "
+            f"MARKETING_VERSION 은 {marketing} 입니다. "
+            "python tools/generate_release_history.py 를 실행하세요."
+        )
+    if [v for v, _ in listed] != [v for v, _ in versions]:
+        fail(
+            "ReleaseHistory.swift 와 CHANGELOG.md 의 버전 목록이 다릅니다. "
+            "python tools/generate_release_history.py 를 실행하세요."
+        )
+
+    # 내용까지 같은지는 생성기에게 직접 묻는다. 목록만 맞고 본문이 낡은 경우를 잡는다.
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "generate_release_history", ROOT / "tools/generate_release_history.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        if module.build() != history:
+            fail(
+                "ReleaseHistory.swift 가 CHANGELOG.md 와 어긋납니다. "
+                "python tools/generate_release_history.py 를 실행하세요."
+            )
+    except Exception as error:  # 생성기 자체가 깨진 경우
+        fail(f"릴리스 이력 생성기를 실행하지 못했습니다: {error}")
+
+    duplicates = {v for v, _ in versions if [x for x, _ in versions].count(v) > 1}
+    for version in sorted(duplicates):
+        fail(f"CHANGELOG.md 에 버전 {version} 이 두 번 있습니다.")
+
+    print(f"  버전 {marketing} (태그 v{marketing}) / 릴리스 기록 {len(listed)}개 점검")
+
+
 def main() -> int:
     print("QuoteDay 정적 검증")
     print("-" * 46)
@@ -623,6 +720,7 @@ def main() -> int:
     check_swift_sources()
     check_resources()
     check_quote_data()
+    check_version()
 
     print("-" * 46)
     for message in notes:

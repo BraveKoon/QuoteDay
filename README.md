@@ -474,6 +474,8 @@ python tools/check_project.py
   (한쪽만 고치면 실기기에서만 조용히 동기화가 안 된다)
 - 사진 추가 권한 문구가 있는지 (없으면 저장하는 순간 앱이 죽는다)
 - 앱 아이콘이 1024x1024 이고 알파 채널이 없는지 (알파가 있으면 App Store 가 거부한다)
+- **버전이 세 곳에서 같은지** — `project.yml` 의 `MARKETING_VERSION`, `CHANGELOG.md` 의
+  최신 항목, 생성된 `ReleaseHistory.swift` 의 첫 항목 (아래 "버전은 한 곳에서 나온다")
 
 macOS 에서는 여기에 더해:
 
@@ -497,15 +499,41 @@ PR 과 `main` 푸시에서 돈다. 두 단계로 나눠 두었다.
 `main` 에 머지되면 `project.yml` 의 `MARKETING_VERSION` 을 읽어, 그 태그가 아직 없으면
 태그를 달고 GitHub Release 를 만든다. 노트는 `CHANGELOG.md` 의 해당 절에서 가져온다.
 
-그래서 릴리스 절차는 **PR 안에서 두 줄을 고치는 것**이 전부다.
+그래서 릴리스 절차는 **PR 안에서 세 줄을 고치는 것**이 전부다.
 
 1. `project.yml` 의 `MARKETING_VERSION` 을 올리고 `generate_xcodeproj.py` 재실행
-2. `CHANGELOG.md` 의 `## [미출시]` 를 `## [1.3] - 2026-09-05` 처럼 버전과 날짜로 확정
-3. 머지 → 태그와 릴리스가 자동으로 생긴다
+2. `CHANGELOG.md` 의 `## [미출시]` 를 `## [1.8] - 2026-09-09` 처럼 버전과 날짜로 확정
+3. `python tools/generate_release_history.py` 로 앱 안의 변경 이력을 다시 만든다
+4. 머지 → 태그와 릴리스가 자동으로 생긴다
 
 버전을 올리지 않은 머지는 태그가 이미 있으므로 조용히 넘어간다.
 버전만 올리고 CHANGELOG 를 안 적었으면 릴리스 작업이 실패한다 — 빈 릴리스를 막기 위한 장치다.
 노트를 미리 확인하려면 `python tools/changelog_section.py 1.3` 을 돌려 보면 된다.
+
+### 버전은 한 곳에서 나온다
+앱 정보에 뜨는 버전과 깃허브 릴리스 태그가 어긋나면, 사용자는 자기가 쓰는 것이 어느
+버전인지 확인할 방법이 없다. 그래서 출처를 하나로 묶어 두었다.
+
+```
+CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (설정 > 변경 이력)
+      │
+      └─ project.yml 의 MARKETING_VERSION ──▶ Info.plist ──▶ release.yml 이 v<버전> 태그
+                                                  │
+                                                  └─▶ AppVersion.tag  (설정 > 앱 정보)
+```
+
+- 화면의 "깃허브 태그" 는 번들의 `CFBundleShortVersionString` 앞에 `v` 를 붙인 것이다.
+  릴리스 워크플로도 같은 값으로 태그를 달기 때문에, 둘이 어긋날 경로가 없다.
+- 두 `Info.plist` 의 버전 키는 값을 박지 않고 `$(MARKETING_VERSION)` /
+  `$(CURRENT_PROJECT_VERSION)` 을 받는다. v1.1~v1.7.1 이 실제로 `1.0` 이 박힌 채
+  나갔던 적이 있어서, `check_project.py` 가 이 형태를 확인한다.
+- `Shared/Data/ReleaseHistory.swift` 는 **생성 파일이다.** 직접 고치지 말고
+  `CHANGELOG.md` 를 고친 뒤 다시 생성한다.
+- `check_project.py` 가 세 값이 같은지 확인하고, 다르면 CI 를 실패시킨다.
+  테스트도 "지금 빌드가 변경 이력의 최신 항목인지" 를 따로 본다.
+- 변경 이력 화면에는 **최상위 항목만** 실린다. 들여쓴 하위 항목과 코드 블록은 빠지므로,
+  CHANGELOG 항목은 첫 단락만으로 뜻이 통하게 쓴다. 자세한 내용은 화면에서 깃허브
+  릴리스 링크로 잇는다.
 
 ---
 

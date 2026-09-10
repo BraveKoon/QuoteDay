@@ -12,8 +12,6 @@ struct ShareCardDesign: Equatable {
     var backgroundColor: Color? = nil
     /// 카드에 함께 넣는 내 감상.
     var note: String = ""
-    /// 아래쪽 QuoteDay 표시.
-    var showsWatermark: Bool = true
 
     /// QuoteDay 의 메인 색. 사진도 색도 고르지 않았을 때 카드의 기본값이다.
     static let defaultColor = Color(hex: 0x5A64D8)

@@ -44,7 +44,8 @@ struct AuthorDetailView: View {
         }
         .scrollIndicators(.hidden)
         .clayBackground()
-        .navigationTitle(author.displayName)
+        // 카드 안과 같은 순서(영문 - 한국어)를 쓰도록 제목도 영문으로 둔다.
+        .navigationTitle(author.name)
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -52,15 +53,19 @@ struct AuthorDetailView: View {
         VStack(spacing: ClayTheme.Spacing.s) {
             AuthorPortrait(author: author, size: 100)
 
-            Text(author.name)
-                .font(ClayFont.title())
-                .foregroundStyle(ClayTheme.textPrimary)
+            // 영문 이름 아래에 한국어 표기를 작게. 명언 상세의 머리말과 같은 모양이다.
+            VStack(spacing: 2) {
+                Text(author.name)
+                    .font(ClayFont.title())
+                    .foregroundStyle(ClayTheme.textPrimary)
 
-            if let korean = author.koreanName, korean != author.name {
-                Text(korean)
-                    .font(ClayFont.callout())
-                    .foregroundStyle(ClayTheme.textSecondary)
+                if let korean = author.koreanName, korean != author.name {
+                    Text(korean)
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                }
             }
+            .multilineTextAlignment(.center)
 
             if let lifespan = author.lifespanText {
                 Text(lifespan)

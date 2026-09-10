@@ -104,8 +104,4 @@ final class ShareCardTests: XCTestCase {
         XCTAssertEqual(design.palette().background.hexString, "5A64D8")
     }
 
-    /// 워터마크는 기본으로 켜져 있어야 한다. 카드가 어디로 퍼지든 출처가 남는다.
-    func testWatermarkIsOnByDefault() {
-        XCTAssertTrue(ShareCardDesign().showsWatermark)
-    }
 }

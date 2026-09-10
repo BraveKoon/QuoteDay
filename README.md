@@ -78,7 +78,7 @@ QuoteDay/
 │   └── AppIntents/      위젯 구성 인텐트
 ├── App/
 │   ├── Models/          ScheduleItem (SwiftData @Model) + ScheduleValidator
-│   │                    ShareCardDesign(카드 배경·감상·워터마크)
+│   │                    ShareCardDesign(카드 배경·감상)
 │   │                    RecurrenceRule(반복 규칙·회차 계산) + ScheduleOccurrence(회차)
 │   │                    QuoteNote(필사 노트 @Model)
 │   ├── Services/        Persistence, ScheduleStore, NotificationService, CalendarService, AppSettings
@@ -119,7 +119,7 @@ QuoteDay/
 | 명언 본문·인물 이름·초상 | ○ | ○ |
 | 일정·알림·위젯 전부 | ○ | ○ |
 | 노트 **쓰기와 읽기** | ○ | ○ |
-| 카드 이미지 공유 | ○ (워터마크) | ○ (워터마크 없음) |
+| 카드 이미지 공유 | ○ | ○ |
 | 카드 테마 | 2종 | 6종 + 세리프 |
 | 인물 프로필(생몰·시대·업적) | ✕ | ○ |
 | 비하인드 스토리 | ✕ | ○ |

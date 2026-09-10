@@ -83,7 +83,7 @@ QuoteDay/
 │   └── AppIntents/      Widget configuration intent
 ├── App/
 │   ├── Models/          ScheduleItem (SwiftData @Model) + ScheduleValidator
-│   │                    ShareCardDesign (card background, note, watermark)
+│   │                    ShareCardDesign (card background, note)
 │   │                    RecurrenceRule (rules and occurrence math) + ScheduleOccurrence
 │   │                    QuoteNote (journaling note, @Model)
 │   ├── Services/        Persistence, ScheduleStore, NotificationService, CalendarService, AppSettings
@@ -126,7 +126,7 @@ content**. With sales on, the line falls here:
 | Quote text, author name, portrait | ○ | ○ |
 | All events, notifications, widgets | ○ | ○ |
 | **Writing and reading** notes | ○ | ○ |
-| Sharing an image card | ○ (watermarked) | ○ (no watermark) |
+| Sharing an image card | ○ | ○ |
 | Card themes | 2 | 6 + serif |
 | Author profile (life, era, achievements) | ✕ | ○ |
 | Behind-the-quote story | ✕ | ○ |

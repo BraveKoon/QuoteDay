@@ -90,10 +90,22 @@ struct QuoteDetailView: View {
             AuthorPortrait(author: presentation.author, size: 116)
                 .clayAppear()
 
-            Text(presentation.author.displayName)
-                .font(ClayFont.hero())
-                .foregroundStyle(ClayTheme.textPrimary)
-                .multilineTextAlignment(.center)
+            // 영문 이름을 위에, 한국어 표기를 그 아래 작게. 두 줄은 한 덩어리라
+            // 바짝 붙인다 — 사이가 벌어지면 서로 다른 정보처럼 보인다.
+            // 이름이 하나뿐인 인물(예: "미상")이면 아랫줄은 그리지 않는다.
+            VStack(spacing: 2) {
+                Text(presentation.author.name)
+                    .font(ClayFont.hero())
+                    .foregroundStyle(ClayTheme.textPrimary)
+
+                if let korean = presentation.author.koreanName,
+                   korean != presentation.author.name {
+                    Text(korean)
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                }
+            }
+            .multilineTextAlignment(.center)
 
             CategoryChip(category: presentation.quote.category)
                 .padding(.top, 2)

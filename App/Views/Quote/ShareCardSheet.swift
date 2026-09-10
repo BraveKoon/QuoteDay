@@ -3,8 +3,11 @@ import SwiftUI
 
 /// 명언을 이미지 카드로 만들어 저장하거나 공유하는 시트.
 ///
-/// 무료 사용자도 카드를 만들고 공유할 수 있다. 잠기는 것은 프리셋 테마와
-/// 워터마크 제거뿐이다 — 공유 자체를 막으면 앱이 알려질 길도 같이 막힌다.
+/// 무료 사용자도 카드를 만들고 공유할 수 있다. 잠기는 것은 프리셋 테마뿐이다 —
+/// 공유 자체를 막으면 앱이 알려질 길도 같이 막힌다.
+///
+/// 아래쪽 QuoteDay 표시는 끄는 방법을 두지 않는다. 카드가 어디까지 퍼지든
+/// 어디서 나온 것인지는 남아 있어야 한다.
 struct ShareCardSheet: View {
     let presentation: QuotePresentation
 
@@ -21,7 +24,6 @@ struct ShareCardSheet: View {
     @State private var isSaving = false
 
     private var canUsePremiumTheme: Bool { plus.isUnlocked(.premiumShareTheme) }
-    private var canHideWatermark: Bool { plus.isUnlocked(.watermarkFree) }
 
     var body: some View {
         NavigationStack {
@@ -30,7 +32,6 @@ struct ShareCardSheet: View {
                     preview
                     backgroundCard
                     noteCard
-                    watermarkCard
                     actions
                 }
                 .padding(ClayTheme.Spacing.m)
@@ -281,38 +282,6 @@ struct ShareCardSheet: View {
         }
         .padding(ClayTheme.Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .clayCard()
-    }
-
-    // MARK: - 워터마크
-
-    private var watermarkCard: some View {
-        VStack(alignment: .leading, spacing: ClayTheme.Spacing.xs) {
-            Toggle(isOn: Binding(
-                get: { !design.showsWatermark },
-                set: { hide in
-                    if canHideWatermark {
-                        design.showsWatermark = !hide
-                    } else {
-                        showsPaywall = true
-                    }
-                }
-            )) {
-                HStack(spacing: ClayTheme.Spacing.xs) {
-                    Text("QuoteDay 표시 숨기기")
-                        .font(ClayFont.headline())
-                        .foregroundStyle(ClayTheme.textPrimary)
-                    if !canHideWatermark { PlusBadge() }
-                }
-            }
-            .tint(ClayTheme.accent)
-
-            Text("무료로도 카드를 만들고 저장할 수 있어요. 아래 QuoteDay 표시만 남습니다.")
-                .font(ClayFont.caption())
-                .foregroundStyle(ClayTheme.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(ClayTheme.Spacing.m)
         .clayCard()
     }
 

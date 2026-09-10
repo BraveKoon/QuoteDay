@@ -15,8 +15,6 @@ public enum PlusFeature: String, CaseIterable, Identifiable, Sendable {
     case noteExport
     /// 공유 카드의 프리미엄 테마·서체.
     case premiumShareTheme
-    /// 공유 카드에서 워터마크 제거.
-    case watermarkFree
 
     public var id: String { rawValue }
 
@@ -28,7 +26,6 @@ public enum PlusFeature: String, CaseIterable, Identifiable, Sendable {
         case .relatedWorks: "관련 저서와 연관 인물"
         case .noteExport: "노트 PDF 내보내기"
         case .premiumShareTheme: "프리미엄 카드 테마"
-        case .watermarkFree: "워터마크 없는 공유"
         }
     }
 
@@ -39,7 +36,6 @@ public enum PlusFeature: String, CaseIterable, Identifiable, Sendable {
         case .relatedWorks: "인물의 저서와 이어서 볼 만한 인물·명언을 추천해요."
         case .noteExport: "적어 둔 생각을 예쁜 PDF 한 권으로 내보낼 수 있어요."
         case .premiumShareTheme: "감성 배경과 프리미엄 서체로 카드를 꾸며 보세요."
-        case .watermarkFree: "공유 카드에서 QuoteDay 표시를 뺄 수 있어요."
         }
     }
 
@@ -50,7 +46,6 @@ public enum PlusFeature: String, CaseIterable, Identifiable, Sendable {
         case .relatedWorks: "books.vertical"
         case .noteExport: "square.and.arrow.up.on.square"
         case .premiumShareTheme: "paintpalette"
-        case .watermarkFree: "sparkles"
         }
     }
 }

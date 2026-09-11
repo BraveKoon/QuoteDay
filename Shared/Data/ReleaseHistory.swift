@@ -10,6 +10,26 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.8.3",
+            date: "2026-09-11",
+            summary: nil,
+            sections: [
+                ReleaseSection(
+                    title: "고침",
+                    items: [
+                        "v1.8.2 를 설치하면 앱이 실행 즉시 죽던 문제. 하트용 iCloud 엔타이틀먼트를 켜자 SwiftData 가 일정과 노트까지 CloudKit 에 올리려 들었다. ModelConfiguration 의 cloudKitDatabase 기본값이 .automatic 이라, 엔타이틀먼트가 있으면 알아서 켜진다.",
+                        "하트와 랭킹은 영향이 없다. 그쪽은 공개 데이터베이스를 CKContainer 로 직접 쓰며 (CloudKitHeartService), SwiftData 와는 아무 상관이 없다. 일정과 노트의 동기화는 별개의 결정이고 아직 하지 않는다.",
+                    ]
+                ),
+                ReleaseSection(
+                    title: "검증",
+                    items: [
+                        "check_project.py 가 모든 ModelConfiguration 이 cloudKitDatabase 를 명시하는지 본다. CI 는 이 부류를 영원히 못 잡는다 — 서명 없이 빌드하므로 엔타이틀먼트가 붙지 않고, 그러면 SwiftData 가 CloudKit 을 시도조차 하지 않는다. v1.8.2 가 정확히 그렇게 CI 를 통과하고 실기기에서 죽었다. 그래서 정적 검사로 옮겼다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.8.2",
             date: "2026-09-11",
             summary: nil,

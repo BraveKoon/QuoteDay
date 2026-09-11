@@ -617,6 +617,48 @@ def check_quote_data() -> None:
     print(f"  명언 {len(slugs)}편 / 인물 {len(author_ids)}명 점검")
 
 
+# ---------------------------------------------------------------- SwiftData
+
+
+def check_swiftdata_cloudkit() -> None:
+    """모든 ModelConfiguration 이 cloudKitDatabase 를 명시하는지.
+
+    기본값은 `.automatic` 이다. 앱에 iCloud 엔타이틀먼트가 있으면 SwiftData 가
+    일정과 노트까지 CloudKit 에 올리려 들고, 그러려면 스키마가 CloudKit 규칙을
+    지켜야 한다(모든 속성이 옵셔널이거나 기본값, 유일성 제약 금지).
+    우리 모델은 둘 다 어기므로 컨테이너 로드가 실패하고 **앱이 실행 즉시 죽는다.**
+
+    CI 는 이것을 잡을 수 없다 — 서명 없이 빌드하므로 엔타이틀먼트가 붙지 않고,
+    그러면 SwiftData 가 CloudKit 을 시도조차 하지 않는다. v1.8.2 가 정확히
+    그렇게 CI 를 통과하고 실기기에서 죽었다. 그래서 여기서 본다.
+    """
+    missing: list[str] = []
+    for path in sorted(ROOT.glob("App/**/*.swift")) + sorted(ROOT.glob("Shared/**/*.swift")):
+        source = path.read_text(encoding="utf-8")
+        for match in re.finditer(r"ModelConfiguration\(", source):
+            # 괄호 균형을 세어 호출 한 건을 통째로 떼어 낸다.
+            start = match.end()
+            depth = 1
+            index = start
+            while index < len(source) and depth:
+                if source[index] == "(":
+                    depth += 1
+                elif source[index] == ")":
+                    depth -= 1
+                index += 1
+            call = source[start:index]
+            if "cloudKitDatabase" not in call:
+                line = source[: match.start()].count("\n") + 1
+                missing.append(f"{path.relative_to(ROOT)}:{line}")
+
+    for where in missing:
+        fail(
+            f"{where}: ModelConfiguration 에 cloudKitDatabase 가 없습니다. "
+            "기본값(.automatic)이면 iCloud 엔타이틀먼트가 붙은 빌드에서 앱이 "
+            "실행 즉시 죽습니다. `.none` 을 명시하세요."
+        )
+
+
 # ---------------------------------------------------------------- 버전
 
 
@@ -720,6 +762,7 @@ def main() -> int:
     check_swift_sources()
     check_resources()
     check_quote_data()
+    check_swiftdata_cloudkit()
     check_version()
 
     print("-" * 46)

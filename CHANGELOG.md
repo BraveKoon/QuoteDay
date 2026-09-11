@@ -8,6 +8,31 @@
 릴리스할 때는 그 값을 올리고, `python tools/generate_xcodeproj.py` 로
 프로젝트 파일을 다시 만든 뒤 `v<버전>` 태그를 단다.
 
+## [1.8.3] - 2026-09-11
+
+### 고침
+- **v1.8.2 를 설치하면 앱이 실행 즉시 죽던 문제.** 하트용 iCloud 엔타이틀먼트를 켜자
+  SwiftData 가 일정과 노트까지 CloudKit 에 올리려 들었다. `ModelConfiguration` 의
+  `cloudKitDatabase` 기본값이 `.automatic` 이라, 엔타이틀먼트가 있으면 알아서 켜진다.
+
+      CloudKit integration requires that all attributes be optional,
+      or have a default value set.
+
+  그러려면 스키마가 CloudKit 규칙을 지켜야 한다 — 모든 속성이 옵셔널이거나 기본값이
+  있어야 하고, 유일성 제약(`@Attribute(.unique)`)을 쓸 수 없다. `ScheduleItem` 과
+  `QuoteNote` 는 둘 다 어긴다. 그래서 App Group → 로컬 → 메모리 세 단계 폴백이 전부
+  실패했고 마지막 `try!` 에서 죽었다. 네 개의 `ModelConfiguration` 에
+  `cloudKitDatabase: .none` 을 명시해 끈다.
+- 하트와 랭킹은 영향이 없다. 그쪽은 **공개 데이터베이스**를 `CKContainer` 로 직접 쓰며
+  (`CloudKitHeartService`), SwiftData 와는 아무 상관이 없다. 일정과 노트의 동기화는
+  별개의 결정이고 아직 하지 않는다.
+
+### 검증
+- `check_project.py` 가 모든 `ModelConfiguration` 이 `cloudKitDatabase` 를 명시하는지
+  본다. **CI 는 이 부류를 영원히 못 잡는다** — 서명 없이 빌드하므로 엔타이틀먼트가
+  붙지 않고, 그러면 SwiftData 가 CloudKit 을 시도조차 하지 않는다. v1.8.2 가 정확히
+  그렇게 CI 를 통과하고 실기기에서 죽었다. 그래서 정적 검사로 옮겼다.
+
 ## [1.8.2] - 2026-09-11
 
 ### 변경

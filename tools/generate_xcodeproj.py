@@ -27,12 +27,14 @@ WIDGET_TARGET = "QuoteDayWidgetExtension"
 TEST_TARGET = "QuoteDayTests"
 
 APP_BUNDLE_ID = "com.quoteday.QuoteDay"
-# 하트 동기화용 CloudKit 컨테이너. **기본값은 비어 있다.**
-# iCloud capability 는 유료 Apple Developer Program 이 있어야 켤 수 있고,
+# 하트·랭킹 동기화용 CloudKit 컨테이너.
+#
+# iCloud capability 는 유료 Apple Developer Program 이 있어야 켤 수 있다.
 # 개인(무료) 팀에서는 entitlements 에 선언만 있어도 프로비저닝 프로파일이
-# 만들어지지 않아 빌드가 통째로 막힌다. 그래서 켜는 쪽을 선택으로 둔다.
-# 켜는 방법은 README 의 "하트 동기화 켜기" 참고.
-CLOUDKIT_CONTAINER = ""
+# 만들어지지 않아 **빌드가 통째로 막힌다.** 그런 계정으로 이 저장소를 빌드하려면
+# 이 값을 "" 로 두고 entitlements 의 iCloud 키도 함께 지워야 한다
+# (README 의 "하트 동기화 끄기" 참고). 둘이 어긋나면 check_project.py 가 잡는다.
+CLOUDKIT_CONTAINER = "iCloud.com.quoteday.app"
 WIDGET_BUNDLE_ID = "com.quoteday.QuoteDay.Widget"
 TEST_BUNDLE_ID = "com.quoteday.QuoteDayTests"
 DEPLOYMENT_TARGET = "17.0"

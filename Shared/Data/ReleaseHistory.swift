@@ -10,6 +10,21 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.8.2",
+            date: "2026-09-11",
+            summary: nil,
+            sections: [
+                ReleaseSection(
+                    title: "변경",
+                    items: [
+                        "하트 동기화와 랭킹을 켰다. v1.5 에 만들어 두고 v1.5.1 부터 꺼 두었던 기능이다. 개인(무료) 개발자 팀은 iCloud capability 를 쓸 수 없어 entitlements 에 선언만 있어도 빌드가 막혔는데, 유료 Apple Developer Program 을 확보해 그 제약이 사라졌다. 이제 하트 아래 숫자가 모든 사용자의 합계이고, 챌린지 랭킹도 실제 순위를 낸다.",
+                        "컨테이너 식별자 iCloud.com.quoteday.app 를 세 곳에 함께 넣었다 — 생성기 상수, project.yml, entitlements. 한 곳만 고치면 실기기에서만 조용히 동기화가 안 되므로 check_project.py 가 셋을 대조한다.",
+                        "포크해서 쓰는 사람을 위해 끄는 방법을 README 에 남겼다. 무료 팀으로 이 저장소를 빌드하려면 컨테이너 값을 비우고 entitlements 의 iCloud 키도 함께 지워야 한다. 둘 중 하나만 하면 검사에서 걸린다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.8.1",
             date: "2026-09-09",
             summary: nil,

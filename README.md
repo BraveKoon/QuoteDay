@@ -32,8 +32,9 @@ Xcode 15 이상에서 열고 다음 두 가지만 설정하면 바로 실행된�
    `Shared/Services/SharedStore.swift` 의 `AppGroup.identifier` 도 같이 바꾼다.
    (App Group 이 없어도 앱은 동작한다. 위젯에 일정이 안 보일 뿐이다 — 아래 "안전한 실패" 참고)
 
-**하트 동기화(CloudKit)는 기본으로 꺼져 있다.** 그대로 두면 하트는 기기에만 저장되고
-나머지는 전부 동작한다. 켜는 방법은 아래 "하트 동기화 켜기" 참고.
+**하트 동기화(CloudKit)가 켜져 있다.** 빌드하려면 유료 Apple Developer Program 이 필요하다 —
+개인(무료) 팀은 iCloud capability 를 쓸 수 없어 **빌드가 통째로 막힌다.**
+무료 계정이라면 아래 "하트 동기화 끄기" 를 먼저 보라(두 줄이면 된다).
 
 프로젝트 파일을 다시 만들어야 한다면 둘 중 아무 방법이나 쓰면 된다.
 
@@ -211,28 +212,42 @@ QuoteDay 에 붙은 첫 번째 쓰기 가능한 백엔드이고, CloudKit **공�
 `HeartSyncing` 프로토콜로 통로를 끊어 두었다. CloudKit 은 시뮬레이터·CI 에서 검증할 수
 없어서 테스트는 가짜 구현으로 돌리고, 나중에 서버를 바꾸더라도 화면은 그대로 둔다.
 
-### 하트 동기화 켜기
-기본값은 **꺼짐**이다. 켜지 않아도 하트는 눌리고, 숫자는 내가 누른 것만 센다.
-화면에는 왜 기기에만 남는지 한 줄이 뜬다.
+### 하트 동기화 — 켜져 있다 (v1.8.2부터)
+컨테이너는 `iCloud.com.quoteday.app` 이고, 식별자가 **세 곳**에 들어간다.
 
-켜려면 **유료 Apple Developer Program($99/년)** 이 필요하다.
-개인(무료) 팀은 iCloud capability 를 쓸 수 없고, entitlements 에 선언만 있어도
+| 어디 | 무엇 |
+|---|---|
+| `tools/generate_xcodeproj.py` 의 `CLOUDKIT_CONTAINER` | 빌드 설정 `QD_CLOUDKIT_CONTAINER` 를 만든다 |
+| `App/Resources/Info.plist` | `QDCloudKitContainer = $(QD_CLOUDKIT_CONTAINER)` 로 받는다 |
+| `App/Resources/QuoteDay.entitlements` | iCloud 서비스와 컨테이너를 선언한다 |
+
+한 곳만 고치면 **실기기에서만** 조용히 동기화가 안 되거나 시작하자마자 죽는다.
+그래서 `check_project.py` 가 셋을 대조한다. (`project.yml` 은 XcodeGen 용 사본이라
+같은 값을 적어 두지만, 프로젝트 파일을 만드는 것은 생성기 쪽이다.)
+
+배포 전에 CloudKit 대시보드에서 **Development → Production 스키마 배포**를 한 번 눌러야 한다.
+레코드 타입은 첫 저장 때 자동으로 만들어지므로 미리 짤 필요는 없다.
+
+위젯에는 iCloud 를 넣지 않았다. 위젯은 하트를 읽지도 쓰지도 않아서, 넣으면
+프로비저닝할 것만 늘어난다.
+
+### 하트 동기화 끄기 — 무료 개발자 계정으로 빌드할 때
+**개인(무료) 팀은 iCloud capability 를 쓸 수 없다.** entitlements 에 선언만 있어도
 프로비저닝 프로파일이 만들어지지 않아 **빌드가 통째로 막힌다.**
 
     Personal development teams do not support the iCloud capability.
 
-그래서 켜는 쪽을 선택으로 두었다. 유료 계정이 생기면 세 가지를 하면 된다.
+이 저장소를 그런 계정으로 빌드하려면 **두 가지를 함께** 해야 한다. 하나만 하면 검사에서 걸린다.
 
-1. Xcode → 두 타겟 중 `QuoteDay` → **Signing & Capabilities → + Capability → iCloud**,
-   **CloudKit** 체크. 컨테이너 목록에서 `iCloud.com.quoteday.app` 을 만든다.
-   (이 단계가 `App/Resources/QuoteDay.entitlements` 에 iCloud 키를 대신 써 준다)
-2. 빌드 설정 **`QD_CLOUDKIT_CONTAINER`** 에 그 컨테이너 식별자를 넣는다.
-   `project.yml` 을 고치고 `python tools/generate_xcodeproj.py` 를 다시 돌리면 된다.
-3. 배포 전에 CloudKit 대시보드에서 **Development → Production 스키마 배포**를 한 번 누른다.
-   레코드 타입은 첫 저장 때 자동으로 만들어지므로 미리 짤 필요는 없다.
+1. `tools/generate_xcodeproj.py` 의 `CLOUDKIT_CONTAINER` 를 `""` 로 바꾸고
+   `python tools/generate_xcodeproj.py` 를 다시 돌린다.
+2. `App/Resources/QuoteDay.entitlements` 에서 `com.apple.developer.icloud-*` 키 두 개를 지운다.
 
-두 값이 어긋나면 `check_project.py` 가 잡는다 — 식별자를 넣었는데 entitlements 에 없거나,
-반대로 꺼 두었는데 iCloud 선언이 남아 있으면(= 위의 빌드 실패) 실패시킨다.
+끄면 하트는 그대로 눌리고 숫자는 내가 누른 것만 센다. 화면에 왜 기기에만 남는지 한 줄이 뜬다.
+랭킹은 점수만 보이고 순위가 사라진다. 나머지 기능은 영향이 없다.
+
+CI 도 같은 이유로 꺼 둔다 — 서명 없이 빌드하므로 켤 수가 없어서
+`QD_CLOUDKIT_CONTAINER=""` 로 덮어쓴다(entitlements 는 서명할 때 붙으므로 그대로 두어도 된다).
 
 ### 공유 카드
 명언을 1080×1080 이미지로 만들어 **사진 앱에 저장**하거나 공유한다.
@@ -563,8 +578,8 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (�
 - 챌린지 기록 자체는 이 기기에만 남는다. 서버로 가는 것은 총점 하나와 그 구간뿐이다.
 - 랭킹은 하트와 같은 CloudKit 스위치를 쓴다. 꺼 두면 점수는 보이고 순위만 없다.
 - 랭킹 순위는 구간으로 세므로 근사값이다. "상위 몇 %" 수준에서만 뜻이 있다.
-- 하트 동기화는 **기본으로 꺼져 있다.** 켜려면 유료 Apple Developer Program 이 필요하고,
-  개인(무료) 팀은 iCloud capability 자체를 쓸 수 없다. 꺼 두면 하트는 기기 안에만 저장된다.
+- 하트 동기화를 빌드하려면 **유료 Apple Developer Program** 이 필요하다. 개인(무료) 팀은
+  iCloud capability 자체를 쓸 수 없어 빌드가 막힌다 — 그런 계정은 위 "하트 동기화 끄기" 를 따른다.
 - 하트 합계는 동시 접속이 아주 많을 때 몇 개가 누락될 수 있다(위 "하트를 어떻게 세는가").
 - 하트를 취소해도 서버에서 즉시 반영되지만, 다른 사람 화면은 그쪽이 앱을 다시 열 때 갱신된다.
 - 공유 카드의 사진은 저장되지 않는다. 시트를 닫으면 다시 골라야 한다.

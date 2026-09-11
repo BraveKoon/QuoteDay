@@ -37,8 +37,9 @@ Open it in Xcode 15 or later. Two settings and it runs.
    (The app still runs without an App Group. The widget just won't show your events —
    see "Failing safely" below.)
 
-**Heart sync (CloudKit) ships turned off.** Leave it that way and hearts stay on the
-device while everything else works. See "Turning heart sync on" below to enable it.
+**Heart sync (CloudKit) is on.** Building therefore needs a paid Apple Developer Program
+membership — a personal (free) team cannot use the iCloud capability and **the build fails
+outright**. On a free account, see "Turning heart sync off" below first (it is two edits).
 
 To regenerate the project file, either way works:
 
@@ -233,29 +234,47 @@ The `HeartSyncing` protocol keeps this behind one seam. CloudKit can't be verifi
 simulator or in CI, so tests run against a fake, and swapping the backend later leaves the
 screens untouched.
 
-### Turning heart sync on
-It ships **off**. Without it hearts still work; the number just counts your own, and one
-line on screen explains why they stay on this device.
+### Heart sync — on since v1.8.2
+The container is `iCloud.com.quoteday.app`, and the identifier lives in **three places**.
 
-Turning it on needs a **paid Apple Developer Program membership ($99/year)**. A personal
-(free) team cannot use the iCloud capability, and merely declaring it in the entitlements
-stops a provisioning profile from being created at all — **the build fails outright**.
+| Where | What it does |
+|---|---|
+| `CLOUDKIT_CONTAINER` in `tools/generate_xcodeproj.py` | produces the `QD_CLOUDKIT_CONTAINER` build setting |
+| `App/Resources/Info.plist` | receives it as `QDCloudKitContainer = $(QD_CLOUDKIT_CONTAINER)` |
+| `App/Resources/QuoteDay.entitlements` | declares the iCloud service and the container |
+
+Change one without the others and sync fails silently **on device only**, or the app dies on
+launch. `check_project.py` cross-checks all three. (`project.yml` carries the same value for
+XcodeGen, but the generator is what writes the project file.)
+
+Before shipping, hit **Deploy Schema to Production** once in the CloudKit dashboard. Record
+types are created on first write, so there is no schema to author by hand.
+
+The widget does not get iCloud. It neither reads nor writes hearts, so adding it would only
+create one more thing to provision.
+
+### Turning heart sync off — building on a free developer account
+**A personal (free) team cannot use the iCloud capability.** Merely declaring it in the
+entitlements stops a provisioning profile from being created at all — **the build fails
+outright**.
 
     Personal development teams do not support the iCloud capability.
 
-That is why enabling it is opt-in. With a paid account, three steps:
+To build this repo on such an account, do **both** of the following. Doing only one trips
+the static check.
 
-1. Xcode → the `QuoteDay` target → **Signing & Capabilities → + Capability → iCloud**,
-   tick **CloudKit**, and create the `iCloud.com.quoteday.app` container.
-   (This step writes the iCloud keys into `App/Resources/QuoteDay.entitlements` for you.)
-2. Put that container identifier in the **`QD_CLOUDKIT_CONTAINER`** build setting — edit
-   `project.yml` and re-run `python tools/generate_xcodeproj.py`.
-3. Before shipping, hit **Deploy Schema to Production** once in the CloudKit dashboard.
-   Record types are created on first write, so there is no schema to author by hand.
+1. Set `CLOUDKIT_CONTAINER` in `tools/generate_xcodeproj.py` to `""` and re-run
+   `python tools/generate_xcodeproj.py`.
+2. Delete the two `com.apple.developer.icloud-*` keys from
+   `App/Resources/QuoteDay.entitlements`.
 
-`check_project.py` catches the two ways these drift: an identifier set but missing from the
-entitlements, or sync switched off while an iCloud declaration lingers (the build failure
-above).
+With sync off, hearts still tap and the number counts your own, with one line on screen
+explaining why they stay on this device. Rankings show your score but no standing. Nothing
+else changes.
+
+CI does the same thing for the same reason — it builds without signing, so it cannot be on,
+and it overrides `QD_CLOUDKIT_CONTAINER=""` (entitlements are applied at signing, so they
+can stay).
 
 ### The share card
 A quote becomes a 1080×1080 image you can **save to Photos** or share. It opens straight
@@ -617,9 +636,9 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (S
 - Challenge records themselves stay on this device; only one total and its bucket leave it.
 - Ranking rides the same CloudKit switch as hearts. Off, the score shows and the rank does not.
 - Rank is counted from buckets, so it is approximate — meaningful only at "top N%" resolution.
-- Heart sync **ships off.** Turning it on needs a paid Apple Developer Program membership;
-  a personal (free) team cannot use the iCloud capability at all. Left off, hearts are
-  stored only on the device.
+- Building heart sync needs a **paid Apple Developer Program membership**. A personal (free)
+  team cannot use the iCloud capability at all, so the build fails — those accounts should
+  follow "Turning heart sync off" above.
 - Heart totals can lose a few taps under heavy concurrency (see "How hearts are counted").
 - Un-hearting reaches the server immediately, but other people's screens only catch up the
   next time they open the app.

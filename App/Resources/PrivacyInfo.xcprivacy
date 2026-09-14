@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 광고 식별자를 쓰지 않고, 다른 회사의 데이터와 맞추지 않는다. -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+
+	<!--
+	    기기 밖으로 나가는 것은 하트와 챌린지 점수뿐이고, 둘 다 CloudKit 공개
+	    데이터베이스로 간다. 레코드 이름에 애플이 준 사용자 레코드 이름이 들어가므로
+	    "사용자 ID" 로 잡고, 하트와 점수는 "제품 상호작용" 으로 잡는다.
+	    둘 다 기능을 위한 것이고 추적에는 쓰지 않는다.
+
+	    일정·노트·명언 원문은 기기 안에만 있다. ZenQuotes 에는 명언을 받아 오기만 하고
+	    사용자 정보를 보내지 않는다.
+	-->
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeUserID</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeProductInteraction</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+	</array>
+
+	<!--
+	    필수 사유 API. `UserDefaults` 하나뿐이다.
+	    1C8F.1 — App Group 안에서 앱과 위젯이 같은 값을 본다(위젯 스냅샷, 설정, 하트).
+	    CA92.1 — App Group 이 잡히지 않은 기기에서는 앱 전용 저장소로 내려간다.
+	-->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>1C8F.1</string>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

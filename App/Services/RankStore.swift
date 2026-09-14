@@ -42,7 +42,12 @@ final class RankStore {
         } catch {
             AppLog.challenge.error("랭킹 전송 실패: \(error.localizedDescription, privacy: .public)")
             availability = .failed(error.localizedDescription)
-            standing = RankStanding(total: total, percentile: standing.percentile, playerCount: standing.playerCount)
+            standing = RankStanding(
+                total: total,
+                percentile: standing.percentile,
+                playerCount: standing.playerCount,
+                rank: standing.rank
+            )
         }
     }
 
@@ -56,13 +61,19 @@ final class RankStore {
         } else {
             defaults.removeObject(forKey: SharedDefaultsKey.rankPercentile)
         }
+        if let rank = standing.rank {
+            defaults.set(rank, forKey: SharedDefaultsKey.rankPosition)
+        } else {
+            defaults.removeObject(forKey: SharedDefaultsKey.rankPosition)
+        }
     }
 
     private static func load(from defaults: UserDefaults) -> RankStanding {
         RankStanding(
             total: defaults.integer(forKey: SharedDefaultsKey.rankTotal),
             percentile: defaults.object(forKey: SharedDefaultsKey.rankPercentile) as? Int,
-            playerCount: defaults.integer(forKey: SharedDefaultsKey.rankPlayerCount)
+            playerCount: defaults.integer(forKey: SharedDefaultsKey.rankPlayerCount),
+            rank: defaults.object(forKey: SharedDefaultsKey.rankPosition) as? Int
         )
     }
 }

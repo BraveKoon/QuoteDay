@@ -10,6 +10,27 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.8.6",
+            date: "2026-09-14",
+            summary: nil,
+            sections: [
+                ReleaseSection(
+                    title: "바뀜",
+                    items: [
+                        "챌린지 순위를 사람이 20명보다 적어도 보여 준다. 전에는 20명이 모이기 전까지 \"순위를 낼 만큼 기록이 모이지 않았어요\"만 떴다. 이제 감추지 않고 말을 바꾼다 — 사람이 적으면 \"3명 중 1등\"처럼 등수로, 20명부터는 \"상위 12%\"처럼 퍼센트로. 세 명 중 한 명에게 \"상위 33%\"는 뜻이 없지만 \"1등\"은 뜻이 있다.",
+                        "나 혼자여도 \"1등\"으로 보인다. 아무 기록도 없을 때만 점수만 보여 준다.",
+                    ]
+                ),
+                ReleaseSection(
+                    title: "더함",
+                    items: [
+                        "RankStanding.rank — 몇 등인지. 기기에도 함께 저장해 앱을 다시 열어도 남는다.",
+                        "적은 인원에서 등수가 1 과 전체 인원 사이를 벗어나지 않는지 확인하는 테스트.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.8.5",
             date: "2026-09-14",
             summary: nil,

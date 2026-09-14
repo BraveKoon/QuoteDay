@@ -1,3 +1,4 @@
+import CloudKit
 import XCTest
 @testable import QuoteDay
 
@@ -198,5 +199,34 @@ final class RankingTests: XCTestCase {
     func testCloudKitRankServiceIsNotCreatedWithoutAContainer() {
         XCTAssertNil(CloudKitRankService(containerIdentifier: nil))
         XCTAssertNil(CloudKitRankService(containerIdentifier: "  "))
+    }
+
+    // MARK: - 레코드 이름
+
+    /// 공개 데이터베이스에는 CloudKit 이 만든 `Users` 레코드가 이미 들어 있고
+    /// 그 이름은 사용자 레코드 이름 그 자체다. 우리가 같은 이름으로 저장하면
+    /// 새 레코드 타입이 만들어지는 대신 시스템 `Users` 레코드에 필드가 붙는다.
+    /// 한 번 그렇게 새어 나간 적이 있어서 이름 규칙을 테스트로 못 박는다.
+    func testOurRecordNamesNeverCollideWithTheUserRecord() {
+        let user = CKRecord.ID(recordName: "_abc123def456")
+
+        XCTAssertNotEqual(CloudKitRankService.scoreID(user).recordName, user.recordName)
+        XCTAssertNotEqual(
+            CloudKitHeartService.heartID(slug: "churchill-courage", user: user).recordName,
+            user.recordName
+        )
+
+        for index in RankBucket.allIndices {
+            XCTAssertNotEqual(CloudKitRankService.bucketID(index).recordName, user.recordName)
+        }
+    }
+
+    /// 점수 레코드와 구간 레코드가 서로 겹치지 않아야 한다.
+    func testScoreAndBucketNamesDoNotOverlap() {
+        let user = CKRecord.ID(recordName: "rank-bucket|0")
+        XCTAssertNotEqual(
+            CloudKitRankService.scoreID(user).recordName,
+            CloudKitRankService.bucketID(0).recordName
+        )
     }
 }

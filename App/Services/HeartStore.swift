@@ -29,6 +29,14 @@ final class HeartStore {
     /// 아직 서버에 올리지 못한 slug → 원하는 상태.
     @ObservationIgnored private var storedPending: [String: Bool]
 
+    /// 지금 서버로 올리는 중인 slug. 같은 명언에 전송이 겹치지 않게 막는다.
+    ///
+    /// 연타하면 탭마다 전송이 하나씩 떠서 서로 경쟁했다. 같은 레코드를 동시에
+    /// 읽고 쓰니 한쪽은 `record to insert already exists`, 합계 쪽은
+    /// `client oplock error updating record` 가 났고, 결국 CloudKit 이
+    /// 요청을 조이기 시작했다. 명언 하나당 전송은 하나만 돈다.
+    @ObservationIgnored private var pushing: Set<String> = []
+
     private(set) var availability: CloudSyncAvailability = .notConfigured
     private(set) var isRefreshing = false
 
@@ -100,7 +108,21 @@ final class HeartStore {
         persist()
 
         guard pushesImmediately else { return }
-        Task { await push(slug: slug, isOn: isOn) }
+        schedulePush(slug: slug)
+    }
+
+    /// 이 명언의 전송을 예약한다. 이미 돌고 있으면 아무것도 하지 않는다 —
+    /// 돌고 있는 쪽이 끝나면서 **그때의 최신 상태**를 다시 읽어 올리기 때문이다.
+    private func schedulePush(slug: String) {
+        guard !pushing.contains(slug) else { return }
+        pushing.insert(slug)
+        Task { @MainActor in
+            defer { pushing.remove(slug) }
+            // 올리는 동안 또 눌렀으면 대기열에 새 값이 남는다. 그것까지 올린다.
+            while let isOn = storedPending[slug] {
+                guard await push(slug: slug, isOn: isOn) else { break }
+            }
+        }
     }
 
     // MARK: - 동기화
@@ -144,22 +166,32 @@ final class HeartStore {
 
     /// 아직 못 올린 하트를 지금 올린다. 하나가 실패해도 나머지는 계속 시도한다.
     func synchronize() async {
-        for (slug, isOn) in storedPending {
-            await push(slug: slug, isOn: isOn)
+        for (slug, isOn) in storedPending where !pushing.contains(slug) {
+            pushing.insert(slug)
+            _ = await push(slug: slug, isOn: isOn)
+            pushing.remove(slug)
         }
     }
 
-    private func push(slug: String, isOn: Bool) async {
+    /// - Returns: 서버가 받아들였으면 true.
+    @discardableResult
+    private func push(slug: String, isOn: Bool) async -> Bool {
         do {
             let total = try await sync.setHeart(isOn, slug: slug)
             withMutation(keyPath: \.hearts) {
+                // 올리는 사이에 또 눌렀으면 대기열의 값이 이미 달라져 있다.
+                // 그때는 서버가 준 수도 한 박자 늦은 값이므로 화면을 되돌리지 않고,
+                // 새 값이 올라간 다음에 맞춘다.
+                guard storedPending[slug] == isOn else { return }
                 storedCounts[slug] = total
                 storedPending.removeValue(forKey: slug)
             }
             persist()
+            return true
         } catch {
             // 대기열에 남겨 둔다. 되돌리지 않는다.
             AppLog.hearts.debug("하트 전송 보류(\(slug, privacy: .public)): \(error.localizedDescription, privacy: .public)")
+            return false
         }
     }
 

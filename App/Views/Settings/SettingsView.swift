@@ -39,7 +39,9 @@ struct SettingsView: View {
                 appearanceCard(settings: settings)
                 calendarCard(settings: settings)
                 widgetGuideCard
-                supportCard
+                if AppFeatureFlags.isSupportEnabled {
+                    supportCard
+                }
                 aboutCard
             }
             .padding(.horizontal, ClayTheme.Spacing.m)

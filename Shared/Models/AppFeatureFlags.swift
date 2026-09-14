@@ -16,4 +16,14 @@ public enum AppFeatureFlags {
     /// 판매를 시작할 때는 이 값을 `true` 로 바꾸고,
     /// App Store Connect 에 `PlusStore.ProductID` 의 상품을 등록하면 된다.
     public static let isPlusEnabled = false
+
+    /// 후원 화면(설정 → 개발자 후원하기)을 보일지.
+    ///
+    /// 앱 안에서 외부 송금·후원으로 이어지는 통로는 앱 심사에서 가장 자주 걸리는
+    /// 항목이다. 규정이 개발자 후원에 어떻게 적용되는지는 사례가 엇갈려서,
+    /// **첫 심사에서는 내려 두고** 앱이 한번 올라간 뒤에 다시 켜는 편이 안전하다.
+    /// 반려되면 고쳐서 다시 올리는 데 며칠이 더 든다.
+    ///
+    /// 코드는 그대로 둔다. 다시 켤 때는 이 값만 `true` 로 바꾸면 된다.
+    public static let isSupportEnabled = false
 }

@@ -10,6 +10,27 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.8.8",
+            date: "2026-09-14",
+            summary: "앱스토어 제출 준비.",
+            sections: [
+                ReleaseSection(
+                    title: "더함",
+                    items: [
+                        "개인정보 매니페스트(PrivacyInfo.xcprivacy)를 앱과 위젯 양쪽에 넣었다. 2024년부터 애플이 요구하는 파일이고, 없으면 업로드 직후 ITMS-91053 경고가 오고 심사에서 막힌다. 우리가 쓰는 필수 사유 API 는 UserDefaults 하나뿐이다 (App Group 은 1C8F.1, 앱 전용 저장소 폴백은 CA92.1). 기기 밖으로 나가는 것은 하트와 챌린지 점수뿐이므로 사용자 ID 와 제품 상호작용을 \"기능을 위해 수집, 추적 안 함\" 으로 적었다.",
+                        "ITSAppUsesNonExemptEncryption = false. HTTPS 말고는 암호화를 쓰지 않아 면제 대상이다. 이 키가 없으면 빌드를 올릴 때마다 같은 질문을 반복해서 받는다.",
+                        "개인정보 처리방침 초안(docs/PRIVACY.md). App Store Connect 의 필수 항목이다.",
+                    ]
+                ),
+                ReleaseSection(
+                    title: "바뀜",
+                    items: [
+                        "후원 화면을 첫 심사 동안 내려 둔다(AppFeatureFlags.isSupportEnabled = false). 앱 안에서 외부 송금·후원으로 이어지는 통로는 심사에서 가장 자주 걸리는 항목이고, 개발자 후원에 규정이 어떻게 적용되는지는 사례가 엇갈린다. 반려되면 다시 올리는 데 며칠이 더 든다. 코드는 그대로 두었으므로 값 한 줄로 다시 켤 수 있다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.8.7",
             date: "2026-09-14",
             summary: nil,

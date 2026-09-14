@@ -66,9 +66,11 @@ SOURCE_ROOTS = {
     TEST_TARGET: ["Tests"],
 }
 
+# 번들에 들어가는 리소스. 개인정보 매니페스트는 **번들마다 따로** 있어야 한다 —
+# 앱과 위젯이 둘 다 UserDefaults(필수 사유 API)를 쓰기 때문이다.
 RESOURCE_DIRS = {
-    APP_TARGET: ["App/Resources/Assets.xcassets"],
-    WIDGET_TARGET: ["Widget/Assets.xcassets"],
+    APP_TARGET: ["App/Resources/Assets.xcassets", "App/Resources/PrivacyInfo.xcprivacy"],
+    WIDGET_TARGET: ["Widget/Assets.xcassets", "Widget/PrivacyInfo.xcprivacy"],
     TEST_TARGET: [],
 }
 
@@ -92,7 +94,7 @@ def oid(*parts: str) -> str:
 def file_type(path: str) -> str:
     if path.endswith(".swift"):
         return "sourcecode.swift"
-    if path.endswith(".plist"):
+    if path.endswith(".plist") or path.endswith(".xcprivacy"):
         return "text.plist.xml"
     if path.endswith(".entitlements"):
         return "text.plist.entitlements"

@@ -143,6 +143,10 @@
 			isa = PBXBuildFile;
 			fileRef = 0C684115641DDB67BC23BCC1 /* ChallengeMode.swift */;
 		};
+		44B09ABE3978623FDF062BBB = {
+			isa = PBXBuildFile;
+			fileRef = 95118D259A3BBC4E856C41F5 /* PrivacyInfo.xcprivacy */;
+		};
 		4730F9757A07E3B91A3A7686 = {
 			isa = PBXBuildFile;
 			fileRef = C7334277AFD709E5C8CED783 /* ClayTheme.swift */;
@@ -246,6 +250,10 @@
 		748E74B04BDC23B0F23072D6 = {
 			isa = PBXBuildFile;
 			fileRef = 9A16F72806EDB7805BB3B020 /* ChallengeHomeView.swift */;
+		};
+		759D2838B3E913A442EBE162 = {
+			isa = PBXBuildFile;
+			fileRef = 892AFE698AD36360F4110471 /* PrivacyInfo.xcprivacy */;
 		};
 		765272DF63CDC8170AAA1B84 = {
 			isa = PBXBuildFile;
@@ -983,6 +991,12 @@
 			path = AuthorDetailView.swift;
 			sourceTree = "<group>";
 		};
+		892AFE698AD36360F4110471 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = PrivacyInfo.xcprivacy;
+			sourceTree = "<group>";
+		};
 		8BB93BFC51F079D8EC86CA9D = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -1011,6 +1025,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = PaywallView.swift;
+			sourceTree = "<group>";
+		};
+		95118D259A3BBC4E856C41F5 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = PrivacyInfo.xcprivacy;
 			sourceTree = "<group>";
 		};
 		977166F8078E4665587F2B0B = {
@@ -1465,6 +1485,7 @@
 				7BD832EF2A49D54A9CDC3E86 /* Assets.xcassets */,
 				BEE634E1756D117ED62F0B83 /* Info.plist */,
 				92764A39C91CEA9700FC1043 /* LockScreenWidget.swift */,
+				892AFE698AD36360F4110471 /* PrivacyInfo.xcprivacy */,
 				7732596E0B435CDA08567803 /* QuoteDayWidget.entitlements */,
 				DC88F77730B0A8B227917080 /* QuoteWidget.swift */,
 				F5735AE0F57BF45DE8DC20D3 /* QuoteWidgetViews.swift */,
@@ -1477,6 +1498,7 @@
 			children = (
 				ED45F7F873BBF0B9A13035DC /* Assets.xcassets */,
 				F928AB2A3D4698DFC2AA3560 /* Info.plist */,
+				95118D259A3BBC4E856C41F5 /* PrivacyInfo.xcprivacy */,
 				5025F8A7E5D81A0448248F7C /* QuoteDay.entitlements */,
 			);
 			path = Resources;
@@ -1732,6 +1754,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44B09ABE3978623FDF062BBB /* PrivacyInfo.xcprivacy in Resources */,
 				EF6732812436183ECC6784B4 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1748,6 +1771,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6D56CF4744B33D26DDD34FBE /* Assets.xcassets in Resources */,
+				759D2838B3E913A442EBE162 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1936,9 +1960,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.8.7;
+				MARKETING_VERSION = 1.8.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -1954,7 +1978,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -1962,7 +1986,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.8.7;
+				MARKETING_VERSION = 1.8.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				QD_CLOUDKIT_CONTAINER = iCloud.com.quoteday.app;
@@ -1978,7 +2002,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -1986,7 +2010,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.8.7;
+				MARKETING_VERSION = 1.8.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				QD_CLOUDKIT_CONTAINER = iCloud.com.quoteday.app;
@@ -2034,7 +2058,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -2044,7 +2068,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.8.7;
+				MARKETING_VERSION = 1.8.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2083,9 +2107,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.8.7;
+				MARKETING_VERSION = 1.8.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -2101,7 +2125,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -2111,7 +2135,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.8.7;
+				MARKETING_VERSION = 1.8.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

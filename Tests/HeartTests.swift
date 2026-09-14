@@ -62,6 +62,46 @@ final class HeartTests: XCTestCase {
         }
     }
 
+    /// 전송이 **겹치는지** 재는 서버 대역.
+    ///
+    /// 실기기에서 하트를 연타하면 탭마다 전송이 하나씩 떠서 같은 레코드를 동시에
+    /// 읽고 썼다. CloudKit 쪽에서 `record to insert already exists` 와
+    /// `client oplock error updating record` 가 났고 결국 요청이 조여졌다.
+    /// 여기서는 한 번에 몇 개가 돌았는지만 센다.
+    actor OverlapCountingHeartSync: HeartSyncing {
+        private(set) var maxConcurrent = 0
+        private(set) var writes: [(slug: String, isOn: Bool)] = []
+        private var active = 0
+        private var serverMine: Set<String> = []
+        private var serverCounts: [String: Int] = [:]
+
+        func mineOnServer() -> Set<String> { serverMine }
+
+        func availability() -> CloudSyncAvailability { .ready }
+        func counts(for slugs: [String]) -> [String: Int] { serverCounts }
+        func myHearts(among slugs: [String]) -> Set<String> { serverMine.intersection(slugs) }
+
+        func setHeart(_ isOn: Bool, slug: String) async throws -> Int {
+            active += 1
+            maxConcurrent = max(maxConcurrent, active)
+            // 네트워크처럼 한 박자 쉰다. 겹치는 호출이 있으면 여기서 겹친다.
+            try? await Task.sleep(for: .milliseconds(20))
+            active -= 1
+
+            writes.append((slug, isOn))
+            let had = serverMine.contains(slug)
+            guard had != isOn else { return serverCounts[slug] ?? 0 }
+            if isOn {
+                serverMine.insert(slug)
+                serverCounts[slug] = (serverCounts[slug] ?? 0) + 1
+            } else {
+                serverMine.remove(slug)
+                serverCounts[slug] = max(0, (serverCounts[slug] ?? 0) - 1)
+            }
+            return serverCounts[slug] ?? 0
+        }
+    }
+
     private let slugs = ["a", "b", "c"]
 
     @MainActor
@@ -163,6 +203,46 @@ final class HeartTests: XCTestCase {
         XCTAssertTrue(serverMine.contains("a"))
     }
 
+    /// 연타해도 같은 명언의 전송이 **겹치면 안 된다.**
+    @MainActor
+    func testRapidTapsNeverOverlapOnTheServer() async throws {
+        let fake = OverlapCountingHeartSync()
+        let store = HeartStore(
+            sync: fake,
+            defaults: Self.cleanDefaults(),
+            slugs: slugs,
+            pushesImmediately: true
+        )
+
+        for _ in 0..<5 { store.toggle("a") }   // 홀수 번 — 마지막은 켜짐
+        XCTAssertTrue(store.isMine("a"))
+
+        try await Self.waitUntilSettled(store)
+
+        let overlap = await fake.maxConcurrent
+        XCTAssertEqual(overlap, 1, "같은 명언의 전송이 동시에 돌면 안 된다.")
+
+        let mine = await fake.mineOnServer()
+        XCTAssertTrue(mine.contains("a"), "마지막으로 누른 상태가 서버에 남아야 한다.")
+        XCTAssertTrue(store.isMine("a"))
+    }
+
+    /// 대기열이 빌 때까지 기다린다.
+    @MainActor
+    private static func waitUntilSettled(
+        _ store: HeartStore,
+        timeout: TimeInterval = 5
+    ) async throws {
+        let deadline = Date.now.addingTimeInterval(timeout)
+        while store.hasPendingChanges {
+            if Date.now > deadline {
+                XCTFail("전송이 끝나지 않았다.")
+                return
+            }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
     // MARK: - 서버 값 받아들이기
 
     @MainActor
@@ -189,6 +269,25 @@ final class HeartTests: XCTestCase {
 
         await store.refresh()
 
+        XCTAssertTrue(store.isMine("a"))
+    }
+
+    /// 조회가 실패하면 화면의 숫자를 **건드리지 않는다.**
+    ///
+    /// 실패를 "아직 아무도 안 눌렀다"로 읽어 0 을 쓰는 것이
+    /// 실기기에서 하트 수가 0 으로 튀던 원인이었다.
+    @MainActor
+    func testFailedRefreshKeepsTheLastKnownCounts() async {
+        let fake = FakeHeartSync(counts: ["a": 7], mine: ["a"])
+        let store = makeStore(sync: fake)
+
+        await store.refresh()
+        XCTAssertEqual(store.snapshot(for: "a"), HeartSnapshot(count: 7, isMine: true))
+
+        await fake.setFailure(true)
+        await store.refresh()
+
+        XCTAssertEqual(store.snapshot(for: "a").count, 7, "조회가 실패했다고 0 으로 떨어지면 안 된다.")
         XCTAssertTrue(store.isMine("a"))
     }
 

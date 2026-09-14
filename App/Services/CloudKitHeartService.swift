@@ -56,8 +56,10 @@ struct CloudKitHeartService: HeartSyncing, @unchecked Sendable {
         static let count = "count"
     }
 
+    private static let tallyPrefix = "tally|"
+
     static func tallyID(_ slug: String) -> CKRecord.ID {
-        CKRecord.ID(recordName: "tally|\(slug)")
+        CKRecord.ID(recordName: tallyPrefix + slug)
     }
 
     static func heartID(slug: String, user: CKRecord.ID) -> CKRecord.ID {
@@ -90,11 +92,18 @@ struct CloudKitHeartService: HeartSyncing, @unchecked Sendable {
         for chunk in slugs.chunked(into: Self.batchSize) {
             let ids = chunk.map(Self.tallyID)
             let fetched = try await database.records(for: ids)
-            for (_, outcome) in fetched {
-                // 아직 아무도 누르지 않은 명언은 레코드가 없다. 정상이다.
-                guard let record = try? outcome.get() else { continue }
-                guard let slug = record[Field.quoteSlug] as? String else { continue }
-                result[slug] = Self.intValue(record[Field.count])
+            for (id, outcome) in fetched {
+                // 레코드 안의 필드가 아니라 **우리가 물어본 ID** 로 키를 잡는다.
+                // 필드가 비어 있다고 해서 그 명언의 수를 통째로 버리면 안 된다.
+                guard let slug = Self.slug(fromTallyID: id) else { continue }
+                switch outcome {
+                case .success(let record):
+                    result[slug] = Self.intValue(record[Field.count])
+                case .failure(let error):
+                    // 아직 아무도 누르지 않은 명언은 레코드가 없다. 그것만 0 이다.
+                    guard Self.isMissingRecord(error) else { throw error }
+                    result[slug] = 0
+                }
             }
         }
         return result
@@ -104,13 +113,20 @@ struct CloudKitHeartService: HeartSyncing, @unchecked Sendable {
         let user = try await container.userRecordID()
         var result: Set<String> = []
         for chunk in slugs.chunked(into: Self.batchSize) {
-            let ids = chunk.map { Self.heartID(slug: $0, user: user) }
-            let fetched = try await database.records(for: ids)
-            for (_, outcome) in fetched {
-                guard let record = try? outcome.get(),
-                      let slug = record[Field.quoteSlug] as? String
-                else { continue }
-                result.insert(slug)
+            var slugByID: [CKRecord.ID: String] = [:]
+            for slug in chunk {
+                slugByID[Self.heartID(slug: slug, user: user)] = slug
+            }
+            let fetched = try await database.records(for: Array(slugByID.keys))
+            for (id, outcome) in fetched {
+                guard let slug = slugByID[id] else { continue }
+                switch outcome {
+                case .success:
+                    result.insert(slug)
+                case .failure(let error):
+                    // 안 누른 명언은 레코드가 없다. 그것만 넘어간다.
+                    guard Self.isMissingRecord(error) else { throw error }
+                }
             }
         }
         return result
@@ -125,7 +141,7 @@ struct CloudKitHeartService: HeartSyncing, @unchecked Sendable {
 
         // 이미 그 상태면 합계를 건드리지 않는다.
         // 같은 하트를 두 번 세는 일을 막는 유일한 방어선이다.
-        let existed = (try? await database.record(for: id)) != nil
+        let existed = (try await fetchRecord(id)) != nil
         guard existed != isOn else {
             return try await tally(slug: slug)
         }
@@ -133,9 +149,22 @@ struct CloudKitHeartService: HeartSyncing, @unchecked Sendable {
         if isOn {
             let record = CKRecord(recordType: RecordType.heart, recordID: id)
             record[Field.quoteSlug] = slug
-            _ = try await database.save(record)
+            do {
+                _ = try await database.save(record)
+            } catch let error as CKError where error.code == .serverRecordChanged {
+                // 그 사이에 이미 들어가 있었다("record to insert already exists").
+                // 원하는 상태는 이미 만들어졌으므로 **합계는 건드리지 않는다.**
+                // 여기서 올리면 한 사람의 하트가 두 번 세어진다.
+                return try await tally(slug: slug)
+            }
         } else {
-            _ = try await database.deleteRecord(withID: id)
+            do {
+                _ = try await database.deleteRecord(withID: id)
+            } catch {
+                guard Self.isMissingRecord(error) else { throw error }
+                // 이미 지워져 있었다. 원하는 상태이므로 합계는 그대로 둔다.
+                return try await tally(slug: slug)
+            }
         }
 
         return try await adjustTally(slug: slug, delta: isOn ? 1 : -1)
@@ -144,7 +173,7 @@ struct CloudKitHeartService: HeartSyncing, @unchecked Sendable {
     // MARK: - 합계
 
     private func tally(slug: String) async throws -> Int {
-        guard let record = try? await database.record(for: Self.tallyID(slug)) else { return 0 }
+        guard let record = try await fetchRecord(Self.tallyID(slug)) else { return 0 }
         return Self.intValue(record[Field.count])
     }
 
@@ -154,7 +183,7 @@ struct CloudKitHeartService: HeartSyncing, @unchecked Sendable {
         var lastError: Error?
 
         for _ in 0..<Self.tallyRetryLimit {
-            let existing = try? await database.record(for: id)
+            let existing = try await fetchRecord(id)
             let record = existing ?? CKRecord(recordType: RecordType.tally, recordID: id)
             // 음수로 내려가지 않게 막는다. 어긋난 삭제가 있어도 화면이 이상해지지 않는다.
             let next = max(0, Self.intValue(record[Field.count]) + delta)
@@ -174,6 +203,34 @@ struct CloudKitHeartService: HeartSyncing, @unchecked Sendable {
     }
 
     // MARK: - 도우미
+
+    /// 레코드를 가져온다. **없으면 nil, 그 밖의 실패는 던진다.**
+    ///
+    /// `try?` 로 뭉개면 "레코드가 없다" 와 "요청이 실패했다" 가 한 값이 된다.
+    /// 실기기에서 정확히 그것 때문에 화면의 하트 수가 0 으로 튀었다 —
+    /// 하트를 연타하면 CloudKit 이 요청을 조이는데
+    /// (`Error rate mitigation activated`), 그때 조회가 실패하는 것을
+    /// "아직 아무도 안 눌렀다" 로 읽고 0 을 화면에 썼다.
+    /// 같은 이유로 이미 있는 레코드를 새로 넣으려다
+    /// `record to insert already exists` 도 났다.
+    private func fetchRecord(_ id: CKRecord.ID) async throws -> CKRecord? {
+        do {
+            return try await database.record(for: id)
+        } catch {
+            guard Self.isMissingRecord(error) else { throw error }
+            return nil
+        }
+    }
+
+    /// "레코드가 없다" 인가. 그 밖의 실패와 절대 섞지 않는다.
+    private static func isMissingRecord(_ error: Error) -> Bool {
+        (error as? CKError)?.code == .unknownItem
+    }
+
+    private static func slug(fromTallyID id: CKRecord.ID) -> String? {
+        guard id.recordName.hasPrefix(tallyPrefix) else { return nil }
+        return String(id.recordName.dropFirst(tallyPrefix.count))
+    }
 
     /// 한 번에 가져오는 레코드 수. CloudKit 권장 상한 안쪽으로 둔다.
     private static let batchSize = 200

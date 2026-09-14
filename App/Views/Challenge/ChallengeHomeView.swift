@@ -32,7 +32,12 @@ struct ChallengeHomeView: View {
         .scrollIndicators(.hidden)
         .clayBackground()
         .fullScreenCover(item: $session) { session in
-            ChallengeQuizView(session: session) { self.session = nil }
+            ChallengeQuizView(
+                session: session,
+                onClose: { self.session = nil },
+                // seed 를 넘기지 않으므로 문제는 매번 새로 뽑힌다.
+                onPlayAgain: { start(session.difficulty, mode: session.mode) }
+            )
         }
         .sheet(isPresented: $showsRanking) {
             RankingSheet()
@@ -207,6 +212,7 @@ struct ChallengeHomeView: View {
             ruleLine("단계가 올라가면 보기가 늘고, 힌트가 사라지고, 오답이 정답과 비슷해집니다.")
             ruleLine("4단계부터는 제한 시간이 있습니다. 시간을 넘기면 오답으로 칩니다.")
             ruleLine("모든 단계는 처음부터 열려 있습니다. 아무 데서나 시작하세요.")
+            ruleLine("같은 단계를 다시 해도 **문제는 매번 새로 나옵니다.** 결과 화면에서 바로 이어서 할 수 있어요.")
             ruleLine("맞힌 문제마다 단계 배점이 붙고, 그 합이 랭킹 점수가 됩니다. 오른쪽 위 아이콘에서 볼 수 있어요.")
 
             if mode == .guessTheAuthor {
@@ -223,7 +229,8 @@ struct ChallengeHomeView: View {
     private func ruleLine(_ text: String) -> some View {
         HStack(alignment: .top, spacing: ClayTheme.Spacing.xs) {
             Text("·")
-            Text(text)
+            // `.init` 을 거쳐야 굵게 표시(**...**)가 살아난다. RankingSheet 와 같다.
+            Text(.init(text))
                 .fixedSize(horizontal: false, vertical: true)
         }
         .font(ClayFont.caption())
@@ -232,8 +239,8 @@ struct ChallengeHomeView: View {
 
     // MARK: - 시작
 
-    private func start(_ difficulty: ChallengeDifficulty) {
-        session = ChallengeSession(mode: mode, difficulty: difficulty)
+    private func start(_ difficulty: ChallengeDifficulty, mode: ChallengeMode? = nil) {
+        session = ChallengeSession(mode: mode ?? self.mode, difficulty: difficulty)
     }
 }
 

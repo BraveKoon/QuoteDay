@@ -71,8 +71,12 @@ public enum SharedDefaultsKey {
     public static let shareCardTheme = "share.cardTheme"
     /// 공유 카드에서 마지막으로 고른 배경색(여섯 자리 16진수).
     public static let shareCardColor = "share.cardColor"
-    /// 챌린지 단계별 기록(JSON 한 덩어리).
+    /// 이번 시즌 챌린지 단계별 기록(JSON 한 덩어리). 시즌이 바뀌면 비워진다.
     public static let challengeRecords = "challenge.records.v1"
+    /// 통산 챌린지 기록. 시즌이 바뀌어도 남는다.
+    public static let challengeRecordsLifetime = "challenge.records.lifetime.v1"
+    /// 마지막으로 본 랭킹 시즌(`RankSeason.id`).
+    public static let challengeSeason = "challenge.season"
     /// 챌린지 화면에서 마지막으로 고른 모드.
     public static let challengeMode = "challenge.lastMode"
     /// 마지막으로 받아 온 명언별 전체 하트 수.

@@ -73,16 +73,18 @@ public struct RankStanding: Hashable, Sendable {
     /// 순위를 내는 최소 인원. **나 혼자여도 보여 준다.**
     public static let minimumPlayers = 1
 
-    /// 이 수보다 적으면 퍼센트 대신 **등수**로 말한다.
+    /// 이 등수 안에 들면 퍼센트 대신 **등수**로 말한다.
     ///
-    /// 세 명 중 한 명에게 "상위 33%" 는 숫자일 뿐 뜻이 없다.
-    /// 그런데 "3명 중 1등" 은 뜻이 있다. 그래서 감추지 않고 말을 바꾼다.
-    public static let minimumPlayersForPercentile = 20
+    /// "상위 3%" 보다 "7등" 이 분명하다. 반대로 500등인 사람에게 "500등" 은
+    /// 막막하기만 하고, "상위 12%" 가 자기 자리를 더 잘 알려 준다.
+    /// 그래서 위쪽은 등수로, 그 아래는 퍼센트로 말한다.
+    public static let rankDisplayLimit = 20
 
     public static let empty = RankStanding(total: 0, percentile: nil, playerCount: 0)
 
     /// 화면에 크게 띄우는 한 줄.
     public var headline: String {
+        if let rank, rank <= Self.rankDisplayLimit { return "\(rank)등" }
         if let percentile { return "상위 \(percentile)%" }
         if let rank { return "\(rank)등" }
         return "\(total)점"
@@ -116,11 +118,9 @@ public struct RankStanding: Hashable, Sendable {
         let rank = above + Int((Double(mine) / 2).rounded(.up))
         let placed = min(playerCount, max(1, rank))
 
-        // 사람이 적으면 퍼센트가 뜻을 잃는다. 그때는 등수만 말한다.
-        guard playerCount >= minimumPlayersForPercentile else {
-            return RankStanding(total: total, percentile: nil, playerCount: playerCount, rank: placed)
-        }
-
+        // 등수와 퍼센트를 둘 다 낸다. 어느 쪽을 보여 줄지는 `headline` 이 고른다.
+        // 퍼센트가 화면에 나오는 것은 등수가 20 등 밖일 때뿐이고,
+        // 그때는 사람이 최소 20 명이므로 퍼센트에 뜻이 있다.
         let raw = Int((Double(rank) / Double(playerCount) * 100).rounded(.up))
         return RankStanding(
             total: total,

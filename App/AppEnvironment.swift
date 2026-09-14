@@ -93,6 +93,8 @@ final class AppEnvironment {
     func refresh() async {
         await scheduleStore.refreshOnLaunch()
         calendarService.refreshAuthorizationStatus()
+        // 백그라운드에 있는 동안 시즌이 바뀌었을 수 있다.
+        challengeStore.refreshSeason()
         // 다른 기기에서 구매했거나 환불된 경우를 여기서 따라잡는다.
         await plusStore.refreshEntitlements()
         // 밀린 하트를 올리고 최신 합계를 받아 온다. 실패해도 화면은 캐시로 채워진다.

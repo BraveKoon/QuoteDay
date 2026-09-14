@@ -11,8 +11,11 @@ import Foundation
 ///
 /// 그래서 점수 분포를 200점 구간으로 나눠 **구간마다 사람 수를 세어 둔다.**
 ///
-///     내 점수    ChallengePlayerScore  "score|<내 사용자 레코드 이름>"
-///     분포        ChallengeRankBucket   "rank-bucket|<구간 번호>"
+///     내 점수    ChallengePlayerScore  "score|<시즌>|<내 사용자 레코드 이름>"
+///     분포        ChallengeRankBucket   "rank-bucket|<시즌>|<구간 번호>"
+///
+/// 이름에 시즌이 들어가므로 1·4·7·10월 1일이 되면 **읽는 곳이 통째로 바뀐다.**
+/// 지우는 작업도 옮기는 작업도 없다(`RankSeason` 참고).
 ///
 /// 구간 레코드는 이름이 정해져 있으므로 ID 로 한 번에 가져올 수 있다.
 /// 하트와 같은 원칙이고, 같은 이유다.
@@ -64,12 +67,12 @@ struct CloudKitRankService: RankSyncing, @unchecked Sendable {
 
     /// 시스템 `Users` 레코드와 이름이 겹치지 않게 앞자리를 붙인다.
     /// 위 주석의 이유로, 이 접두사를 떼면 안 된다.
-    static func scoreID(_ user: CKRecord.ID) -> CKRecord.ID {
-        CKRecord.ID(recordName: "score|\(user.recordName)")
+    static func scoreID(season: RankSeason, user: CKRecord.ID) -> CKRecord.ID {
+        CKRecord.ID(recordName: "score|\(season.id)|\(user.recordName)")
     }
 
-    static func bucketID(_ index: Int) -> CKRecord.ID {
-        CKRecord.ID(recordName: "rank-bucket|\(index)")
+    static func bucketID(season: RankSeason, _ index: Int) -> CKRecord.ID {
+        CKRecord.ID(recordName: "rank-bucket|\(season.id)|\(index)")
     }
 
     // MARK: - 상태
@@ -95,7 +98,10 @@ struct CloudKitRankService: RankSyncing, @unchecked Sendable {
     }
 
     private func bucketCounts() async throws -> [Int: Int] {
-        let fetched = try await database.records(for: RankBucket.allIndices.map(Self.bucketID))
+        let season = RankSeason.current()
+        let fetched = try await database.records(
+            for: RankBucket.allIndices.map { Self.bucketID(season: season, $0) }
+        )
         var counts: [Int: Int] = [:]
         for (_, outcome) in fetched {
             // 아직 아무도 들어오지 않은 구간은 레코드가 없다. 정상이다.
@@ -110,7 +116,7 @@ struct CloudKitRankService: RankSyncing, @unchecked Sendable {
 
     func submit(total: Int) async throws -> RankStanding {
         let me = try await container.userRecordID()
-        let id = Self.scoreID(me)
+        let id = Self.scoreID(season: RankSeason.current(), user: me)
         let newBucket = RankBucket.index(for: total)
 
         let existing = try? await database.record(for: id)
@@ -137,7 +143,7 @@ struct CloudKitRankService: RankSyncing, @unchecked Sendable {
 
     /// 구간의 사람 수를 고친다. 남이 먼저 썼으면 다시 읽고 시도한다.
     private func adjustBucket(_ index: Int, delta: Int) async throws {
-        let id = Self.bucketID(index)
+        let id = Self.bucketID(season: RankSeason.current(), index)
         var lastError: Error?
 
         for _ in 0..<Self.retryLimit {

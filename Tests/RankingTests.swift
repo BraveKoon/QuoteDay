@@ -111,17 +111,38 @@ final class RankingTests: XCTestCase {
 
     // MARK: - 순위
 
-    /// 사람이 모자라면 퍼센트 대신 **등수**로 말한다.
-    /// 세 명 중 한 명에게 "상위 33%" 는 뜻이 없지만 "1등" 은 뜻이 있다.
-    func testFewPlayersShowARankInsteadOfAPercentile() {
+    /// 20등 안에 들면 **등수**로 말한다. "상위 3%" 보다 "7등" 이 분명하다.
+    func testTopRanksAreShownAsAPlace() {
         let counts = [0: 2, 5: 1]                       // 세 명, 나는 맨 위 구간
         let standing = RankStanding.from(counts: counts, total: 1_000)
 
-        XCTAssertNil(standing.percentile, "표본이 적을 때 퍼센트는 내지 않는다.")
         XCTAssertEqual(standing.playerCount, 3)
         XCTAssertEqual(standing.rank, 1)
-        XCTAssertEqual(standing.headline, "1등")
+        XCTAssertEqual(standing.headline, "1등", "20등 안이면 등수로 말한다.")
         XCTAssertEqual(standing.detail, "3명 중 1000점")
+    }
+
+    /// 20등 밖이면 퍼센트로 말한다. 500등인 사람에게 "500등" 은 막막하기만 하다.
+    func testRanksBelowTheLimitAreShownAsAPercentile() {
+        let counts = [0: 100]                           // 100명이 모두 같은 구간
+        let standing = RankStanding.from(counts: counts, total: 0)
+
+        XCTAssertEqual(standing.rank, 50)
+        XCTAssertGreaterThan(standing.rank ?? 0, RankStanding.rankDisplayLimit)
+        XCTAssertEqual(standing.headline, "상위 50%")
+    }
+
+    /// 경계에서 표시가 바뀐다.
+    func testTheLimitIsTheBoundaryBetweenPlaceAndPercentile() {
+        // 위에 19명, 내 구간에 나 혼자 → 20등.
+        let atLimit = RankStanding.from(counts: [0: 1, 5: 19], total: 0)
+        XCTAssertEqual(atLimit.rank, RankStanding.rankDisplayLimit)
+        XCTAssertEqual(atLimit.headline, "20등")
+
+        // 위에 20명 → 21등. 여기서부터 퍼센트다.
+        let pastLimit = RankStanding.from(counts: [0: 1, 5: 20], total: 0)
+        XCTAssertEqual(pastLimit.rank, RankStanding.rankDisplayLimit + 1)
+        XCTAssertTrue(pastLimit.headline.hasPrefix("상위 "))
     }
 
     /// 나 혼자여도 감추지 않는다.
@@ -152,13 +173,6 @@ final class RankingTests: XCTestCase {
         }
     }
 
-    /// 사람이 충분히 모이면 퍼센트로 바뀐다.
-    func testPercentileTakesOverOnceEnoughPlayersJoin() {
-        let counts = [0: RankStanding.minimumPlayersForPercentile]
-        let standing = RankStanding.from(counts: counts, total: 100)
-        XCTAssertNotNil(standing.percentile, "인원이 기준을 넘으면 퍼센트로 말한다.")
-        XCTAssertTrue(standing.headline.hasPrefix("상위 "))
-    }
 
     func testTopScorerIsInTheTopPercent() {
         // 100명, 나만 맨 위 구간에 있다.
@@ -170,7 +184,8 @@ final class RankingTests: XCTestCase {
         let standing = RankStanding.from(counts: counts, total: ChallengeScore.maximumTotal)
         XCTAssertEqual(standing.playerCount, 100)
         XCTAssertEqual(standing.percentile, 1, "맨 위면 상위 1% 여야 한다.")
-        XCTAssertEqual(standing.headline, "상위 1%")
+        XCTAssertEqual(standing.rank, 1)
+        XCTAssertEqual(standing.headline, "1등", "1등은 퍼센트보다 등수가 분명하다.")
     }
 
     func testBottomScorerIsNotInTheTopPercent() {
@@ -248,24 +263,114 @@ final class RankingTests: XCTestCase {
     /// 한 번 그렇게 새어 나간 적이 있어서 이름 규칙을 테스트로 못 박는다.
     func testOurRecordNamesNeverCollideWithTheUserRecord() {
         let user = CKRecord.ID(recordName: "_abc123def456")
+        let season = RankSeason(year: 2026, quarter: 1)
 
-        XCTAssertNotEqual(CloudKitRankService.scoreID(user).recordName, user.recordName)
+        XCTAssertNotEqual(
+            CloudKitRankService.scoreID(season: season, user: user).recordName,
+            user.recordName
+        )
         XCTAssertNotEqual(
             CloudKitHeartService.heartID(slug: "churchill-courage", user: user).recordName,
             user.recordName
         )
 
         for index in RankBucket.allIndices {
-            XCTAssertNotEqual(CloudKitRankService.bucketID(index).recordName, user.recordName)
+            XCTAssertNotEqual(
+                CloudKitRankService.bucketID(season: season, index).recordName,
+                user.recordName
+            )
         }
     }
 
     /// 점수 레코드와 구간 레코드가 서로 겹치지 않아야 한다.
     func testScoreAndBucketNamesDoNotOverlap() {
-        let user = CKRecord.ID(recordName: "rank-bucket|0")
+        let season = RankSeason(year: 2026, quarter: 1)
+        let user = CKRecord.ID(recordName: "rank-bucket|\(season.id)|0")
         XCTAssertNotEqual(
-            CloudKitRankService.scoreID(user).recordName,
-            CloudKitRankService.bucketID(0).recordName
+            CloudKitRankService.scoreID(season: season, user: user).recordName,
+            CloudKitRankService.bucketID(season: season, 0).recordName
         )
+    }
+
+    /// 시즌이 바뀌면 **읽고 쓰는 레코드가 통째로 바뀌어야** 리셋이 된다.
+    func testRecordNamesChangeWithTheSeason() {
+        let user = CKRecord.ID(recordName: "_abc123def456")
+        let first = RankSeason(year: 2026, quarter: 1)
+        let second = RankSeason(year: 2026, quarter: 2)
+
+        XCTAssertNotEqual(
+            CloudKitRankService.scoreID(season: first, user: user).recordName,
+            CloudKitRankService.scoreID(season: second, user: user).recordName
+        )
+        XCTAssertNotEqual(
+            CloudKitRankService.bucketID(season: first, 0).recordName,
+            CloudKitRankService.bucketID(season: second, 0).recordName
+        )
+        XCTAssertTrue(
+            CloudKitRankService.bucketID(season: first, 3).recordName.contains(first.id)
+        )
+    }
+
+    // MARK: - 시즌
+
+    /// 1·4·7·10월 1일에 시즌이 바뀐다.
+    func testSeasonBoundariesAreTheFirstOfJanAprJulOct() {
+        let calendar = Self.seoul
+        let cases: [(month: Int, day: Int, quarter: Int)] = [
+            (1, 1, 1), (3, 31, 1),
+            (4, 1, 2), (6, 30, 2),
+            (7, 1, 3), (9, 30, 3),
+            (10, 1, 4), (12, 31, 4)
+        ]
+        for item in cases {
+            let date = Self.date(2026, item.month, item.day, calendar)
+            let season = RankSeason.current(date, calendar: calendar)
+            XCTAssertEqual(season.quarter, item.quarter, "2026-\(item.month)-\(item.day)")
+            XCTAssertEqual(season.year, 2026)
+        }
+    }
+
+    func testSeasonIdentityAndStartMonth() {
+        XCTAssertEqual(RankSeason(year: 2026, quarter: 1).id, "2026Q1")
+        XCTAssertEqual(RankSeason(year: 2026, quarter: 3).title, "2026년 3분기")
+        XCTAssertEqual(RankSeason(year: 2026, quarter: 1).startMonth, 1)
+        XCTAssertEqual(RankSeason(year: 2026, quarter: 2).startMonth, 4)
+        XCTAssertEqual(RankSeason(year: 2026, quarter: 3).startMonth, 7)
+        XCTAssertEqual(RankSeason(year: 2026, quarter: 4).startMonth, 10)
+    }
+
+    /// 4분기 다음은 이듬해 1분기다.
+    func testSeasonWrapsAtTheEndOfTheYear() {
+        let last = RankSeason(year: 2026, quarter: 4)
+        XCTAssertEqual(last.next, RankSeason(year: 2027, quarter: 1))
+        XCTAssertEqual(last.endDate(calendar: Self.seoul), Self.date(2027, 1, 1, Self.seoul))
+    }
+
+    /// 한 시즌이 끝나는 순간은 다음 시즌이 시작하는 순간이다 — 틈도 겹침도 없다.
+    func testSeasonsTileTheYearWithoutGaps() {
+        for quarter in 1...4 {
+            let season = RankSeason(year: 2026, quarter: quarter)
+            XCTAssertEqual(
+                season.endDate(calendar: Self.seoul),
+                season.next.startDate(calendar: Self.seoul)
+            )
+        }
+    }
+
+    func testDaysRemainingCountsDownToTheReset() {
+        let season = RankSeason(year: 2026, quarter: 1)
+        XCTAssertEqual(season.daysRemaining(from: Self.date(2026, 3, 30, Self.seoul), calendar: Self.seoul), 2)
+        XCTAssertEqual(season.daysRemaining(from: Self.date(2026, 3, 31, Self.seoul), calendar: Self.seoul), 1)
+        XCTAssertEqual(season.daysRemaining(from: Self.date(2026, 4, 1, Self.seoul), calendar: Self.seoul), 0)
+    }
+
+    private static let seoul: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .gmt
+        return calendar
+    }()
+
+    private static func date(_ year: Int, _ month: Int, _ day: Int, _ calendar: Calendar) -> Date {
+        calendar.date(from: DateComponents(year: year, month: month, day: day)) ?? .distantPast
     }
 }

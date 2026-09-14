@@ -56,37 +56,42 @@ public enum RankBucket {
 public struct RankStanding: Hashable, Sendable {
     /// 내 총점.
     public let total: Int
-    /// 상위 몇 퍼센트인지. 표본이 모자라면 nil.
+    /// 상위 몇 퍼센트인지. 표본이 모자라면 nil — 그때는 `rank` 를 쓴다.
     public let percentile: Int?
     /// 집계에 들어간 사람 수.
     public let playerCount: Int
+    /// 몇 등인지. 집계에 아무도 없으면 nil.
+    public let rank: Int?
 
-    public init(total: Int, percentile: Int?, playerCount: Int) {
+    public init(total: Int, percentile: Int?, playerCount: Int, rank: Int? = nil) {
         self.total = total
         self.percentile = percentile
         self.playerCount = playerCount
+        self.rank = rank
     }
 
-    /// 이 수보다 사람이 적으면 순위를 내지 않는다.
+    /// 순위를 내는 최소 인원. **나 혼자여도 보여 준다.**
+    public static let minimumPlayers = 1
+
+    /// 이 수보다 적으면 퍼센트 대신 **등수**로 말한다.
     ///
-    /// 세 명 중 한 명이 "상위 33%"인 것은 숫자일 뿐 뜻이 없다.
-    /// 모자랄 때는 순위 대신 그 사실을 말한다.
-    public static let minimumPlayers = 20
+    /// 세 명 중 한 명에게 "상위 33%" 는 숫자일 뿐 뜻이 없다.
+    /// 그런데 "3명 중 1등" 은 뜻이 있다. 그래서 감추지 않고 말을 바꾼다.
+    public static let minimumPlayersForPercentile = 20
 
     public static let empty = RankStanding(total: 0, percentile: nil, playerCount: 0)
 
     /// 화면에 크게 띄우는 한 줄.
     public var headline: String {
-        guard let percentile else { return "\(total)점" }
-        return "상위 \(percentile)%"
+        if let percentile { return "상위 \(percentile)%" }
+        if let rank { return "\(rank)등" }
+        return "\(total)점"
     }
 
     /// 그 아래 설명.
     public var detail: String {
-        guard percentile != nil else {
-            return playerCount < Self.minimumPlayers
-                ? "순위를 낼 만큼 기록이 모이지 않았어요. \(Self.minimumPlayers)명부터 보여 드려요."
-                : "아직 순위를 계산하지 못했어요."
+        guard percentile != nil || rank != nil else {
+            return "아직 순위를 계산하지 못했어요."
         }
         return "\(playerCount)명 중 \(total)점"
     }
@@ -109,12 +114,19 @@ public struct RankStanding: Hashable, Sendable {
         let above = counts.filter { $0.key > myBucket }.values.reduce(0, +)
         let mine = max(1, counts[myBucket] ?? 1)
         let rank = above + Int((Double(mine) / 2).rounded(.up))
+        let placed = min(playerCount, max(1, rank))
+
+        // 사람이 적으면 퍼센트가 뜻을 잃는다. 그때는 등수만 말한다.
+        guard playerCount >= minimumPlayersForPercentile else {
+            return RankStanding(total: total, percentile: nil, playerCount: playerCount, rank: placed)
+        }
 
         let raw = Int((Double(rank) / Double(playerCount) * 100).rounded(.up))
         return RankStanding(
             total: total,
             percentile: min(100, max(1, raw)),
-            playerCount: playerCount
+            playerCount: playerCount,
+            rank: placed
         )
     }
 }

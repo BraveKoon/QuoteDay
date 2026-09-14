@@ -85,6 +85,7 @@ public enum SharedDefaultsKey {
     public static let rankTotal = "rank.total"
     public static let rankPercentile = "rank.percentile"
     public static let rankPlayerCount = "rank.playerCount"
+    public static let rankPosition = "rank.position"
 }
 
 /// 위젯 스냅샷의 읽기/쓰기 담당.

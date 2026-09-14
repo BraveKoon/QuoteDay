@@ -111,14 +111,53 @@ final class RankingTests: XCTestCase {
 
     // MARK: - 순위
 
-    /// 사람이 모자라면 순위를 내지 않는다. 세 명 중 한 명이 "상위 33%"인 것은 뜻이 없다.
-    func testNoPercentileUntilEnoughPlayers() {
-        let counts = [0: 2, 5: 1]
+    /// 사람이 모자라면 퍼센트 대신 **등수**로 말한다.
+    /// 세 명 중 한 명에게 "상위 33%" 는 뜻이 없지만 "1등" 은 뜻이 있다.
+    func testFewPlayersShowARankInsteadOfAPercentile() {
+        let counts = [0: 2, 5: 1]                       // 세 명, 나는 맨 위 구간
         let standing = RankStanding.from(counts: counts, total: 1_000)
-        XCTAssertNil(standing.percentile)
+
+        XCTAssertNil(standing.percentile, "표본이 적을 때 퍼센트는 내지 않는다.")
         XCTAssertEqual(standing.playerCount, 3)
-        XCTAssertTrue(standing.detail.contains("\(RankStanding.minimumPlayers)"))
-        XCTAssertEqual(standing.headline, "1000점")
+        XCTAssertEqual(standing.rank, 1)
+        XCTAssertEqual(standing.headline, "1등")
+        XCTAssertEqual(standing.detail, "3명 중 1000점")
+    }
+
+    /// 나 혼자여도 감추지 않는다.
+    func testASinglePlayerStillSeesARank() {
+        let standing = RankStanding.from(counts: [0: 1], total: 120)
+        XCTAssertEqual(standing.playerCount, 1)
+        XCTAssertEqual(standing.rank, 1)
+        XCTAssertEqual(standing.headline, "1등")
+    }
+
+    /// 아무 기록도 없으면 점수만 보여 준다.
+    func testNoPlayersFallsBackToTheScore() {
+        let standing = RankStanding.from(counts: [:], total: 640)
+        XCTAssertEqual(standing.playerCount, 0)
+        XCTAssertNil(standing.rank)
+        XCTAssertNil(standing.percentile)
+        XCTAssertEqual(standing.headline, "640점")
+    }
+
+    /// 등수는 1 과 전체 인원 사이를 벗어나지 않는다.
+    func testRankStaysWithinThePlayerCount() {
+        let counts = [0: 3, 2: 4, 4: 2]                 // 아홉 명
+        for total in stride(from: 0, through: ChallengeScore.maximumTotal, by: 100) {
+            let standing = RankStanding.from(counts: counts, total: total)
+            guard let rank = standing.rank else { return XCTFail("등수가 없다.") }
+            XCTAssertGreaterThanOrEqual(rank, 1)
+            XCTAssertLessThanOrEqual(rank, standing.playerCount)
+        }
+    }
+
+    /// 사람이 충분히 모이면 퍼센트로 바뀐다.
+    func testPercentileTakesOverOnceEnoughPlayersJoin() {
+        let counts = [0: RankStanding.minimumPlayersForPercentile]
+        let standing = RankStanding.from(counts: counts, total: 100)
+        XCTAssertNotNil(standing.percentile, "인원이 기준을 넘으면 퍼센트로 말한다.")
+        XCTAssertTrue(standing.headline.hasPrefix("상위 "))
     }
 
     func testTopScorerIsInTheTopPercent() {
@@ -157,7 +196,7 @@ final class RankingTests: XCTestCase {
     }
 
     func testPercentileStaysInRange() {
-        let counts = [0: 50, 3: 50]
+        let counts = [0: 50, 3: 50]   // 100명 — 퍼센트 구간
         for total in stride(from: 0, through: ChallengeScore.maximumTotal, by: 100) {
             guard let percentile = RankStanding.from(counts: counts, total: total).percentile else {
                 continue

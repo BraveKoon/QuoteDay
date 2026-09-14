@@ -11,11 +11,25 @@ import Foundation
 ///
 /// 그래서 점수 분포를 200점 구간으로 나눠 **구간마다 사람 수를 세어 둔다.**
 ///
-///     내 점수    ChallengePlayerScore  "<내 사용자 레코드 이름>"
+///     내 점수    ChallengePlayerScore  "score|<내 사용자 레코드 이름>"
 ///     분포        ChallengeRankBucket   "rank-bucket|<구간 번호>"
 ///
 /// 구간 레코드는 이름이 정해져 있으므로 ID 로 한 번에 가져올 수 있다.
 /// 하트와 같은 원칙이고, 같은 이유다.
+///
+/// ## 점수 레코드 이름에 `score|` 를 붙이는 이유
+///
+/// 사용자 레코드 이름을 **그대로** 레코드 이름으로 쓰면 안 된다.
+/// 그 이름은 CloudKit 이 이미 쓰고 있는 시스템 `Users` 레코드의 이름이다.
+/// 같은 이름으로 저장하면 `ChallengePlayerScore` 가 만들어지는 대신
+/// `total` 과 `bucket` 이 **`Users` 레코드에 붙는다.**
+/// 그러면 두 가지가 한꺼번에 망가진다.
+///
+/// 1. 대시보드에 `ChallengePlayerScore` 가 영영 나타나지 않는다.
+/// 2. `record(for:)` 가 `Users` 레코드를 돌려주므로 `existing` 이 절대 nil 이 아니고,
+///    첫 제출인데도 "이전 구간이 있다"고 잘못 읽어 분포를 고치지 않는다.
+///
+/// 실제로 그렇게 새어 나갔다. 앞자리를 붙여 이름 공간을 갈라 둔다.
 ///
 /// ## 정확도
 ///
@@ -48,7 +62,13 @@ struct CloudKitRankService: RankSyncing, @unchecked Sendable {
         static let count = "count"
     }
 
-    private static func bucketID(_ index: Int) -> CKRecord.ID {
+    /// 시스템 `Users` 레코드와 이름이 겹치지 않게 앞자리를 붙인다.
+    /// 위 주석의 이유로, 이 접두사를 떼면 안 된다.
+    static func scoreID(_ user: CKRecord.ID) -> CKRecord.ID {
+        CKRecord.ID(recordName: "score|\(user.recordName)")
+    }
+
+    static func bucketID(_ index: Int) -> CKRecord.ID {
         CKRecord.ID(recordName: "rank-bucket|\(index)")
     }
 
@@ -90,11 +110,13 @@ struct CloudKitRankService: RankSyncing, @unchecked Sendable {
 
     func submit(total: Int) async throws -> RankStanding {
         let me = try await container.userRecordID()
-        let id = CKRecord.ID(recordName: me.recordName)
+        let id = Self.scoreID(me)
         let newBucket = RankBucket.index(for: total)
 
         let existing = try? await database.record(for: id)
-        let oldBucket = existing.map { Self.intValue($0[Field.bucket]) }
+        // 값이 없는 것과 0 구간은 뜻이 다르다. `intValue` 로 뭉개면
+        // 첫 제출이 0 구간일 때 분포를 한 번도 올리지 않는다.
+        let oldBucket = existing.flatMap { Self.optionalIntValue($0[Field.bucket]) }
 
         // 구간이 바뀔 때만 분포를 고친다. 같은 구간 안에서 점수만 오르면
         // 사람 수는 그대로이므로 건드릴 것이 없다.
@@ -140,6 +162,15 @@ struct CloudKitRankService: RankSyncing, @unchecked Sendable {
     // MARK: - 도우미
 
     private static let retryLimit = 4
+
+    /// 값이 아예 없으면 nil. 있으면 정수로.
+    private static func optionalIntValue(_ value: Any?) -> Int? {
+        guard let value else { return nil }
+        if let number = value as? Int64 { return Int(number) }
+        if let number = value as? Int { return number }
+        if let number = value as? NSNumber { return number.intValue }
+        return nil
+    }
 
     private static func intValue(_ value: Any?) -> Int {
         if let number = value as? Int64 { return Int(number) }

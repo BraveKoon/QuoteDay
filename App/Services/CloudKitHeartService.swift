@@ -56,11 +56,11 @@ struct CloudKitHeartService: HeartSyncing, @unchecked Sendable {
         static let count = "count"
     }
 
-    private static func tallyID(_ slug: String) -> CKRecord.ID {
+    static func tallyID(_ slug: String) -> CKRecord.ID {
         CKRecord.ID(recordName: "tally|\(slug)")
     }
 
-    private static func heartID(slug: String, user: CKRecord.ID) -> CKRecord.ID {
+    static func heartID(slug: String, user: CKRecord.ID) -> CKRecord.ID {
         CKRecord.ID(recordName: "\(slug)|\(user.recordName)")
     }
 

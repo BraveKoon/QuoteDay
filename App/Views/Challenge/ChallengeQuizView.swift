@@ -8,6 +8,8 @@ struct ChallengeQuizView: View {
     let session: ChallengeSession
     /// 닫기. 부모가 시트를 내린다.
     let onClose: () -> Void
+    /// 같은 모드·단계로 새 판을 시작한다. 부모가 새 세션을 만들어 갈아 끼운다.
+    let onPlayAgain: () -> Void
 
     @State private var isNewRecord = false
     @State private var hasRecorded = false
@@ -30,7 +32,8 @@ struct ChallengeQuizView: View {
                         bestStreak: session.bestStreak,
                         isNewRecord: isNewRecord
                     ),
-                    onClose: onClose
+                    onClose: onClose,
+                    onPlayAgain: onPlayAgain
                 )
             } else if let question = session.currentQuestion {
                 quiz(question)
@@ -325,7 +328,8 @@ struct ChallengeQuizView: View {
 #Preview {
     ChallengeQuizView(
         session: ChallengeSession(mode: .fillInTheBlank, difficulty: .normal, seed: "preview"),
-        onClose: {}
+        onClose: {},
+        onPlayAgain: {}
     )
     .injecting(AppEnvironment.preview())
 }

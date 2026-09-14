@@ -6,6 +6,8 @@ struct ChallengeResultView: View {
 
     let result: ChallengeResult
     let onClose: () -> Void
+    /// 같은 단계로 한 판 더. 문제는 새로 뽑힌다.
+    let onPlayAgain: () -> Void
 
     var body: some View {
         ScrollView {
@@ -19,11 +21,17 @@ struct ChallengeResultView: View {
         }
         .scrollIndicators(.hidden)
         .safeAreaInset(edge: .bottom) {
-            Button("닫기") { onClose() }
-                .clayButton(.primary, fullWidth: true)
-                .padding(.horizontal, ClayTheme.Spacing.m)
-                .padding(.bottom, ClayTheme.Spacing.m)
-                .background(ClayTheme.background)
+            // 한 판 더 하려고 화면을 닫고 목록으로 돌아갈 이유가 없다.
+            // 여기서 바로 이어서 하게 한다 — 문제는 매번 새로 뽑힌다.
+            VStack(spacing: ClayTheme.Spacing.xs) {
+                Button("한 판 더") { onPlayAgain() }
+                    .clayButton(.primary, fullWidth: true)
+                Button("닫기") { onClose() }
+                    .clayButton(.secondary, fullWidth: true)
+            }
+            .padding(.horizontal, ClayTheme.Spacing.m)
+            .padding(.bottom, ClayTheme.Spacing.m)
+            .background(ClayTheme.background)
         }
     }
 
@@ -98,12 +106,13 @@ struct ChallengeResultView: View {
         .accessibilityLabel("\(title) \(value)")
     }
 
-    /// 이 단계의 누적 기록.
+    /// 이 단계의 누적 기록. 랭킹은 시즌 기록으로 매기므로 둘을 나눠 보여 준다.
     private var recordCard: some View {
         let record = store.record(mode: result.mode, difficulty: result.difficulty)
+        let lifetime = store.lifetimeRecord(mode: result.mode, difficulty: result.difficulty)
 
         return VStack(alignment: .leading, spacing: ClayTheme.Spacing.xs) {
-            Text("이 단계 누적")
+            Text("이 단계 · \(store.season.title)")
                 .font(ClayFont.headline())
                 .foregroundStyle(ClayTheme.textPrimary)
 
@@ -112,9 +121,16 @@ struct ChallengeResultView: View {
             recordLine("푼 판", "\(record.playCount)판")
             recordLine("누적 정답률", percentText(record.accuracy))
             recordLine(
-                "이 단계 최고 점수",
+                "랭킹에 올라가는 점수",
                 "\(ChallengeScore.points(correctCount: record.bestScore, difficulty: result.difficulty))점"
             )
+
+            if lifetime.bestScore > record.bestScore || lifetime.playCount > record.playCount {
+                ClayDivider()
+                    .padding(.vertical, 2)
+                recordLine("통산 최고 점수", "\(lifetime.bestScore) / \(result.questionCount)")
+                recordLine("통산 푼 판", "\(lifetime.playCount)판")
+            }
         }
         .padding(ClayTheme.Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -150,7 +166,8 @@ struct ChallengeResultView: View {
             bestStreak: 5,
             isNewRecord: true
         ),
-        onClose: {}
+        onClose: {},
+        onPlayAgain: {}
     )
     .clayBackground()
     .injecting(AppEnvironment.preview())

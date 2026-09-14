@@ -335,6 +335,10 @@
 			isa = PBXBuildFile;
 			fileRef = 5FD4E6400472C4F80BB49F9A /* ChallengeScore.swift */;
 		};
+		9D82D5E48D4F386E653D8A27 = {
+			isa = PBXBuildFile;
+			fileRef = 61557691D31F44AB4F44EABA /* RankSeason.swift */;
+		};
 		9D8B8228667C4747765B1F70 = {
 			isa = PBXBuildFile;
 			fileRef = 5B61FD0D6DA5693CC14AEC4E /* CloudKitConfiguration.swift */;
@@ -455,6 +459,10 @@
 		DAA768F6F31A5C0EBA6294CB = {
 			isa = PBXBuildFile;
 			fileRef = 580B96EDF2D379725ADB41D0 /* QuoteCategoryOption.swift */;
+		};
+		DAFA376C81E1AE84155E83EA = {
+			isa = PBXBuildFile;
+			fileRef = 61557691D31F44AB4F44EABA /* RankSeason.swift */;
 		};
 		DCA55805BBE9BC0E0FD3F6E8 = {
 			isa = PBXBuildFile;
@@ -889,6 +897,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = BehindStory.swift;
+			sourceTree = "<group>";
+		};
+		61557691D31F44AB4F44EABA = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = RankSeason.swift;
 			sourceTree = "<group>";
 		};
 		648ADB8AEFB7172F5548AA76 = {
@@ -1581,6 +1595,7 @@
 				BE73433C5222A7AF14D1B59F /* PlusFeature.swift */,
 				EE249BE91E4B13A46667234E /* Quote.swift */,
 				0293EB7A04D7197ABA9121F6 /* QuoteHeart.swift */,
+				61557691D31F44AB4F44EABA /* RankSeason.swift */,
 				FE1646147C41479988B75770 /* Release.swift */,
 				5F128CFBB5886FDBC1FF852B /* ShareCardTheme.swift */,
 				A44C4AFF27C954A27365D8DC /* StableIdentifier.swift */,
@@ -1816,6 +1831,7 @@
 				D616B44D16A20DA67A7DFB2A /* AppRouter.swift in Sources */,
 				D8CB689BAD87EF2D5E9469AE /* QuoteService.swift in Sources */,
 				DAA768F6F31A5C0EBA6294CB /* QuoteCategoryOption.swift in Sources */,
+				DAFA376C81E1AE84155E83EA /* RankSeason.swift in Sources */,
 				DCA55805BBE9BC0E0FD3F6E8 /* ScheduleItem.swift in Sources */,
 				DEF97525C3C26443C233BB4F /* ReleaseNotesSheet.swift in Sources */,
 				E3B113FDBD4A4675A03D856D /* ShareCardDesign.swift in Sources */,
@@ -1879,6 +1895,7 @@
 				8403B7B2D91BB070B87ED12B /* ClayStyle.swift in Sources */,
 				867B398C21FA03611D5E66A7 /* AppFeatureFlags.swift in Sources */,
 				90F37D2D13732953542CCCDB /* BlankMaker.swift in Sources */,
+				9D82D5E48D4F386E653D8A27 /* RankSeason.swift in Sources */,
 				9D8B8228667C4747765B1F70 /* CloudKitConfiguration.swift in Sources */,
 				A793BC4FEE3EFDCFECF03852 /* ForeignNameLibrary.swift in Sources */,
 				A79992568A0CD208629EE516 /* SupportOption.swift in Sources */,
@@ -1919,9 +1936,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.8.6;
+				MARKETING_VERSION = 1.8.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -1937,7 +1954,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -1945,7 +1962,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.8.6;
+				MARKETING_VERSION = 1.8.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				QD_CLOUDKIT_CONTAINER = iCloud.com.quoteday.app;
@@ -1961,7 +1978,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -1969,7 +1986,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.8.6;
+				MARKETING_VERSION = 1.8.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				QD_CLOUDKIT_CONTAINER = iCloud.com.quoteday.app;
@@ -2017,7 +2034,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -2027,7 +2044,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.8.6;
+				MARKETING_VERSION = 1.8.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2066,9 +2083,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.8.6;
+				MARKETING_VERSION = 1.8.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -2084,7 +2101,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -2094,7 +2111,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.8.6;
+				MARKETING_VERSION = 1.8.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

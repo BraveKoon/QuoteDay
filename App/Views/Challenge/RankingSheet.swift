@@ -37,6 +37,13 @@ struct RankingSheet: View {
 
     private var standingCard: some View {
         VStack(spacing: ClayTheme.Spacing.xs) {
+            Text(store.season.title)
+                .font(ClayFont.caption())
+                .foregroundStyle(ClayTheme.textOnTint)
+                .padding(.horizontal, ClayTheme.Spacing.s)
+                .padding(.vertical, 4)
+                .background { Capsule().fill(ClayTheme.accent) }
+
             Image(systemName: "chart.bar.fill")
                 .font(.system(size: 26, weight: .semibold))
                 .foregroundStyle(ClayTheme.accent)
@@ -57,6 +64,13 @@ struct RankingSheet: View {
                 .foregroundStyle(ClayTheme.textSecondary)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
+
+            Text(store.season.resetNotice())
+                .font(ClayFont.caption())
+                .foregroundStyle(ClayTheme.textSecondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 2)
 
             if let message = rank.availability.message(subject: "랭킹") {
                 Label(message, systemImage: "icloud.slash")
@@ -79,7 +93,7 @@ struct RankingSheet: View {
     private var breakdownCard: some View {
         VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
             HStack {
-                Text("점수 내역")
+                Text("이번 시즌 점수 내역")
                     .font(ClayFont.headline())
                     .foregroundStyle(ClayTheme.textPrimary)
                 Spacer()
@@ -153,7 +167,8 @@ struct RankingSheet: View {
             line("맞힌 문제 하나에 단계 배점만큼 점수가 붙어요. 1단계 10점부터 5단계 80점까지입니다.")
             line("**같은 판을 여러 번 돌아도 오르지 않아요.** 모드·단계마다 최고 기록만 셉니다.")
             line("안 해 본 단계를 해 보면 오릅니다. 5단계를 절반만 맞혀도 1단계를 다 맞힌 것보다 높아요.")
-            line("사람이 \(RankStanding.minimumPlayersForPercentile)명보다 적으면 등수로, 그보다 많아지면 상위 몇 %로 보여 드려요. 몇 명 안 될 때 퍼센트는 뜻이 없거든요.")
+            line("\(RankStanding.rankDisplayLimit)등 안에 들면 등수로, 그 아래는 상위 몇 %로 보여 드려요.")
+            line("**랭킹은 석 달마다 리셋돼요.** 1월·4월·7월·10월 1일에 모두가 0에서 다시 시작합니다. 통산 기록은 그대로 남아요.")
             line("다른 사람의 이름이나 점수는 보여 주지 않아요. 내가 어디쯤인지만 알려 드립니다.")
         }
         .padding(ClayTheme.Spacing.m)

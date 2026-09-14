@@ -368,6 +368,95 @@ final class ChallengeTests: XCTestCase {
         XCTAssertEqual(reopened.record(mode: .guessTheAuthor, difficulty: .extreme).bestScore, 6)
     }
 
+    // MARK: - 시즌 리셋
+
+    /// 시즌이 바뀌면 **이번 시즌 기록만** 비워지고 통산 기록은 남아야 한다.
+    /// 랭킹만 다시 시작하는 것이지, 사람이 쌓아 온 것을 지우는 것이 아니다.
+    @MainActor
+    func testSeasonRolloverClearsSeasonRecordsButKeepsLifetime() {
+        let store = makeCleanStore()
+        store.finish(
+            mode: .fillInTheBlank, difficulty: .beginner,
+            correctCount: 7, questionCount: 10, bestStreak: 4
+        )
+
+        XCTAssertEqual(store.record(mode: .fillInTheBlank, difficulty: .beginner).bestScore, 7)
+        XCTAssertGreaterThan(store.rankingTotal, 0)
+
+        store.refreshSeason(RankSeason(year: 3000, quarter: 1))
+
+        XCTAssertEqual(
+            store.record(mode: .fillInTheBlank, difficulty: .beginner).bestScore, 0,
+            "새 시즌은 0 에서 시작한다."
+        )
+        XCTAssertEqual(store.rankingTotal, 0, "랭킹 점수도 함께 0 이 된다.")
+        XCTAssertEqual(
+            store.lifetimeRecord(mode: .fillInTheBlank, difficulty: .beginner).bestScore, 7,
+            "통산 기록은 남는다."
+        )
+        XCTAssertEqual(store.lifetimeRecord(mode: .fillInTheBlank, difficulty: .beginner).playCount, 1)
+    }
+
+    /// 같은 시즌 안에서 여러 번 불러도 기록이 사라지면 안 된다.
+    @MainActor
+    func testRefreshingWithinTheSameSeasonKeepsRecords() {
+        let store = makeCleanStore()
+        store.finish(
+            mode: .fillInTheBlank, difficulty: .normal,
+            correctCount: 5, questionCount: 10, bestStreak: 2
+        )
+
+        store.refreshSeason()
+        store.refreshSeason()
+
+        XCTAssertEqual(store.record(mode: .fillInTheBlank, difficulty: .normal).bestScore, 5)
+    }
+
+    /// 시즌 개념이 없던 버전에서 올라온 기록을 지우면 안 된다.
+    @MainActor
+    func testRecordsFromBeforeSeasonsAreAdoptedNotWiped() {
+        let suite = "test.challenge.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+
+        ChallengeStore(defaults: defaults).finish(
+            mode: .guessTheAuthor, difficulty: .hard,
+            correctCount: 8, questionCount: 10, bestStreak: 5
+        )
+
+        // 시즌 키가 없던 옛 버전 상태로 되돌린다.
+        defaults.removeObject(forKey: SharedDefaultsKey.challengeSeason)
+        defaults.removeObject(forKey: SharedDefaultsKey.challengeRecordsLifetime)
+
+        let reopened = ChallengeStore(defaults: defaults)
+        XCTAssertEqual(
+            reopened.record(mode: .guessTheAuthor, difficulty: .hard).bestScore, 8,
+            "올리자마자 기록이 사라지면 안 된다."
+        )
+        XCTAssertEqual(
+            reopened.lifetimeRecord(mode: .guessTheAuthor, difficulty: .hard).bestScore, 8,
+            "통산 기록은 여기서 출발한다."
+        )
+    }
+
+    // MARK: - 다시 해도 문제가 바뀐다
+
+    /// 같은 모드·단계로 다시 시작하면 **다른 문제**가 나와야 한다.
+    /// 그러지 않으면 두 번째 판부터는 외우기가 된다.
+    @MainActor
+    func testPlayingAgainGivesDifferentQuestions() {
+        let first = ChallengeSession(mode: .fillInTheBlank, difficulty: .normal)
+        let second = ChallengeSession(mode: .fillInTheBlank, difficulty: .normal)
+
+        XCTAssertFalse(first.questions.isEmpty)
+        XCTAssertEqual(first.questionCount, second.questionCount)
+        XCTAssertNotEqual(
+            first.questions.map(\.quote.slug),
+            second.questions.map(\.quote.slug),
+            "seed 를 넘기지 않으면 판마다 새로 뽑혀야 한다."
+        )
+    }
+
     // MARK: - 도우미
 
     private func wrongIndex(for question: ChallengeQuestion) -> Int {

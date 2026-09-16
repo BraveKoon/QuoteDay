@@ -95,5 +95,5 @@ iCloud 에 로그인하지 않아도 앱은 그대로 동작합니다. 하트는
 ## 9. 문의
 
 <!-- TODO: 실제로 쓰실 연락처로 바꾸세요. 공개되는 문서입니다. -->
-- 이메일: `여기에_공개해도_되는_이메일@example.com`
+- 이메일: `coronet.sob4n@icloud.com`
 - 또는 GitHub 이슈: https://github.com/BraveKoon/QuoteDay/issues

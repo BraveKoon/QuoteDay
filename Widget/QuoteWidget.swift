@@ -69,12 +69,17 @@ struct QuoteTimelineProvider: AppIntentTimelineProvider {
     }
 
     private func makeEntry(at date: Date, configuration: SelectQuoteCategoryIntent) -> QuoteEntry {
-        // 위젯에서 특정 카테고리를 골랐다면 원격 명언(카테고리 정보가 없다)은 쓰지 않는다.
-        let useRemote = configuration.category == .all && remoteStore.isEnabled
+        // 위젯에서 따로 고르지 않았으면 앱 설정을 따른다. 그래야 홈 화면의 위젯과
+        // 앱을 열었을 때의 문장이 같다.
+        let category = DailyQuoteSelection.resolvedCategory(
+            widgetChoice: configuration.category.category
+        )
+        // 카테고리가 있으면 원격 명언을 쓰지 않는 규칙은 `todayPresentation` 안에 있다.
+        // 여기서 한 번 더 판단하면 앱과 규칙이 갈라진다 — 그래서 갈렸었다.
         let presentation = quoteService.todayPresentation(
             for: date,
-            preferred: configuration.category.category,
-            useRemote: useRemote,
+            preferred: category,
+            useRemote: remoteStore.isEnabled,
             remote: remoteStore
         )
         let snapshot = snapshotStore.load()

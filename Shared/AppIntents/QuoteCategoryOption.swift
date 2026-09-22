@@ -5,6 +5,7 @@ import AppIntents
 /// `AppCategory` 를 그대로 `AppEnum` 으로 만들면 "전체" 선택지를 넣을 수 없어
 /// 위젯 전용 래퍼를 둔다.
 enum QuoteCategoryOption: String, AppEnum, CaseIterable {
+    /// 앱 설정의 선호 카테고리를 따른다. 위젯의 기본값이다.
     case all
     case work, leisure, meal, study, exercise, health, relationship, growth, daily
 
@@ -17,7 +18,7 @@ enum QuoteCategoryOption: String, AppEnum, CaseIterable {
     /// 케이스를 추가하면 여기에도 반드시 한 줄 추가해야 한다.
     static var caseDisplayRepresentations: [QuoteCategoryOption: DisplayRepresentation] {
         [
-            .all: DisplayRepresentation(title: "✨ 전체"),
+            .all: DisplayRepresentation(title: "✨ 앱 설정 따름"),
             .work: DisplayRepresentation(title: "💼 직장"),
             .leisure: DisplayRepresentation(title: "🎮 여가"),
             .meal: DisplayRepresentation(title: "🍽 식사"),
@@ -30,7 +31,8 @@ enum QuoteCategoryOption: String, AppEnum, CaseIterable {
         ]
     }
 
-    /// `all` 이면 nil.
+    /// 이 위젯만 따로 고른 카테고리. `all` 이면 nil 이고,
+    /// 그때는 앱 설정을 따른다(`DailyQuoteSelection.resolvedCategory`).
     var category: AppCategory? {
         guard self != .all else { return nil }
         return AppCategory(rawValue: rawValue)

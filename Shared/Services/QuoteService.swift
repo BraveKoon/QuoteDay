@@ -114,13 +114,17 @@ public struct QuoteService: Sendable {
     ///
     /// 캐시가 없거나(첫 실행·오프라인) 기능이 꺼져 있으면 내장 명언으로 되돌아가므로
     /// 네트워크 없이도 화면은 항상 채워진다.
+    ///
+    /// **카테고리를 고른 사람에게는 원격 명언을 쓰지 않는다.** ZenQuotes 문장에는
+    /// 카테고리가 없어서, 그대로 내보내면 고른 설정이 조용히 무시된다.
+    /// 앱과 위젯이 이 규칙을 서로 다르게 갖고 있어서 두 곳의 문장이 어긋났다.
     public func todayPresentation(
         for date: Date = .now,
         preferred category: AppCategory? = nil,
         useRemote: Bool,
         remote: RemoteQuoteStore = .shared
     ) -> QuotePresentation {
-        if useRemote, let remotePresentation = remote.presentation(on: date) {
+        if useRemote, category == nil, let remotePresentation = remote.presentation(on: date) {
             return remotePresentation
         }
         return presentationOfTheDay(for: date, preferred: category)

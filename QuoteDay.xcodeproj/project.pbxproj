@@ -147,6 +147,10 @@
 			isa = PBXBuildFile;
 			fileRef = 95118D259A3BBC4E856C41F5 /* PrivacyInfo.xcprivacy */;
 		};
+		4706E6882841E6C00D09382C = {
+			isa = PBXBuildFile;
+			fileRef = C640241792192143993F65B3 /* DailyQuoteSelection.swift */;
+		};
 		4730F9757A07E3B91A3A7686 = {
 			isa = PBXBuildFile;
 			fileRef = C7334277AFD709E5C8CED783 /* ClayTheme.swift */;
@@ -306,6 +310,10 @@
 		8E12D4ADCD33426481595F82 = {
 			isa = PBXBuildFile;
 			fileRef = A038F65A8FD7C5DB5E8BEC9C /* AppFeatureFlags.swift */;
+		};
+		8E15686E7289912954E9CD80 = {
+			isa = PBXBuildFile;
+			fileRef = EDD47A8FC726C6CB2399A181 /* WidgetAgreementTests.swift */;
 		};
 		904ADDA682459CCDC085FCEF = {
 			isa = PBXBuildFile;
@@ -587,6 +595,10 @@
 		FE97EB8251F358EEC0393B72 = {
 			isa = PBXBuildFile;
 			fileRef = 16FBAC84771CF89D20788E56 /* RemoteQuoteTests.swift */;
+		};
+		FF52E3DDF58CAC9699784E79 = {
+			isa = PBXBuildFile;
+			fileRef = C640241792192143993F65B3 /* DailyQuoteSelection.swift */;
 		};
 /* End PBXBuildFile section */
 
@@ -1165,6 +1177,12 @@
 			path = RankingSheet.swift;
 			sourceTree = "<group>";
 		};
+		C640241792192143993F65B3 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = DailyQuoteSelection.swift;
+			sourceTree = "<group>";
+		};
 		C6C0B3EB82F8AB2F6B75C190 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -1253,6 +1271,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = folder.assetcatalog;
 			path = Assets.xcassets;
+			sourceTree = "<group>";
+		};
+		EDD47A8FC726C6CB2399A181 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = WidgetAgreementTests.swift;
 			sourceTree = "<group>";
 		};
 		EE249BE91E4B13A46667234E = {
@@ -1447,6 +1471,7 @@
 				E6766A2934C231BEE76E3480 /* BlankMaker.swift */,
 				0BB2796F07DA2C7345006812 /* ChallengeGenerator.swift */,
 				5B61FD0D6DA5693CC14AEC4E /* CloudKitConfiguration.swift */,
+				C640241792192143993F65B3 /* DailyQuoteSelection.swift */,
 				FE324088DA0E0BBF5B136CA7 /* HeartSyncing.swift */,
 				977166F8078E4665587F2B0B /* QuoteService.swift */,
 				28CBEC6F5FCB6ADF1B531D5E /* RankSyncing.swift */,
@@ -1525,6 +1550,7 @@
 				16FBAC84771CF89D20788E56 /* RemoteQuoteTests.swift */,
 				ECB8A315BC81E2AB5F7AD82D /* ScheduleAndNavigationTests.swift */,
 				4D3A7D585C1321AFAF9CFE3A /* ShareCardTests.swift */,
+				EDD47A8FC726C6CB2399A181 /* WidgetAgreementTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -1800,6 +1826,7 @@
 				3B6CBB5E521603BCC47AF2C7 /* RankingSheet.swift in Sources */,
 				3B92E8E1B1A15327B90354DD /* ForeignNameLibrary.swift in Sources */,
 				3E6A55054D28D9F84F8933A7 /* Quote.swift in Sources */,
+				4706E6882841E6C00D09382C /* DailyQuoteSelection.swift in Sources */,
 				4730F9757A07E3B91A3A7686 /* ClayTheme.swift in Sources */,
 				4AE0697B1039CE2285796789 /* CalendarViewModel.swift in Sources */,
 				4D3473BCA45CD1A27F8F1AD3 /* WidgetSnapshot.swift in Sources */,
@@ -1884,6 +1911,7 @@
 				15B82FD91221A1C33FC7477B /* ChallengeTests.swift in Sources */,
 				58B328AA57C1FE89104D2D7F /* ReleaseHistoryTests.swift in Sources */,
 				63D6B94494F72829BABCE2AE /* ShareCardTests.swift in Sources */,
+				8E15686E7289912954E9CD80 /* WidgetAgreementTests.swift in Sources */,
 				A611F1A0E3957787978AA87E /* ScheduleAndNavigationTests.swift in Sources */,
 				E90E1911D37099FEB85CD56F /* QuoteEngineTests.swift in Sources */,
 				EA127D7DA9AF5DD3A378C517 /* RecurrenceTests.swift in Sources */,
@@ -1936,6 +1964,7 @@
 				F164468D03689FC548713012 /* DisputedAttribution.swift in Sources */,
 				F36722AB805F041C420331F6 /* BehindStory.swift in Sources */,
 				FD41707ABC8F0F23C40EDD40 /* QuoteLibrary.swift in Sources */,
+				FF52E3DDF58CAC9699784E79 /* DailyQuoteSelection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

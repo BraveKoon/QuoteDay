@@ -131,7 +131,8 @@ final class WidgetAgreementTests: XCTestCase {
     }
 
     func testAppAndWidgetAgreeForEveryPreferredCategory() {
-        let categories: [AppCategory?] = [nil] + AppCategory.selectableForQuotes.map { Optional($0) }
+        var categories: [AppCategory?] = [nil]
+        categories.append(contentsOf: AppCategory.selectableForQuotes.map { $0 })
         for category in categories {
             for useRemote in [true, false] {
                 let remote = makeRemoteStore(name: "agree")

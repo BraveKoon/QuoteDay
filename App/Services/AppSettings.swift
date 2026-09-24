@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 /// 사용자 설정. App Group `UserDefaults` 에 저장되어 위젯에서도 읽을 수 있다.
 ///
@@ -153,6 +154,19 @@ final class AppSettings {
                     defaults.removeObject(forKey: SharedDefaultsKey.preferredCategory)
                 }
             }
+            // 위젯도 이 설정을 따르므로 함께 다시 그린다. 이 줄이 없으면
+            // 자정까지 홈 화면에 옛 카테고리의 문장이 남는다.
+            Self.reloadWidgets()
+        }
+    }
+
+    /// 오늘의 명언을 고르는 기준이 바뀌었을 때 위젯을 다시 그린다.
+    ///
+    /// 앱과 위젯은 각자 계산하므로, 앱에서 설정을 바꿔도 위젯은 자기 타임라인이
+    /// 만료될 때까지 예전 기준으로 그린 화면을 붙들고 있다.
+    private static func reloadWidgets() {
+        for kind in AppGroup.allWidgetKinds {
+            WidgetCenter.shared.reloadTimelines(ofKind: kind)
         }
     }
 
@@ -197,6 +211,8 @@ final class AppSettings {
                 storedUsesRemoteQuote = newValue
                 defaults.set(newValue, forKey: SharedDefaultsKey.remoteQuoteEnabled)
             }
+            // 이 스위치는 오늘의 명언 자체를 바꾼다. 위젯도 같이 바뀌어야 한다.
+            Self.reloadWidgets()
         }
     }
 

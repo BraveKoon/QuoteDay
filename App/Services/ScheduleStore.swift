@@ -286,7 +286,8 @@ final class ScheduleStore {
                 await notifications.scheduleDailyQuote(
                     hour: settings.dailyQuoteHour,
                     minute: settings.dailyQuoteMinute,
-                    preferred: settings.preferredCategory
+                    preferred: settings.preferredCategory,
+                    useRemote: settings.usesRemoteQuoteOfTheDay
                 )
             }
         }

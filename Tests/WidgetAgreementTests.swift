@@ -1,11 +1,14 @@
 import XCTest
 @testable import QuoteDay
 
-/// 앱과 위젯이 **같은 문장**을 고르는지 확인한다.
+/// 앱·위젯·알림이 **같은 문장**을 고르는지 확인한다.
 ///
-/// 둘은 서로 다른 프로세스에서 각자 계산한다. 규칙이 한쪽에만 있으면 어긋나도
+/// 셋은 서로 다른 프로세스에서 각자 계산한다. 규칙이 한쪽에만 있으면 어긋나도
 /// 아무 데서도 오류가 나지 않는다 — 홈 화면의 위젯과 앱을 열었을 때의 문장이
 /// 조용히 달라질 뿐이다. 실제로 그렇게 어긋났고, 이 파일이 그것을 막는다.
+///
+/// 알림도 같은 이유로 어긋났다. 잠금 화면에서는 위젯과 알림이 나란히 보여서
+/// 특히 잘 드러난다.
 final class WidgetAgreementTests: XCTestCase {
 
     private let service = QuoteService.shared
@@ -159,6 +162,88 @@ final class WidgetAgreementTests: XCTestCase {
                 )
             }
         }
+    }
+
+    // MARK: - 알림도 같은 문장인지
+
+    /// 알림 본문은 앱·위젯이 고른 바로 그 문장이어야 한다.
+    ///
+    /// 예전에는 알림만 `quoteOfTheDay` 를 바로 불러서 내장 명언을 집었다.
+    /// 원격 명언을 쓰는 사람에게는 잠금 화면에서 위젯은 영어 원격 명언을,
+    /// 알림은 한글 내장 명언을 말했다.
+    private func notificationBody(
+        preferred: AppCategory?,
+        useRemote: Bool,
+        remote: RemoteQuoteStore
+    ) -> String {
+        // App/Services/NotificationService.scheduleDailyQuote 와 같은 호출이다.
+        let presentation = service.todayPresentation(
+            for: date,
+            preferred: preferred,
+            useRemote: useRemote,
+            remote: remote
+        )
+        return DailyQuoteNotification.content(for: presentation).body
+    }
+
+    func testNotificationSaysTheSameQuoteAsTheAppAndWidget() {
+        var categories: [AppCategory?] = [nil]
+        categories.append(contentsOf: AppCategory.selectableForQuotes.map { $0 })
+        for category in categories {
+            for useRemote in [true, false] {
+                let remote = makeRemoteStore(name: "notify")
+                remote.save(
+                    RemoteQuote(text: "From the API.", authorName: "Someone", dayKey: date.dayKey())
+                )
+                let settings = makeSettingsDefaults(name: "notify")
+                if let category {
+                    settings.set(category.rawValue, forKey: SharedDefaultsKey.preferredCategory)
+                }
+
+                let widget = widgetQuote(
+                    widgetChoice: nil,
+                    settings: settings,
+                    useRemote: useRemote,
+                    remote: remote
+                )
+                let body = notificationBody(
+                    preferred: category,
+                    useRemote: useRemote,
+                    remote: remote
+                )
+
+                XCTAssertTrue(
+                    body.contains(widget.text),
+                    "카테고리 \(category?.rawValue ?? "전체"), 원격 \(useRemote) 에서 알림이 위젯과 다른 명언을 말합니다."
+                )
+            }
+        }
+    }
+
+    /// 원격 명언을 쓰는 사람의 알림에는 원격 문장이 들어가야 한다.
+    func testNotificationCarriesTheRemoteQuoteWhenThereIsNoCategory() {
+        let remote = makeRemoteStore()
+        remote.save(RemoteQuote(text: "From the API.", authorName: "Someone", dayKey: date.dayKey()))
+
+        let body = notificationBody(preferred: nil, useRemote: true, remote: remote)
+        XCTAssertTrue(body.contains("From the API."), "알림이 내장 명언으로 되돌아갔습니다.")
+    }
+
+    /// 알림 식별자는 앱이 쓰는 것과 위젯이 찾는 것이 같아야 한다.
+    /// 다르면 위젯이 고쳐 쓸 알림을 못 찾고 조용히 지나간다.
+    func testNotificationIdentifierIsStableForADay() {
+        let calendar = Calendar.current
+        let morning = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: date) ?? date
+        let evening = calendar.date(bySettingHour: 22, minute: 0, second: 0, of: date) ?? date
+
+        XCTAssertEqual(
+            DailyQuoteNotification.identifier(for: morning),
+            DailyQuoteNotification.identifier(for: evening)
+        )
+        XCTAssertTrue(
+            DailyQuoteNotification.identifier(for: morning)
+                .hasPrefix(DailyQuoteNotification.identifierPrefix)
+        )
     }
 
     /// 자정을 넘기면 두 곳 모두 새 문장으로 넘어가야 한다.

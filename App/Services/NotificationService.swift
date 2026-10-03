@@ -27,7 +27,8 @@ final class NotificationService {
     /// 반복 회차를 미리 예약해 두는 기간. 앱을 열 때마다 다시 채운다.
     static let scheduleHorizonDays = 60
 
-    private static let dailyQuotePrefix = "daily-quote-"
+    /// 위젯도 같은 값으로 오늘 자 알림을 찾아 고쳐 쓴다.
+    private static let dailyQuotePrefix = DailyQuoteNotification.identifierPrefix
     private static let schedulePrefix = "schedule-"
 
     init(
@@ -220,7 +221,19 @@ final class NotificationService {
     // MARK: - 매일의 명언
 
     /// 오늘부터 `dailyQuoteHorizonDays` 일치의 "오늘의 명언" 알림을 예약한다.
-    func scheduleDailyQuote(hour: Int, minute: Int, preferred category: AppCategory?) async {
+    ///
+    /// 문장은 앱·위젯과 **같은 길**로 고른다(`todayPresentation`). 예전에는 알림만
+    /// 내장 명언을 바로 집어서, 원격 명언을 쓰는 사람에게는 잠금 화면의 위젯과
+    /// 알림이 서로 다른 문장을 보여 주었다.
+    ///
+    /// 원격 명언은 그날이 되어야 받아 올 수 있으므로, 내일 이후 몫은 내장 명언으로
+    /// 예약된다. 그래서 원격 명언이 새로 들어오면 이 함수를 다시 불러야 한다.
+    func scheduleDailyQuote(
+        hour: Int,
+        minute: Int,
+        preferred category: AppCategory?,
+        useRemote: Bool
+    ) async {
         cancelDailyQuote()
         guard await requestAuthorizationIfNeeded() else { return }
 
@@ -234,21 +247,15 @@ final class NotificationService {
             else { continue }
             components.second = 0
 
-            let quote = quoteService.quoteOfTheDay(for: fireDate, preferred: category)
-            let author = quoteService.author(for: quote)
-
-            let content = UNMutableNotificationContent()
-            content.title = "☀️ 오늘의 명언"
-            content.body = "\u{201C}\(quote.text)\u{201D}\n— \(author.displayName)"
-            content.sound = .default
-            content.userInfo = [
-                NotificationPayloadKey.deepLink: DeepLink.quote(quote.id).url.absoluteString,
-                NotificationPayloadKey.quoteID: quote.id.uuidString
-            ]
+            let presentation = quoteService.todayPresentation(
+                for: fireDate,
+                preferred: category,
+                useRemote: useRemote
+            )
 
             let request = UNNotificationRequest(
-                identifier: "\(Self.dailyQuotePrefix)\(fireDate.dayKey(calendar: calendar))",
-                content: content,
+                identifier: DailyQuoteNotification.identifier(for: fireDate, calendar: calendar),
+                content: DailyQuoteNotification.content(for: presentation),
                 trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
             )
 

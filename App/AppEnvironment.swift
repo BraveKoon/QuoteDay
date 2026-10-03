@@ -87,6 +87,25 @@ final class AppEnvironment {
         for kind in AppGroup.allWidgetKinds {
             WidgetCenter.shared.reloadTimelines(ofKind: kind)
         }
+        // 알림 본문에는 번역 전 영어가 들어가 있다. 다시 예약하지 않으면
+        // 위젯은 한글, 알림은 영어가 된다.
+        Task { await rescheduleDailyQuote() }
+    }
+
+    /// 예약해 둔 "오늘의 명언" 알림을 지금 기준으로 다시 만든다.
+    ///
+    /// 알림은 14일치를 미리 예약하는데, 원격 명언은 그날이 되어야 받아 올 수
+    /// 있다. 그래서 예약 당시에는 내장 명언이 들어가고, 나중에 원격 명언이
+    /// 들어오면 그대로 두면 위젯과 알림이 어긋난다. 새 문장이 생길 때마다
+    /// 다시 예약해서 둘을 맞춘다.
+    func rescheduleDailyQuote() async {
+        guard settings.isDailyQuoteEnabled, notifications.isAuthorized else { return }
+        await notifications.scheduleDailyQuote(
+            hour: settings.dailyQuoteHour,
+            minute: settings.dailyQuoteMinute,
+            preferred: settings.preferredCategory,
+            useRemote: settings.usesRemoteQuoteOfTheDay
+        )
     }
 
     /// 앱이 활성화될 때마다 호출한다.
@@ -115,6 +134,9 @@ final class AppEnvironment {
             for kind in AppGroup.allWidgetKinds {
                 WidgetCenter.shared.reloadTimelines(ofKind: kind)
             }
+            // 알림은 앱이 켜지기 전에 이미 예약돼 있다. 새 명언이 들어왔으면
+            // 다시 예약해야 위젯과 같은 문장을 보여 준다.
+            await rescheduleDailyQuote()
         }
         // 새 명언이든 예전 것이든, 아직 번역이 안 된 것이 있으면 여기서 잡힌다.
         refreshTranslationTarget()

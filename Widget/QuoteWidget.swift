@@ -53,7 +53,14 @@ struct QuoteTimelineProvider: AppIntentTimelineProvider {
 
         // 사용자가 앱을 열지 않아도 위젯이 스스로 오늘 자 명언을 받아 온다.
         // 실패하면 그대로 내장 명언으로 그려진다.
-        await remoteStore.refreshIfNeeded(now: now)
+        let fetched = await remoteStore.refreshIfNeeded(now: now)
+
+        // 새 문장을 받았으면 오늘 자 알림도 같이 고쳐 쓴다. 알림은 며칠 전에
+        // 예약되어 내장 명언을 들고 있고, 앱을 열지 않으면 아무도 고쳐 주지
+        // 않는다. 그대로 두면 잠금 화면에서 위젯과 알림이 다른 문장을 말한다.
+        if fetched {
+            await DailyQuoteNotification.rewriteToday(now: now, remote: remoteStore)
+        }
 
         // 남은 시간과 "다음 일정"이 자연스럽게 갱신되도록 한 시간 간격으로 항목을 만든다.
         var entries: [QuoteEntry] = [makeEntry(at: now, configuration: configuration)]

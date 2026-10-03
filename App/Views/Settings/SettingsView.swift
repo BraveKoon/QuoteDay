@@ -339,11 +339,18 @@ struct SettingsView: View {
                 }
                 .tint(ClayTheme.accent)
                 .onChange(of: settings.usesRemoteQuoteOfTheDay) { _, isOn in
+                    // 어느 쪽으로 바뀌든 알림을 다시 예약한다. 예약해 둔 본문은
+                    // 바꾼 설정을 모르기 때문에, 그대로 두면 위젯과 알림이 다른
+                    // 문장을 보여 준다.
                     guard isOn else {
                         remoteQuoteRefreshToken += 1
+                        Task { await refreshDailyQuoteIfNeeded() }
                         return
                     }
-                    Task { await refreshRemoteQuote(force: false) }
+                    Task {
+                        await refreshRemoteQuote(force: false)
+                        await refreshDailyQuoteIfNeeded()
+                    }
                 }
 
                 if settings.usesRemoteQuoteOfTheDay {
@@ -482,7 +489,8 @@ struct SettingsView: View {
         await notifications.scheduleDailyQuote(
             hour: settings.dailyQuoteHour,
             minute: settings.dailyQuoteMinute,
-            preferred: settings.preferredCategory
+            preferred: settings.preferredCategory,
+            useRemote: settings.usesRemoteQuoteOfTheDay
         )
         pendingNotificationCount = await notifications.pendingNotificationCount()
     }

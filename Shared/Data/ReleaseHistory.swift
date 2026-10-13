@@ -10,6 +10,19 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.8.11",
+            date: "2026-10-13",
+            summary: nil,
+            sections: [
+                ReleaseSection(
+                    title: "고침",
+                    items: [
+                        "알림 시각에서 오전/오후만 바꿔도 저장된다. 오후 7:30 에서 오전 7:30 으로 바꾸면 계속 오후 7:30 으로 되돌아갔다. 시나 분을 같이 건드리면 통과했기 때문에 \"오후 7:30 → 오후 6:30 → 오전 7:30\" 으로 돌아가야 했다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.8.10",
             date: "2026-10-03",
             summary: "원격 명언을, 알림은 내장 명언을 말하고 있었다.",

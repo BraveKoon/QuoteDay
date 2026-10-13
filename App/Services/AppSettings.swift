@@ -234,12 +234,25 @@ final class AppSettings {
     }
 
     /// 매일의 명언 알림 시각을 `DatePicker` 와 주고받기 위한 브리지.
+    ///
+    /// **반드시 오늘 날짜 위에 올려 준다.** 예전에는 시·분만 담은
+    /// `DateComponents` 로 Date 를 만들었는데, 날짜가 비어 있으면 Foundation 이
+    /// 서기 1년 1월 1일을 채워 넣는다. 그 시절에는 표준시가 없어서 지역마다
+    /// 분 단위로 떨어지지 않는 지방 평균시(서울은 UTC+8:27:52)를 쓴다.
+    /// 그런 날짜 위에서는 피커가 오전/오후를 뒤집을 때 돌려주는 값이 흔들려서,
+    /// 오전/오후만 바꾸면 되돌아가 버렸다. 시나 분을 같이 건드리면 통과했기
+    /// 때문에 "오후 7:30 → 오후 6:30 → 오전 7:30" 처럼 돌아가야 했다.
+    ///
+    /// 오늘 위에 올리면 평범한 날짜가 되어 그 문제가 사라지고, 시·분을
+    /// 그대로 되읽을 수 있다.
     var dailyQuoteTime: Date {
         get {
-            var components = DateComponents()
+            let calendar = Calendar.current
+            var components = calendar.dateComponents([.year, .month, .day], from: .now)
             components.hour = dailyQuoteHour
             components.minute = dailyQuoteMinute
-            return Calendar.current.date(from: components) ?? Date.now
+            components.second = 0
+            return calendar.date(from: components) ?? .now
         }
         set {
             let components = Calendar.current.dateComponents([.hour, .minute], from: newValue)

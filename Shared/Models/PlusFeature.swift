@@ -11,7 +11,10 @@ public enum PlusFeature: String, CaseIterable, Identifiable, Sendable {
     case behindStory
     /// 관련 저서·연관 인물 추천.
     case relatedWorks
-    /// 노트를 PDF 로 내보내기.
+    /// 기록을 보기 좋게 인쇄하기.
+    ///
+    /// **백업이 아니다.** PDF 는 다시 읽어 들일 수 없으므로 기기를 바꿀 때
+    /// 쓸 수 없다. 백업은 설정의 "기록 내보내기"(JSON)가 한다.
     case noteExport
     /// 공유 카드의 프리미엄 테마·서체.
     case premiumShareTheme
@@ -24,7 +27,7 @@ public enum PlusFeature: String, CaseIterable, Identifiable, Sendable {
         case .authorProfile: "인물 프로필"
         case .behindStory: "비하인드 스토리"
         case .relatedWorks: "관련 저서와 연관 인물"
-        case .noteExport: "노트 PDF 내보내기"
+        case .noteExport: "인쇄용 PDF"
         case .premiumShareTheme: "프리미엄 카드 테마"
         }
     }
@@ -34,7 +37,7 @@ public enum PlusFeature: String, CaseIterable, Identifiable, Sendable {
         case .authorProfile: "생애, 주요 업적, 활동한 시대를 한 장에 정리해 드려요."
         case .behindStory: "이 문장이 어떤 상황에서 나왔는지 배경을 읽어 보세요."
         case .relatedWorks: "인물의 저서와 이어서 볼 만한 인물·명언을 추천해요."
-        case .noteExport: "적어 둔 생각을 예쁜 PDF 한 권으로 내보낼 수 있어요."
+        case .noteExport: "적어 둔 생각을 한 권으로 묶어 인쇄하거나 간직할 수 있어요. 백업은 설정의 \"기록 내보내기\"로 하세요."
         case .premiumShareTheme: "감성 배경과 프리미엄 서체로 카드를 꾸며 보세요."
         }
     }

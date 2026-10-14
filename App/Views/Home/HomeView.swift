@@ -7,7 +7,13 @@ struct HomeView: View {
     @Environment(AppRouter.self) private var router
     @Environment(AppEnvironment.self) private var appEnvironment
 
+    @Environment(NoteStore.self) private var notes
+
     @State private var editorTarget: ScheduleEditorTarget?
+    /// 열어 둔 월간 회고. 값이 들어오면 시트가 올라온다.
+    @State private var reviewMonth: ReviewMonth?
+    /// 오늘 고른 기분. 고르면 명언이 그 기분의 것으로 바뀐다.
+    @State private var mood: QuoteMood?
 
     /// 상태를 갖지 않는 뷰모델이라 매 렌더마다 새로 만들어도 비용이 없다.
     private var viewModel: HomeViewModel {
@@ -16,18 +22,42 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
+            // 오늘의 명언이 바뀌거나 번역이 끝나면 이 값이 올라 화면이 다시 그려진다.
+            // (RemoteQuoteStore 는 UserDefaults 를 직접 읽는 값 타입이라 관찰되지 않는다)
+            let _ = appEnvironment.remoteQuoteRevision
+            // 기분을 골랐으면 그 기분의 문장으로 바꿔 보여 준다. 그 기분에
+            // 붙은 명언이 없으면 조용히 오늘의 명언으로 돌아간다.
+            let presentation = mood
+                .flatMap { QuoteService.shared.presentation(for: $0) }
+                ?? viewModel.quoteOfTheDay()
+
             VStack(alignment: .leading, spacing: ClayTheme.Spacing.l) {
                 header
                     .clayAppear()
 
-                quoteSection
+                quoteSection(presentation)
                     .clayAppear(delay: 0.05)
 
-                nextScheduleSection
+                MoodPickerRow(selection: $mood)
+                    .clayAppear(delay: 0.07)
+
+                // 오늘의 명언 바로 아래가 이 릴리스의 중심이다. 기록이 설정
+                // 세 단계 아래에 있는 한 아무도 쓰지 않는다.
+                JournalCard(presentation: presentation, mood: mood)
                     .clayAppear(delay: 0.1)
 
-                todaySection
+                // 있을 때만 그린다. 빈 카드로 자리를 채우지 않는다.
+                ThrowbackCard()
                     .clayAppear(delay: 0.15)
+
+                monthlyReviewRow
+                    .clayAppear(delay: 0.15)
+
+                nextScheduleSection
+                    .clayAppear(delay: 0.2)
+
+                todaySection
+                    .clayAppear(delay: 0.25)
             }
             .padding(.horizontal, ClayTheme.Spacing.m)
             .padding(.top, ClayTheme.Spacing.m)
@@ -38,6 +68,9 @@ struct HomeView: View {
         .clayBackground()
         .sheet(item: $editorTarget) { target in
             ScheduleEditorView(target: target)
+        }
+        .sheet(item: $reviewMonth) { target in
+            MonthlyReviewView(month: target.date)
         }
     }
 
@@ -60,12 +93,8 @@ struct HomeView: View {
 
     // MARK: - 오늘의 명언
 
-    private var quoteSection: some View {
-        // 오늘의 명언이 바뀌거나 번역이 끝나면 이 값이 올라 화면이 다시 그려진다.
-        // (RemoteQuoteStore 는 UserDefaults 를 직접 읽는 값 타입이라 관찰되지 않는다)
-        _ = appEnvironment.remoteQuoteRevision
-        let presentation = viewModel.quoteOfTheDay()
-        return VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+    private func quoteSection(_ presentation: QuotePresentation) -> some View {
+        VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
             QuoteCard(presentation: presentation, style: .hero) {
                 router.showQuote(presentation.quote)
             }
@@ -79,6 +108,44 @@ struct HomeView: View {
         }
         // 날짜가 바뀌면 카드가 부드럽게 교체된다.
         .animation(.easeInOut(duration: 0.35), value: presentation.id)
+    }
+
+    // MARK: - 지난달 회고
+
+    /// 지난달에 쓸 만큼 쌓였을 때만 뜬다.
+    ///
+    /// 회고는 이 앱에서 한 달을 넘긴 사람에게만 보이는 보상이다. 아무 때나
+    /// 열리면 보상이 아니라 메뉴가 된다.
+    @ViewBuilder
+    private var monthlyReviewRow: some View {
+        let month = MonthlyReview.previousMonth()
+        let review = MonthlyReview.make(from: notes.notes.map(\.archived), month: month)
+        if review.isWorthShowing {
+            Button {
+                reviewMonth = ReviewMonth(date: month)
+            } label: {
+                HStack(spacing: ClayTheme.Spacing.s) {
+                    Image(systemName: "sparkles")
+                        .foregroundStyle(ClayTheme.accent)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(Formatters.monthTitle.string(from: month)) 돌아보기")
+                            .font(ClayFont.headline())
+                            .foregroundStyle(ClayTheme.textPrimary)
+                        Text(review.headline)
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.textSecondary)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(ClayTheme.textSecondary)
+                }
+                .padding(ClayTheme.Spacing.m)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .clayCard(cornerRadius: ClayTheme.Radius.card)
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // MARK: - 다음 일정

@@ -129,6 +129,21 @@ public struct QuoteService: Sendable {
         }
         return presentationOfTheDay(for: date, preferred: category)
     }
+    /// 그 기분에 어울리는 그날의 명언.
+    ///
+    /// 무작위가 아니라 **날짜로 정해진다.** 칩을 눌렀다 뗐다 할 때마다 문장이
+    /// 바뀌면 고르는 행위가 뽑기가 되고, 좋았던 문장을 다시 찾을 수 없다.
+    public func presentation(for mood: QuoteMood, on date: Date = .now) -> QuotePresentation? {
+        let slugs = MoodLibrary.slugs(for: mood)
+        guard !slugs.isEmpty else { return nil }
+        let index = StableHash.index(
+            for: "mood:\(mood.rawValue):\(date.dayKey())",
+            count: slugs.count
+        )
+        guard let quote = library.quote(slug: slugs[index]) else { return nil }
+        return library.presentation(for: quote)
+    }
+
     public func quotes(in category: AppCategory) -> [Quote] { library.quotes(in: category) }
     public func quotes(byAuthor authorID: String) -> [Quote] { library.quotes(byAuthor: authorID) }
     public func search(_ term: String) -> [Quote] { library.search(term) }

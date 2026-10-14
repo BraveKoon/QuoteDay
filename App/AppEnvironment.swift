@@ -20,6 +20,7 @@ final class AppEnvironment {
     let quoteService: QuoteService
     let plusStore: PlusStore
     let noteStore: NoteStore
+    let streakStore: StreakStore
     let challengeStore: ChallengeStore
     let heartStore: HeartStore
     let rankStore: RankStore
@@ -60,6 +61,7 @@ final class AppEnvironment {
         )
         self.plusStore = PlusStore(defaults: defaults)
         self.noteStore = NoteStore(context: container.mainContext)
+        self.streakStore = StreakStore(defaults: defaults)
         self.challengeStore = ChallengeStore(defaults: defaults)
         self.heartStore = HeartStore(sync: heartSync, defaults: defaults)
         self.rankStore = RankStore(sync: rankSync, defaults: defaults)
@@ -110,7 +112,10 @@ final class AppEnvironment {
 
     /// 앱이 활성화될 때마다 호출한다.
     func refresh() async {
+        // 사흘 쉬고 연 사람에게 "5일째"라고 말하지 않도록 먼저 맞춘다.
+        streakStore.refresh()
         await scheduleStore.refreshOnLaunch()
+        await notifications.scheduleMonthlyReview(hasRecords: !noteStore.isEmpty)
         calendarService.refreshAuthorizationStatus()
         // 백그라운드에 있는 동안 시즌이 바뀌었을 수 있다.
         challengeStore.refreshSeason()
@@ -226,8 +231,14 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse
     ) async {
         let userInfo = response.notification.request.content.userInfo
+        let wantsCompose = response.actionIdentifier == DailyQuoteNotification.composeActionIdentifier
         await MainActor.run {
-            router.handleNotification(userInfo: userInfo)
+            // "바로 기록하기" 는 명언 상세가 아니라 홈의 입력칸으로 보낸다.
+            if wantsCompose {
+                router.handle(.composeToday)
+            } else {
+                router.handleNotification(userInfo: userInfo)
+            }
         }
     }
 }
@@ -249,6 +260,7 @@ extension View {
             .environment(environment.scheduleStore)
             .environment(environment.plusStore)
             .environment(environment.noteStore)
+            .environment(environment.streakStore)
             .environment(environment.challengeStore)
             .environment(environment.heartStore)
             .environment(environment.rankStore)

@@ -67,6 +67,22 @@ public extension Date {
         return String(format: "%04d-%02d-%02d", year, month, day)
     }
 
+    /// `dayKey` 가 가리키는 날의 정오. 날짜 계산에만 쓴다.
+    ///
+    /// 자정이 아니라 정오인 이유: 서머타임이 자정에 걸리는 지역이 있어서,
+    /// 자정으로 잡으면 그 날짜가 존재하지 않는 경우가 생긴다. 정오는 어디서나
+    /// 안전하고, 날짜만 보는 계산에서는 시각이 무엇이든 상관없다.
+    static func fromDayKey(_ key: String, calendar: Calendar = .current) -> Date? {
+        let parts = key.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        var components = DateComponents()
+        components.year = parts[0]
+        components.month = parts[1]
+        components.day = parts[2]
+        components.hour = 12
+        return calendar.date(from: components)
+    }
+
     func startOfDay(calendar: Calendar = .current) -> Date {
         calendar.startOfDay(for: self)
     }

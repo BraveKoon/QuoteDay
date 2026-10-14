@@ -15,6 +15,30 @@ import UserNotifications
 public enum DailyQuoteNotification {
     public static let identifierPrefix = "daily-quote-"
 
+    /// 알림에 붙일 동작 묶음의 이름.
+    public static let categoryIdentifier = "daily-quote"
+    /// "바로 기록하기" 동작의 이름.
+    public static let composeActionIdentifier = "daily-quote-compose"
+
+    /// 알림에서 바로 기록으로 갈 수 있게 하는 동작.
+    ///
+    /// 알림을 받은 자리에서 생각이 가장 생생하다. 홈까지 보내 놓고 다시
+    /// 탭하게 만들면 그 사이에 마음이 식는다.
+    public static var category: UNNotificationCategory {
+        UNNotificationCategory(
+            identifier: categoryIdentifier,
+            actions: [
+                UNNotificationAction(
+                    identifier: composeActionIdentifier,
+                    title: "바로 기록하기",
+                    options: [.foreground]
+                )
+            ],
+            intentIdentifiers: [],
+            options: []
+        )
+    }
+
     public static func identifier(for date: Date, calendar: Calendar = .current) -> String {
         "\(identifierPrefix)\(date.dayKey(calendar: calendar))"
     }
@@ -24,6 +48,7 @@ public enum DailyQuoteNotification {
         content.title = "☀️ 오늘의 명언"
         content.body = presentation.shareText
         content.sound = .default
+        content.categoryIdentifier = categoryIdentifier
         content.userInfo = [
             NotificationPayloadKey.deepLink: DeepLink.quote(presentation.id).url.absoluteString,
             NotificationPayloadKey.quoteID: presentation.id.uuidString

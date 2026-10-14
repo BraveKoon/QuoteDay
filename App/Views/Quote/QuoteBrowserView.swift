@@ -1,8 +1,12 @@
 import SwiftUI
 
-/// 명언 둘러보기 탭. 카테고리 필터와 검색을 제공한다.
+/// 명언 둘러보기 탭. 카테고리 필터와 검색, 그리고 **내 기록**으로 가는 문.
+///
+/// 기록 목록은 1.8 까지 설정 화면 안에 있었다. 설정은 한 번 맞추고 다시 안 여는
+/// 곳이라, 거기 둔 것은 없는 것과 같다. 명언을 보는 자리 옆이 제자리다.
 struct QuoteBrowserView: View {
     @Environment(AppRouter.self) private var router
+    @Environment(NoteStore.self) private var notes
 
     @State private var selectedCategory: AppCategory?
     @State private var searchText = ""
@@ -18,9 +22,11 @@ struct QuoteBrowserView: View {
     }
 
     var body: some View {
+        NavigationStack {
         ScrollView {
             VStack(alignment: .leading, spacing: ClayTheme.Spacing.m) {
                 header
+                myNotesLink
                 searchField
                 categoryFilter
 
@@ -54,6 +60,40 @@ struct QuoteBrowserView: View {
         .sheet(item: $cardTarget) { target in
             ShareCardSheet(presentation: target)
         }
+        // 이 화면은 자체 헤더를 쓴다. 밀어 올린 기록 목록은 자기 바를 갖는다.
+        .toolbar(.hidden, for: .navigationBar)
+        }
+    }
+
+    /// 내 기록으로 가는 줄. 글이 없으면 무엇을 하는 곳인지 알려 준다.
+    private var myNotesLink: some View {
+        NavigationLink {
+            NotesListView()
+        } label: {
+            HStack(spacing: ClayTheme.Spacing.s) {
+                Image(systemName: "square.and.pencil")
+                    .foregroundStyle(ClayTheme.accent)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("내 기록")
+                        .font(ClayFont.headline())
+                        .foregroundStyle(ClayTheme.textPrimary)
+                    Text(notes.isEmpty
+                         ? "홈에서 오늘 한 줄을 남기면 여기 쌓여요."
+                         : "\(notes.recordedDayCount)일 동안 \(notes.notes.count)편을 남겼어요.")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                        .multilineTextAlignment(.leading)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(ClayTheme.textSecondary)
+            }
+            .padding(ClayTheme.Spacing.m)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .clayCard(cornerRadius: ClayTheme.Radius.card)
+        }
+        .buttonStyle(.plain)
     }
 
     /// 작은 동작 줄 + 그 아래 명언 카드.

@@ -5,10 +5,16 @@ import Foundation
 /// - `quoteday://quote/<uuid>` : 명언 상세
 /// - `quoteday://schedule/<uuid>` : 일정 상세(캘린더 탭에서 해당 날짜 선택)
 /// - `quoteday://today` : 홈 탭
+/// - `quoteday://today?compose=1` : 홈 탭 + 오늘 한 줄 쓰기 바로 열기
 public enum DeepLink: Equatable, Sendable {
     case quote(UUID)
     case schedule(UUID)
     case today
+    /// 홈으로 가서 기록 입력칸을 바로 펼친다. 알림의 "바로 기록하기" 가 쓴다.
+    ///
+    /// 알림을 받은 자리에서 생각이 가장 생생하다. 홈까지 보내 놓고 다시
+    /// 탭하게 만들면 그 사이에 마음이 식는다.
+    case composeToday
 
     public static let scheme = "quoteday"
 
@@ -20,6 +26,8 @@ public enum DeepLink: Equatable, Sendable {
             URL(string: "\(Self.scheme)://schedule/\(id.uuidString)") ?? Self.fallbackURL
         case .today:
             Self.fallbackURL
+        case .composeToday:
+            URL(string: "\(Self.scheme)://today?compose=1") ?? Self.fallbackURL
         }
     }
 
@@ -40,7 +48,10 @@ public enum DeepLink: Equatable, Sendable {
             guard let id = UUID(uuidString: value) else { return nil }
             self = .schedule(id)
         case "today", "":
-            self = .today
+            let wantsCompose = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?
+                .contains { $0.name == "compose" && $0.value == "1" } ?? false
+            self = wantsCompose ? .composeToday : .today
         default:
             return nil
         }

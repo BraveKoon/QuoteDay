@@ -226,8 +226,14 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse
     ) async {
         let userInfo = response.notification.request.content.userInfo
+        let wantsCompose = response.actionIdentifier == DailyQuoteNotification.composeActionIdentifier
         await MainActor.run {
-            router.handleNotification(userInfo: userInfo)
+            // "바로 기록하기" 는 명언 상세가 아니라 홈의 입력칸으로 보낸다.
+            if wantsCompose {
+                router.handle(.composeToday)
+            } else {
+                router.handleNotification(userInfo: userInfo)
+            }
         }
     }
 }

@@ -91,6 +91,10 @@
 			isa = PBXBuildFile;
 			fileRef = CAD723716DB6C977745C80CA /* JournalArchiveTests.swift */;
 		};
+		22D9B961ED114C362B1AD363 = {
+			isa = PBXBuildFile;
+			fileRef = 50CD69602916AD33BDBF6BED /* JournalComposeTests.swift */;
+		};
 		23D20C0FBF76308CB79CC0AA = {
 			isa = PBXBuildFile;
 			fileRef = 4BB9359D2598D80420E32958 /* CloudKitRankService.swift */;
@@ -222,6 +226,10 @@
 		5F003B30F5F8E9CAA14E8991 = {
 			isa = PBXBuildFile;
 			fileRef = 28CBEC6F5FCB6ADF1B531D5E /* RankSyncing.swift */;
+		};
+		63BB596460B1911768956F65 = {
+			isa = PBXBuildFile;
+			fileRef = C5DF8588F87B5BD0225D365F /* JournalCard.swift */;
 		};
 		63D6B94494F72829BABCE2AE = {
 			isa = PBXBuildFile;
@@ -891,6 +899,12 @@
 			path = QuoteDay.entitlements;
 			sourceTree = "<group>";
 		};
+		50CD69602916AD33BDBF6BED = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalComposeTests.swift;
+			sourceTree = "<group>";
+		};
 		53546DADF352DDED4B5495D5 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -1237,6 +1251,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = RankingSheet.swift;
+			sourceTree = "<group>";
+		};
+		C5DF8588F87B5BD0225D365F = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalCard.swift;
 			sourceTree = "<group>";
 		};
 		C640241792192143993F65B3 = {
@@ -1613,6 +1633,7 @@
 				83C5C9587EF589732174E86E /* DailyQuoteTimeTests.swift */,
 				DB1C5D5CE6B4AF60FD9E1BD6 /* HeartTests.swift */,
 				CAD723716DB6C977745C80CA /* JournalArchiveTests.swift */,
+				50CD69602916AD33BDBF6BED /* JournalComposeTests.swift */,
 				8778F843E1DE59586B67E419 /* NoteStoreDayTests.swift */,
 				7CA9E13CF0D451B629400AEF /* PlusTests.swift */,
 				330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */,
@@ -1631,6 +1652,7 @@
 			isa = PBXGroup;
 			children = (
 				29751952A88730ACE801F76E /* HomeView.swift */,
+				C5DF8588F87B5BD0225D365F /* JournalCard.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -1912,6 +1934,7 @@
 				590A70C51E3A0296F2295B81 /* CalendarDayCell.swift in Sources */,
 				5DE75781AC2C6C34B7125C2C /* NoteStore.swift in Sources */,
 				5DEF99A272929AD81056A110 /* HomeView.swift in Sources */,
+				63BB596460B1911768956F65 /* JournalCard.swift in Sources */,
 				67D1288057766CD4935E9E7E /* CloudKitConfiguration.swift in Sources */,
 				67F88D13F3EA196CC8254AE4 /* AppCategory.swift in Sources */,
 				685D1738D98794E66BA4C7C9 /* QuoteBrowserView.swift in Sources */,
@@ -1987,6 +2010,7 @@
 				132E45E87385D3F6F7CC52D7 /* HeartTests.swift in Sources */,
 				15B82FD91221A1C33FC7477B /* ChallengeTests.swift in Sources */,
 				1CF966A808C5ED40E746F7FC /* JournalArchiveTests.swift in Sources */,
+				22D9B961ED114C362B1AD363 /* JournalComposeTests.swift in Sources */,
 				58B328AA57C1FE89104D2D7F /* ReleaseHistoryTests.swift in Sources */,
 				5DDC79D5A4AC1C12557D4CF3 /* DailyQuoteTimeTests.swift in Sources */,
 				63D6B94494F72829BABCE2AE /* ShareCardTests.swift in Sources */,

@@ -105,6 +105,7 @@ final class PlusTests: XCTestCase {
     func testNotePreviewTruncatesLongText() {
         let note = QuoteNote(
             quoteSlug: "s",
+            dayKey: "2026-10-14",
             quoteTextSnapshot: "명언",
             authorNameSnapshot: "인물",
             text: String(repeating: "가", count: 200)
@@ -116,6 +117,7 @@ final class PlusTests: XCTestCase {
     func testNotePreviewFlattensNewlines() {
         let note = QuoteNote(
             quoteSlug: "s",
+            dayKey: "2026-10-14",
             quoteTextSnapshot: "명언",
             authorNameSnapshot: "인물",
             text: "첫 줄\n둘째 줄"
@@ -127,6 +129,7 @@ final class PlusTests: XCTestCase {
     func testBlankNoteIsEmpty() {
         let note = QuoteNote(
             quoteSlug: "s",
+            dayKey: "2026-10-14",
             quoteTextSnapshot: "명언",
             authorNameSnapshot: "인물",
             text: "   \n  "

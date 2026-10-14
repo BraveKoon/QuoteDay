@@ -40,6 +40,8 @@ final class AppRouter {
     var selectedDate: Date = .now
     /// 캘린더 탭에서 열어 줄 일정.
     var highlightedScheduleID: UUID?
+    /// 홈의 기록 입력칸을 펼친 채로 열어야 하는지. 홈 카드가 읽고 되돌린다.
+    var wantsTodayCompose = false
 
     private let quoteService: QuoteService
 
@@ -73,6 +75,9 @@ final class AppRouter {
             selectedTab = .calendar
         case .today:
             selectedTab = .home
+        case .composeToday:
+            selectedTab = .home
+            wantsTodayCompose = true
         }
     }
 

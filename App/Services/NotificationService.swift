@@ -39,6 +39,9 @@ final class NotificationService {
         self.center = center
         self.quoteService = quoteService
         self.calendar = calendar
+        // 알림에 붙는 동작은 보낼 때가 아니라 **등록해 둘 때** 정해진다.
+        // 여기서 빠지면 "바로 기록하기" 가 알림에 나타나지 않는다.
+        center.setNotificationCategories([DailyQuoteNotification.category])
     }
 
     var isAuthorized: Bool {

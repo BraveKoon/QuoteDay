@@ -11,6 +11,7 @@ struct SettingsView: View {
     @Environment(AppEnvironment.self) private var appEnvironment
     @Environment(PlusStore.self) private var plus
     @Environment(NoteStore.self) private var notes
+    @Environment(AppRouter.self) private var router
 
     @State private var pendingNotificationCount = 0
     @State private var isRefreshingRemoteQuote = false
@@ -164,26 +165,36 @@ struct SettingsView: View {
 
     // MARK: - 노트
 
+    /// 기록 목록이 여기 있었다는 사실만 남긴다.
+    ///
+    /// 설정은 한 번 맞추고 다시 안 여는 곳이라, 가장 중요한 기능을 여기 두었던
+    /// 것이 애초에 잘못이었다. 그래도 쓰던 사람이 길을 잃지는 않게 한다.
     private var notesCard: some View {
-        card(title: "나의 노트", symbol: "square.and.pencil") {
+        card(title: "나의 기록", symbol: "square.and.pencil") {
             VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
                 Text(notes.isEmpty
-                     ? "명언 상세에서 노트를 쓰면 여기 모입니다."
-                     : "지금까지 \(notes.notes.count)편의 명언에 생각을 남겼어요.")
+                     ? "홈에서 오늘 한 줄을 남기면 명언 탭의 \u{201C}내 기록\u{201D}에 쌓여요."
+                     : "지금까지 \(notes.recordedDayCount)일 동안 \(notes.notes.count)편을 남겼어요.")
                     .font(ClayFont.callout())
                     .foregroundStyle(ClayTheme.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                NavigationLink {
-                    NotesListView()
+                Text("기록 모아 보기는 명언 탭 맨 위로 옮겼어요.")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Button {
+                    router.selectedTab = .quotes
                 } label: {
-                    Label("노트 모아 보기", systemImage: "chevron.right")
+                    Label("명언 탭에서 보기", systemImage: "arrow.up.forward")
                         .font(ClayFont.headline())
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, ClayTheme.Spacing.s + 2)
                         .foregroundStyle(ClayTheme.textPrimary)
                         .clayCard(cornerRadius: ClayTheme.Radius.control)
                 }
+                .buttonStyle(.plain)
             }
         }
     }

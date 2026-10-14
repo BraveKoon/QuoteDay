@@ -16,18 +16,28 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
+            // 오늘의 명언이 바뀌거나 번역이 끝나면 이 값이 올라 화면이 다시 그려진다.
+            // (RemoteQuoteStore 는 UserDefaults 를 직접 읽는 값 타입이라 관찰되지 않는다)
+            let _ = appEnvironment.remoteQuoteRevision
+            let presentation = viewModel.quoteOfTheDay()
+
             VStack(alignment: .leading, spacing: ClayTheme.Spacing.l) {
                 header
                     .clayAppear()
 
-                quoteSection
+                quoteSection(presentation)
                     .clayAppear(delay: 0.05)
 
-                nextScheduleSection
+                // 오늘의 명언 바로 아래가 이 릴리스의 중심이다. 기록이 설정
+                // 세 단계 아래에 있는 한 아무도 쓰지 않는다.
+                JournalCard(presentation: presentation)
                     .clayAppear(delay: 0.1)
 
-                todaySection
+                nextScheduleSection
                     .clayAppear(delay: 0.15)
+
+                todaySection
+                    .clayAppear(delay: 0.2)
             }
             .padding(.horizontal, ClayTheme.Spacing.m)
             .padding(.top, ClayTheme.Spacing.m)
@@ -60,12 +70,8 @@ struct HomeView: View {
 
     // MARK: - 오늘의 명언
 
-    private var quoteSection: some View {
-        // 오늘의 명언이 바뀌거나 번역이 끝나면 이 값이 올라 화면이 다시 그려진다.
-        // (RemoteQuoteStore 는 UserDefaults 를 직접 읽는 값 타입이라 관찰되지 않는다)
-        _ = appEnvironment.remoteQuoteRevision
-        let presentation = viewModel.quoteOfTheDay()
-        return VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+    private func quoteSection(_ presentation: QuotePresentation) -> some View {
+        VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
             QuoteCard(presentation: presentation, style: .hero) {
                 router.showQuote(presentation.quote)
             }

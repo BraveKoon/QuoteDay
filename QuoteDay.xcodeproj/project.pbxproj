@@ -47,6 +47,10 @@
 			isa = PBXBuildFile;
 			fileRef = 69B32C4A8C04DC7317304508 /* NotesListView.swift */;
 		};
+		117719805DB9D40273664738 = {
+			isa = PBXBuildFile;
+			fileRef = E2C5EC365FEE2CB9A2D02BB0 /* JournalStreak.swift */;
+		};
 		120B5E867FA3107D92C71FE5 = {
 			isa = PBXBuildFile;
 			fileRef = 55F17BFD846695A20D9D29C0 /* SettingsView.swift */;
@@ -275,6 +279,10 @@
 			isa = PBXBuildFile;
 			fileRef = 9A16F72806EDB7805BB3B020 /* ChallengeHomeView.swift */;
 		};
+		749CFE7565FB3E4B60D37605 = {
+			isa = PBXBuildFile;
+			fileRef = E2C5EC365FEE2CB9A2D02BB0 /* JournalStreak.swift */;
+		};
 		759D2838B3E913A442EBE162 = {
 			isa = PBXBuildFile;
 			fileRef = 892AFE698AD36360F4110471 /* PrivacyInfo.xcprivacy */;
@@ -422,6 +430,10 @@
 		B36E03D938949E98FEE3A7B3 = {
 			isa = PBXBuildFile;
 			fileRef = 2B5CC22705DFC11BC2CCAF19 /* QuoteLibraryData.swift */;
+		};
+		B52FB5A70E62136175EC2E56 = {
+			isa = PBXBuildFile;
+			fileRef = 17B521BCB3D8D3E83345FE0C /* JournalStreakTests.swift */;
 		};
 		B61EF751E16F2543F4AA2BD7 = {
 			isa = PBXBuildFile;
@@ -584,6 +596,10 @@
 			isa = PBXBuildFile;
 			fileRef = 53546DADF352DDED4B5495D5 /* RootTabView.swift */;
 		};
+		F15B109FF7D67200F99F9DEB = {
+			isa = PBXBuildFile;
+			fileRef = 95E2388A4446F00F9A84BE0E /* StreakStore.swift */;
+		};
 		F164468D03689FC548713012 = {
 			isa = PBXBuildFile;
 			fileRef = 59B6C17D3DA747A1AEC34046 /* DisputedAttribution.swift */;
@@ -738,6 +754,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = RemoteQuoteTests.swift;
+			sourceTree = "<group>";
+		};
+		17B521BCB3D8D3E83345FE0C = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalStreakTests.swift;
 			sourceTree = "<group>";
 		};
 		199940478C3A59423BFEF3C6 = {
@@ -1121,6 +1143,12 @@
 			path = PrivacyInfo.xcprivacy;
 			sourceTree = "<group>";
 		};
+		95E2388A4446F00F9A84BE0E = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = StreakStore.swift;
+			sourceTree = "<group>";
+		};
 		977166F8078E4665587F2B0B = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -1329,6 +1357,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = WidgetSnapshot.swift;
+			sourceTree = "<group>";
+		};
+		E2C5EC365FEE2CB9A2D02BB0 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalStreak.swift;
 			sourceTree = "<group>";
 		};
 		E40F4F782E2301BB3B796F80 = {
@@ -1634,6 +1668,7 @@
 				DB1C5D5CE6B4AF60FD9E1BD6 /* HeartTests.swift */,
 				CAD723716DB6C977745C80CA /* JournalArchiveTests.swift */,
 				50CD69602916AD33BDBF6BED /* JournalComposeTests.swift */,
+				17B521BCB3D8D3E83345FE0C /* JournalStreakTests.swift */,
 				8778F843E1DE59586B67E419 /* NoteStoreDayTests.swift */,
 				7CA9E13CF0D451B629400AEF /* PlusTests.swift */,
 				330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */,
@@ -1720,6 +1755,7 @@
 				2BB954BFC1F8AE17DC738C8D /* QuoteTranslationTask.swift */,
 				B663D4D8413004C8C4FE767E /* RankStore.swift */,
 				713DE0C004E84D4AFF654912 /* ScheduleStore.swift */,
+				95E2388A4446F00F9A84BE0E /* StreakStore.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -1736,6 +1772,7 @@
 				5FD4E6400472C4F80BB49F9A /* ChallengeScore.swift */,
 				A891BF38ED152A6472BE1E46 /* DeepLink.swift */,
 				199940478C3A59423BFEF3C6 /* JournalArchive.swift */,
+				E2C5EC365FEE2CB9A2D02BB0 /* JournalStreak.swift */,
 				BE73433C5222A7AF14D1B59F /* PlusFeature.swift */,
 				EE249BE91E4B13A46667234E /* Quote.swift */,
 				0293EB7A04D7197ABA9121F6 /* QuoteHeart.swift */,
@@ -1910,6 +1947,7 @@
 				0CD5478196C468A0AEF8791A /* AuthorPortrait.swift in Sources */,
 				0F7060DD4AB9AFA74C5F8B72 /* ChallengeQuestion.swift in Sources */,
 				1097DB041263D476797561CF /* NotesListView.swift in Sources */,
+				117719805DB9D40273664738 /* JournalStreak.swift in Sources */,
 				120B5E867FA3107D92C71FE5 /* SettingsView.swift in Sources */,
 				1A32667D279F3C48E0F730C6 /* QuoteHeart.swift in Sources */,
 				1A57FEA2BCB63A0691680521 /* CategoryChip.swift in Sources */,
@@ -1991,6 +2029,7 @@
 				EE747B0B97D3D751FC62FDC8 /* HomeViewModel.swift in Sources */,
 				EF1C01EDDF6569CB6FBF05CB /* Persistence.swift in Sources */,
 				F01FF9526EF3C15B534C0096 /* RootTabView.swift in Sources */,
+				F15B109FF7D67200F99F9DEB /* StreakStore.swift in Sources */,
 				F228DF7CF4672AC199EFB05C /* DailyQuoteNotification.swift in Sources */,
 				F312B673E8A7311A0F950A00 /* NotificationService.swift in Sources */,
 				F543163AE1AD608F9654896D /* ScheduleOccurrence.swift in Sources */,
@@ -2016,6 +2055,7 @@
 				63D6B94494F72829BABCE2AE /* ShareCardTests.swift in Sources */,
 				8E15686E7289912954E9CD80 /* WidgetAgreementTests.swift in Sources */,
 				A611F1A0E3957787978AA87E /* ScheduleAndNavigationTests.swift in Sources */,
+				B52FB5A70E62136175EC2E56 /* JournalStreakTests.swift in Sources */,
 				E6605CA807A6EC44477CB24C /* NoteStoreDayTests.swift in Sources */,
 				E90E1911D37099FEB85CD56F /* QuoteEngineTests.swift in Sources */,
 				EA127D7DA9AF5DD3A378C517 /* RecurrenceTests.swift in Sources */,
@@ -2045,6 +2085,7 @@
 				53CF9C696774D664286B73C9 /* QuoteHeart.swift in Sources */,
 				5BB5BFB55A83ADC63177D70E /* ReleaseHistory.swift in Sources */,
 				5F003B30F5F8E9CAA14E8991 /* RankSyncing.swift in Sources */,
+				749CFE7565FB3E4B60D37605 /* JournalStreak.swift in Sources */,
 				765272DF63CDC8170AAA1B84 /* HeartSyncing.swift in Sources */,
 				78D93F5FDAA1480D7AE3E7A7 /* RemoteQuoteService.swift in Sources */,
 				7BB212837B646C2E0BD5F9DD /* Author.swift in Sources */,

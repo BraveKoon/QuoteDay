@@ -79,6 +79,8 @@ public enum SharedDefaultsKey {
     public static let challengeSeason = "challenge.season"
     /// 챌린지 화면에서 마지막으로 고른 모드.
     public static let challengeMode = "challenge.lastMode"
+    /// 연속 기록(JSON 한 덩어리). 숫자 몇 개뿐이라 스키마를 늘리지 않는다.
+    public static let journalStreak = "journal.streak.v1"
     /// 기록을 마지막으로 내보낸 시각. 없으면 한 번도 백업하지 않았다는 뜻이다.
     public static let lastJournalBackupAt = "journal.lastBackupAt"
     /// 마지막으로 받아 온 명언별 전체 하트 수.

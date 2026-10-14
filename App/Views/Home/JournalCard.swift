@@ -13,6 +13,7 @@ struct JournalCard: View {
     let presentation: QuotePresentation
 
     @Environment(NoteStore.self) private var notes
+    @Environment(StreakStore.self) private var streaks
     @Environment(AppRouter.self) private var router
     @Environment(\.scenePhase) private var scenePhase
 
@@ -38,6 +39,8 @@ struct JournalCard: View {
             } else {
                 invitation
             }
+
+            streakLine
         }
         .padding(ClayTheme.Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -160,6 +163,26 @@ struct JournalCard: View {
         .onChange(of: draft) { _, _ in scheduleSave() }
     }
 
+    /// 홈 구석에 작게. **크게 쓰지 않는다** — 압박이 아니라 배경이어야 한다.
+    @ViewBuilder
+    private var streakLine: some View {
+        let streak = streaks.streak
+        if !streak.homeText.isEmpty {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(streak.homeText)
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+                if let note = streak.freezeNote {
+                    Text(note)
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.accent)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
     // MARK: - 쓰기
 
     private func beginEditing() {
@@ -190,6 +213,14 @@ struct JournalCard: View {
         guard isEditing else { return }
         // 본문이 비면 NoteStore 가 그날 글을 지운다. 빈 껍데기를 남기지 않는다.
         notes.save(text: draft, for: presentation, source: .daily)
+
+        // 연속 기록은 글이 실제로 남았을 때만 올린다. 썼다 지운 날까지 세면
+        // 숫자가 거짓말이 되고, 사용자도 그걸 안다.
+        if notes.notes(on: .now).isEmpty {
+            streaks.undoToday()
+        } else {
+            streaks.recordEntry()
+        }
     }
 
     // MARK: - 말 걸기

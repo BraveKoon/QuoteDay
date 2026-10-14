@@ -1,6 +1,9 @@
 import SwiftUI
 
-/// 지금까지 쓴 노트를 모아 보고, PDF 로 내보내는 화면.
+/// 지금까지 쓴 기록을 모아 보고, 인쇄용 PDF 로 묶는 화면.
+///
+/// PDF 는 **백업이 아니다** — 다시 읽어 들일 수 없다. 기기를 바꿀 때 쓰는
+/// 백업은 설정의 "기록 내보내기"(JSON)가 맡는다.
 struct NotesListView: View {
     @Environment(NoteStore.self) private var notes
     @Environment(PlusStore.self) private var plus
@@ -54,7 +57,7 @@ struct NotesListView: View {
             VStack(spacing: ClayTheme.Spacing.s) {
                 if let exportedFile {
                     ShareLink(item: exportedFile) {
-                        Label("PDF 공유하기", systemImage: "square.and.arrow.up")
+                        Label("PDF 공유하기", systemImage: "printer")
                             .frame(maxWidth: .infinity)
                     }
                     .clayButton(.primary, fullWidth: true)
@@ -68,7 +71,7 @@ struct NotesListView: View {
                             ProgressView().tint(ClayTheme.textPrimary)
                         } else {
                             Label(
-                                exportedFile == nil ? "노트 \(notes.notes.count)편 PDF 로 내보내기" : "다시 만들기",
+                                exportedFile == nil ? "기록 \(notes.notes.count)편 인쇄용 PDF 로 묶기" : "다시 만들기",
                                 systemImage: "doc.richtext"
                             )
                         }
@@ -81,7 +84,7 @@ struct NotesListView: View {
         } else {
             PlusLockedCard(
                 feature: .noteExport,
-                message: "노트 \(notes.notes.count)편을 표지가 있는 PDF 한 권으로 묶어 드려요."
+                message: "기록 \(notes.notes.count)편을 표지가 있는 PDF 한 권으로 묶어 드려요. 백업은 설정에서 따로 하세요."
             ) {
                 showsPaywall = true
             }

@@ -87,6 +87,10 @@
 			isa = PBXBuildFile;
 			fileRef = EE249BE91E4B13A46667234E /* Quote.swift */;
 		};
+		1CF966A808C5ED40E746F7FC = {
+			isa = PBXBuildFile;
+			fileRef = CAD723716DB6C977745C80CA /* JournalArchiveTests.swift */;
+		};
 		23D20C0FBF76308CB79CC0AA = {
 			isa = PBXBuildFile;
 			fileRef = 4BB9359D2598D80420E32958 /* CloudKitRankService.swift */;
@@ -166,6 +170,10 @@
 		4ED0E76EF2481887A6F1DBFF = {
 			isa = PBXBuildFile;
 			fileRef = 59B6C17D3DA747A1AEC34046 /* DisputedAttribution.swift */;
+		};
+		4EEF53F6DED2F27B88DD39F4 = {
+			isa = PBXBuildFile;
+			fileRef = 199940478C3A59423BFEF3C6 /* JournalArchive.swift */;
 		};
 		4F287646E538AD5343972CFE = {
 			isa = PBXBuildFile;
@@ -496,6 +504,10 @@
 			isa = PBXBuildFile;
 			fileRef = 92764A39C91CEA9700FC1043 /* LockScreenWidget.swift */;
 		};
+		DEC8D8D92289876673762C99 = {
+			isa = PBXBuildFile;
+			fileRef = 47AAB5D31F1BE9B0E0F39083 /* JournalArchiveDocument.swift */;
+		};
 		DEF97525C3C26443C233BB4F = {
 			isa = PBXBuildFile;
 			fileRef = ABDF2F48E3A7BFD64E5BC2E8 /* ReleaseNotesSheet.swift */;
@@ -515,6 +527,10 @@
 		E5A30A7FE7C04554AB7114DD = {
 			isa = PBXBuildFile;
 			fileRef = 5F128CFBB5886FDBC1FF852B /* ShareCardTheme.swift */;
+		};
+		E6605CA807A6EC44477CB24C = {
+			isa = PBXBuildFile;
+			fileRef = 8778F843E1DE59586B67E419 /* NoteStoreDayTests.swift */;
 		};
 		E8BC090335169404E3110D47 = {
 			isa = PBXBuildFile;
@@ -579,6 +595,10 @@
 		F543163AE1AD608F9654896D = {
 			isa = PBXBuildFile;
 			fileRef = F2829150112B2526E9BB263C /* ScheduleOccurrence.swift */;
+		};
+		F6FE661AFF02CB3F39530485 = {
+			isa = PBXBuildFile;
+			fileRef = 199940478C3A59423BFEF3C6 /* JournalArchive.swift */;
 		};
 		F79E7F7801BFA303399230C6 = {
 			isa = PBXBuildFile;
@@ -712,6 +732,12 @@
 			path = RemoteQuoteTests.swift;
 			sourceTree = "<group>";
 		};
+		199940478C3A59423BFEF3C6 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalArchive.swift;
+			sourceTree = "<group>";
+		};
 		1E3721AA12BAB68581565FD9 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -827,6 +853,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = AppRouter.swift;
+			sourceTree = "<group>";
+		};
+		47AAB5D31F1BE9B0E0F39083 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalArchiveDocument.swift;
 			sourceTree = "<group>";
 		};
 		4A21180D8A8F60CCF2AE357A = {
@@ -1025,6 +1057,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = AuthorDetailView.swift;
+			sourceTree = "<group>";
+		};
+		8778F843E1DE59586B67E419 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = NoteStoreDayTests.swift;
 			sourceTree = "<group>";
 		};
 		892AFE698AD36360F4110471 = {
@@ -1235,6 +1273,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = RecurrenceRule.swift;
+			sourceTree = "<group>";
+		};
+		CAD723716DB6C977745C80CA = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalArchiveTests.swift;
 			sourceTree = "<group>";
 		};
 		D550BB8FC789EF2AFF6F4056 = {
@@ -1568,6 +1612,8 @@
 				6CA9B05771F2B338450108DC /* ChallengeTests.swift */,
 				83C5C9587EF589732174E86E /* DailyQuoteTimeTests.swift */,
 				DB1C5D5CE6B4AF60FD9E1BD6 /* HeartTests.swift */,
+				CAD723716DB6C977745C80CA /* JournalArchiveTests.swift */,
+				8778F843E1DE59586B67E419 /* NoteStoreDayTests.swift */,
 				7CA9E13CF0D451B629400AEF /* PlusTests.swift */,
 				330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */,
 				92762851B7349EBBE5469D0C /* RankingTests.swift */,
@@ -1642,6 +1688,7 @@
 				7F4AC1ADFB65DFD1D9493DC4 /* CloudKitHeartService.swift */,
 				4BB9359D2598D80420E32958 /* CloudKitRankService.swift */,
 				363B856753BBFF85DDF29B95 /* HeartStore.swift */,
+				47AAB5D31F1BE9B0E0F39083 /* JournalArchiveDocument.swift */,
 				0C72FE8A99F4B0AC2C0F8233 /* NotePDFExporter.swift */,
 				020A9AAB2971017A79E05CA7 /* NoteStore.swift */,
 				5FA85081F75F9D3264BF4A88 /* NotificationService.swift */,
@@ -1666,6 +1713,7 @@
 				0F86797CCD4AE099F6F25341 /* ChallengeQuestion.swift */,
 				5FD4E6400472C4F80BB49F9A /* ChallengeScore.swift */,
 				A891BF38ED152A6472BE1E46 /* DeepLink.swift */,
+				199940478C3A59423BFEF3C6 /* JournalArchive.swift */,
 				BE73433C5222A7AF14D1B59F /* PlusFeature.swift */,
 				EE249BE91E4B13A46667234E /* Quote.swift */,
 				0293EB7A04D7197ABA9121F6 /* QuoteHeart.swift */,
@@ -1857,6 +1905,7 @@
 				4AE0697B1039CE2285796789 /* CalendarViewModel.swift in Sources */,
 				4D3473BCA45CD1A27F8F1AD3 /* WidgetSnapshot.swift in Sources */,
 				4ED0E76EF2481887A6F1DBFF /* DisputedAttribution.swift in Sources */,
+				4EEF53F6DED2F27B88DD39F4 /* JournalArchive.swift in Sources */,
 				502D4DF22951B28133F5383B /* NotePDFExporter.swift in Sources */,
 				56A6E646A60B69B5B93458BA /* QuoteDetailView.swift in Sources */,
 				57637725F7B19FA9A01C258B /* RemoteQuoteService.swift in Sources */,
@@ -1910,6 +1959,7 @@
 				DAA768F6F31A5C0EBA6294CB /* QuoteCategoryOption.swift in Sources */,
 				DAFA376C81E1AE84155E83EA /* RankSeason.swift in Sources */,
 				DCA55805BBE9BC0E0FD3F6E8 /* ScheduleItem.swift in Sources */,
+				DEC8D8D92289876673762C99 /* JournalArchiveDocument.swift in Sources */,
 				DEF97525C3C26443C233BB4F /* ReleaseNotesSheet.swift in Sources */,
 				E3B113FDBD4A4675A03D856D /* ShareCardDesign.swift in Sources */,
 				E5700511C07D47B95A0AE516 /* BehindStory.swift in Sources */,
@@ -1936,11 +1986,13 @@
 				0DCF303893655CEE25F591F6 /* PlusTests.swift in Sources */,
 				132E45E87385D3F6F7CC52D7 /* HeartTests.swift in Sources */,
 				15B82FD91221A1C33FC7477B /* ChallengeTests.swift in Sources */,
+				1CF966A808C5ED40E746F7FC /* JournalArchiveTests.swift in Sources */,
 				58B328AA57C1FE89104D2D7F /* ReleaseHistoryTests.swift in Sources */,
 				5DDC79D5A4AC1C12557D4CF3 /* DailyQuoteTimeTests.swift in Sources */,
 				63D6B94494F72829BABCE2AE /* ShareCardTests.swift in Sources */,
 				8E15686E7289912954E9CD80 /* WidgetAgreementTests.swift in Sources */,
 				A611F1A0E3957787978AA87E /* ScheduleAndNavigationTests.swift in Sources */,
+				E6605CA807A6EC44477CB24C /* NoteStoreDayTests.swift in Sources */,
 				E90E1911D37099FEB85CD56F /* QuoteEngineTests.swift in Sources */,
 				EA127D7DA9AF5DD3A378C517 /* RecurrenceTests.swift in Sources */,
 				ED6C441865728C4A92D08B9D /* RankingTests.swift in Sources */,
@@ -1992,6 +2044,7 @@
 				F0198F0B08D2E24E555D431D /* QuoteService.swift in Sources */,
 				F164468D03689FC548713012 /* DisputedAttribution.swift in Sources */,
 				F36722AB805F041C420331F6 /* BehindStory.swift in Sources */,
+				F6FE661AFF02CB3F39530485 /* JournalArchive.swift in Sources */,
 				FD41707ABC8F0F23C40EDD40 /* QuoteLibrary.swift in Sources */,
 				FF52E3DDF58CAC9699784E79 /* DailyQuoteSelection.swift in Sources */,
 			);

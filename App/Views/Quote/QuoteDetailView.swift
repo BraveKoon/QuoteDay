@@ -223,7 +223,10 @@ struct QuoteDetailView: View {
     // MARK: - 노트 (무료)
 
     private func noteSection(for presentation: QuotePresentation) -> some View {
+        // 오늘 쓴 글만 고친다. 예전 글은 그대로 두고 몇 편 있는지만 알린다 —
+        // 명언 하나에 글 하나이던 시절에는 새로 쓰면 예전 글이 사라졌다.
         let existing = notes.note(for: presentation.quote.slug)
+        let past = notes.allNotes(for: presentation.quote.slug).filter { $0.id != existing?.id }
 
         return VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
             SectionHeader("나의 노트")
@@ -242,6 +245,13 @@ struct QuoteDetailView: View {
                 Text("이 문장에서 떠오른 생각을 적어 두면 나중에 모아 볼 수 있어요.")
                     .font(ClayFont.callout())
                     .foregroundStyle(ClayTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if !past.isEmpty {
+                Text("이 명언에 예전에 남긴 글이 \(past.count)편 있어요.")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.accent)
                     .fixedSize(horizontal: false, vertical: true)
             }
 

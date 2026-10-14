@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
 /// 설정 화면. 클레이 스타일을 유지하기 위해 `Form` 대신 카드로 구성한다.
 struct SettingsView: View {
@@ -19,6 +20,14 @@ struct SettingsView: View {
     /// 방금 복사한 후원 수단. 체크 표시를 잠깐 보여 주기 위한 값이다.
     @State private var copiedSupportID: String?
     @State private var showsReleaseNotes = false
+    @State private var showsExporter = false
+    @State private var showsImporter = false
+    /// 내보내기 시트에 넘길 문서. 버튼을 누른 순간 만든다.
+    @State private var exportDocument: JournalArchiveDocument?
+    /// 내보내기·가져오기 결과를 알리는 한 줄.
+    @State private var archiveMessage: String?
+    /// 마지막 백업 시각을 다시 읽게 만드는 트리거.
+    @State private var backupToken = 0
 
     var body: some View {
         @Bindable var settings = settings
@@ -32,6 +41,7 @@ struct SettingsView: View {
                     plusCard
                 }
                 notesCard
+                backupCard
                 notificationCard(settings: settings)
                 remoteQuoteCard(settings: settings)
                 dailyQuoteCard(settings: settings)
@@ -55,6 +65,20 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showsReleaseNotes) {
             ReleaseNotesSheet()
+        }
+        .fileExporter(
+            isPresented: $showsExporter,
+            document: exportDocument,
+            contentType: .json,
+            defaultFilename: JournalArchive.fileName()
+        ) { result in
+            finishExport(result)
+        }
+        .fileImporter(
+            isPresented: $showsImporter,
+            allowedContentTypes: [.json]
+        ) { result in
+            finishImport(result)
         }
         .task {
             await notifications.refreshAuthorizationStatus()
@@ -161,6 +185,107 @@ struct SettingsView: View {
                         .clayCard(cornerRadius: ClayTheme.Radius.control)
                 }
             }
+        }
+    }
+
+    // MARK: - 기록 백업
+
+    private var backupCard: some View {
+        // 읽어 두기만 하면 값이 바뀌어도 다시 그리지 않는다. 토큰을 건드려
+        // 내보낸 직후 "마지막 백업" 줄이 바로 갱신되게 한다.
+        _ = backupToken
+        let lastBackup = JournalBackupMark.lastBackup()
+        let needsWarning = JournalBackupMark.needsWarning(noteCount: notes.notes.count)
+
+        return card(title: "기록 백업", symbol: "arrow.up.doc") {
+            VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+                Text("기록은 이 기기에만 있습니다. 파일로 내보내 두면 기기를 바꿔도 가져올 수 있어요.")
+                    .font(ClayFont.callout())
+                    .foregroundStyle(ClayTheme.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let lastBackup {
+                    Text("마지막 백업 \(Formatters.shortDateTime.string(from: lastBackup))")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                } else if needsWarning {
+                    Text("마지막 백업: 없음 — 지금 기기를 잃으면 기록 \(notes.notes.count)편이 함께 사라집니다.")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.danger)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Button {
+                    prepareExport()
+                } label: {
+                    Label("기록 내보내기", systemImage: "square.and.arrow.up")
+                        .frame(maxWidth: .infinity)
+                }
+                .clayButton(.secondary, fullWidth: true)
+                .disabled(notes.isEmpty)
+
+                Button {
+                    showsImporter = true
+                } label: {
+                    Label("기록 가져오기", systemImage: "square.and.arrow.down")
+                        .frame(maxWidth: .infinity)
+                }
+                .clayButton(.secondary, fullWidth: true)
+
+                Text("가져오기는 가진 기록을 지우지 않아요. 같은 글은 나중에 고친 쪽만 남습니다.")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let archiveMessage {
+                    Text(archiveMessage)
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.accent)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+    }
+
+    private func prepareExport() {
+        do {
+            exportDocument = JournalArchiveDocument(
+                data: try JournalArchive.encode(notes.exportPayload())
+            )
+            showsExporter = true
+        } catch {
+            archiveMessage = "내보낼 파일을 만들지 못했어요."
+            AppLog.notes.error("내보내기 인코딩 실패: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    private func finishExport(_ result: Result<URL, Error>) {
+        exportDocument = nil
+        switch result {
+        case .success:
+            JournalBackupMark.markBackedUp()
+            backupToken += 1
+            archiveMessage = "기록 \(notes.notes.count)편을 내보냈어요."
+        case .failure(let error):
+            // 사용자가 취소한 것도 실패로 온다. 조용히 넘어간다.
+            AppLog.notes.debug("내보내기 종료: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    private func finishImport(_ result: Result<[URL], Error>) {
+        guard case .success(let urls) = result, let url = urls.first else { return }
+        // 파일 앱에서 고른 파일은 보안 범위 밖에 있다. 열기 전에 권한을 얻는다.
+        let needsScope = url.startAccessingSecurityScopedResource()
+        defer { if needsScope { url.stopAccessingSecurityScopedResource() } }
+
+        do {
+            let merged = try notes.importArchive(try Data(contentsOf: url))
+            archiveMessage = merged.summary
+        } catch JournalArchiveError.tooNew(let schema) {
+            archiveMessage = "더 새로운 버전에서 만든 파일이에요(형식 \(schema)). 앱을 업데이트해 주세요."
+        } catch {
+            archiveMessage = "읽을 수 없는 파일이에요. QuoteDay 가 내보낸 파일인지 확인해 주세요."
+            AppLog.notes.error("가져오기 실패: \(error.localizedDescription, privacy: .public)")
         }
     }
 

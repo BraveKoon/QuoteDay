@@ -27,6 +27,10 @@
 			isa = PBXBuildFile;
 			fileRef = 2DF738E3E3185302E795EF07 /* NameKey.swift */;
 		};
+		0B0AAEE81BF7C06D9516052C = {
+			isa = PBXBuildFile;
+			fileRef = 3EC44F41FB368CAB28BEB47F /* MonthlyReview.swift */;
+		};
 		0BC92BE8C6F0A38AFCD2EA41 = {
 			isa = PBXBuildFile;
 			fileRef = 5FD4E6400472C4F80BB49F9A /* ChallengeScore.swift */;
@@ -175,6 +179,10 @@
 			isa = PBXBuildFile;
 			fileRef = E0E18626C493AE5C0EE77817 /* WidgetSnapshot.swift */;
 		};
+		4D56B876F58BCD01D5D9E2BD = {
+			isa = PBXBuildFile;
+			fileRef = 121082B9D88AA9959100226C /* ThrowbackCard.swift */;
+		};
 		4ED0E76EF2481887A6F1DBFF = {
 			isa = PBXBuildFile;
 			fileRef = 59B6C17D3DA747A1AEC34046 /* DisputedAttribution.swift */;
@@ -275,6 +283,10 @@
 			isa = PBXBuildFile;
 			fileRef = 28CBEC6F5FCB6ADF1B531D5E /* RankSyncing.swift */;
 		};
+		737B0A4DD5677888DE82CBEB = {
+			isa = PBXBuildFile;
+			fileRef = 3EC44F41FB368CAB28BEB47F /* MonthlyReview.swift */;
+		};
 		748E74B04BDC23B0F23072D6 = {
 			isa = PBXBuildFile;
 			fileRef = 9A16F72806EDB7805BB3B020 /* ChallengeHomeView.swift */;
@@ -287,6 +299,10 @@
 			isa = PBXBuildFile;
 			fileRef = 892AFE698AD36360F4110471 /* PrivacyInfo.xcprivacy */;
 		};
+		7610430AF12E013BE3BBC284 = {
+			isa = PBXBuildFile;
+			fileRef = 4001857FE0FB8E98F00A1AC4 /* JournalLookbackTests.swift */;
+		};
 		765272DF63CDC8170AAA1B84 = {
 			isa = PBXBuildFile;
 			fileRef = FE324088DA0E0BBF5B136CA7 /* HeartSyncing.swift */;
@@ -298,6 +314,10 @@
 		78D93F5FDAA1480D7AE3E7A7 = {
 			isa = PBXBuildFile;
 			fileRef = E40F4F782E2301BB3B796F80 /* RemoteQuoteService.swift */;
+		};
+		7A6AF4B82BCB3C631E9C445F = {
+			isa = PBXBuildFile;
+			fileRef = CBDEDE38C5A37B730C941305 /* JournalRepository.swift */;
 		};
 		7BB212837B646C2E0BD5F9DD = {
 			isa = PBXBuildFile;
@@ -399,6 +419,10 @@
 			isa = PBXBuildFile;
 			fileRef = 2BB954BFC1F8AE17DC738C8D /* QuoteTranslationTask.swift */;
 		};
+		A0D69470C4E6805AD4123BCE = {
+			isa = PBXBuildFile;
+			fileRef = 18494E9E0626551828F4B5FA /* QuoteMood.swift */;
+		};
 		A3D90B6FADFCC61019998A1C = {
 			isa = PBXBuildFile;
 			fileRef = 4F80E4DF1C332D39FC03926A /* PlusLockedCard.swift */;
@@ -422,6 +446,10 @@
 		A978B4F4E853643057590D68 = {
 			isa = PBXBuildFile;
 			fileRef = 580B96EDF2D379725ADB41D0 /* QuoteCategoryOption.swift */;
+		};
+		ACA65269CEE14B3CD0A96260 = {
+			isa = PBXBuildFile;
+			fileRef = 1116B0A086864142B4BC3B0F /* MonthlyReviewView.swift */;
 		};
 		B2A65AB6AA7F9C3D6377A514 = {
 			isa = PBXBuildFile;
@@ -628,6 +656,10 @@
 			isa = PBXBuildFile;
 			fileRef = 78432620EB5EAAD902F01C15 /* QuoteLibrary.swift */;
 		};
+		F9AE987D3226F37969F7681A = {
+			isa = PBXBuildFile;
+			fileRef = 18494E9E0626551828F4B5FA /* QuoteMood.swift */;
+		};
 		FA2F2685730524FBA4B64937 = {
 			isa = PBXBuildFile;
 			fileRef = 1E5C87233090C8CFDB8B803C /* AuthorLibrary.swift */;
@@ -744,6 +776,18 @@
 			path = AppCategory.swift;
 			sourceTree = "<group>";
 		};
+		1116B0A086864142B4BC3B0F = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = MonthlyReviewView.swift;
+			sourceTree = "<group>";
+		};
+		121082B9D88AA9959100226C = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = ThrowbackCard.swift;
+			sourceTree = "<group>";
+		};
 		1626CA185D5265345E8A5A43 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -760,6 +804,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = JournalStreakTests.swift;
+			sourceTree = "<group>";
+		};
+		18494E9E0626551828F4B5FA = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteMood.swift;
 			sourceTree = "<group>";
 		};
 		199940478C3A59423BFEF3C6 = {
@@ -872,6 +922,18 @@
 			includeInIndex = 0;
 			path = QuoteDayWidgetExtension.appex;
 			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3EC44F41FB368CAB28BEB47F = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = MonthlyReview.swift;
+			sourceTree = "<group>";
+		};
+		4001857FE0FB8E98F00A1AC4 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalLookbackTests.swift;
+			sourceTree = "<group>";
 		};
 		4630106E5179B747C7D7131A = {
 			isa = PBXFileReference;
@@ -1329,6 +1391,12 @@
 			path = JournalArchiveTests.swift;
 			sourceTree = "<group>";
 		};
+		CBDEDE38C5A37B730C941305 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalRepository.swift;
+			sourceTree = "<group>";
+		};
 		D550BB8FC789EF2AFF6F4056 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -1482,6 +1550,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0611745EAAF31B30F7DEC6E5 = {
+			isa = PBXGroup;
+			children = (
+				1116B0A086864142B4BC3B0F /* MonthlyReviewView.swift */,
+			);
+			path = Journal;
+			sourceTree = "<group>";
+		};
 		0A615C0DFAC147A3F3B7C72B = {
 			isa = PBXGroup;
 			children = (
@@ -1577,6 +1653,7 @@
 				46D127C34398A9D7BED9A5E5 /* Calendar */,
 				511E42668456A97C0B165605 /* Challenge */,
 				9CBBF034CDF457D8B4F1D08F /* Home */,
+				0611745EAAF31B30F7DEC6E5 /* Journal */,
 				E7F010151A07EC9BE8BB0657 /* Notes */,
 				4E424792AB134FFB09EC9640 /* Plus */,
 				4886F00048A8C9D93C5757BA /* Quote */,
@@ -1668,6 +1745,7 @@
 				DB1C5D5CE6B4AF60FD9E1BD6 /* HeartTests.swift */,
 				CAD723716DB6C977745C80CA /* JournalArchiveTests.swift */,
 				50CD69602916AD33BDBF6BED /* JournalComposeTests.swift */,
+				4001857FE0FB8E98F00A1AC4 /* JournalLookbackTests.swift */,
 				17B521BCB3D8D3E83345FE0C /* JournalStreakTests.swift */,
 				8778F843E1DE59586B67E419 /* NoteStoreDayTests.swift */,
 				7CA9E13CF0D451B629400AEF /* PlusTests.swift */,
@@ -1688,6 +1766,7 @@
 			children = (
 				29751952A88730ACE801F76E /* HomeView.swift */,
 				C5DF8588F87B5BD0225D365F /* JournalCard.swift */,
+				121082B9D88AA9959100226C /* ThrowbackCard.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -1746,6 +1825,7 @@
 				4BB9359D2598D80420E32958 /* CloudKitRankService.swift */,
 				363B856753BBFF85DDF29B95 /* HeartStore.swift */,
 				47AAB5D31F1BE9B0E0F39083 /* JournalArchiveDocument.swift */,
+				CBDEDE38C5A37B730C941305 /* JournalRepository.swift */,
 				0C72FE8A99F4B0AC2C0F8233 /* NotePDFExporter.swift */,
 				020A9AAB2971017A79E05CA7 /* NoteStore.swift */,
 				5FA85081F75F9D3264BF4A88 /* NotificationService.swift */,
@@ -1773,9 +1853,11 @@
 				A891BF38ED152A6472BE1E46 /* DeepLink.swift */,
 				199940478C3A59423BFEF3C6 /* JournalArchive.swift */,
 				E2C5EC365FEE2CB9A2D02BB0 /* JournalStreak.swift */,
+				3EC44F41FB368CAB28BEB47F /* MonthlyReview.swift */,
 				BE73433C5222A7AF14D1B59F /* PlusFeature.swift */,
 				EE249BE91E4B13A46667234E /* Quote.swift */,
 				0293EB7A04D7197ABA9121F6 /* QuoteHeart.swift */,
+				18494E9E0626551828F4B5FA /* QuoteMood.swift */,
 				61557691D31F44AB4F44EABA /* RankSeason.swift */,
 				FE1646147C41479988B75770 /* Release.swift */,
 				5F128CFBB5886FDBC1FF852B /* ShareCardTheme.swift */,
@@ -1964,6 +2046,7 @@
 				4730F9757A07E3B91A3A7686 /* ClayTheme.swift in Sources */,
 				4AE0697B1039CE2285796789 /* CalendarViewModel.swift in Sources */,
 				4D3473BCA45CD1A27F8F1AD3 /* WidgetSnapshot.swift in Sources */,
+				4D56B876F58BCD01D5D9E2BD /* ThrowbackCard.swift in Sources */,
 				4ED0E76EF2481887A6F1DBFF /* DisputedAttribution.swift in Sources */,
 				4EEF53F6DED2F27B88DD39F4 /* JournalArchive.swift in Sources */,
 				502D4DF22951B28133F5383B /* NotePDFExporter.swift in Sources */,
@@ -1981,8 +2064,10 @@
 				6E0CA61B847417D4E9B3AD25 /* EmptyStateView.swift in Sources */,
 				6FB94A170979DC02460FEDF1 /* QuoteCard.swift in Sources */,
 				711F3758473F7E78AD08E137 /* RankSyncing.swift in Sources */,
+				737B0A4DD5677888DE82CBEB /* MonthlyReview.swift in Sources */,
 				748E74B04BDC23B0F23072D6 /* ChallengeHomeView.swift in Sources */,
 				76BB2F69333B3FCD80F7E683 /* QuoteDayApp.swift in Sources */,
+				7A6AF4B82BCB3C631E9C445F /* JournalRepository.swift in Sources */,
 				80FCDC78CD1EC2EDEAC32B8D /* ScheduleStore.swift in Sources */,
 				82EED4E43C9EBCF04F529395 /* AppEnvironment.swift in Sources */,
 				84EE7C5F90BB712DC963D8BC /* StableIdentifier.swift in Sources */,
@@ -2000,8 +2085,10 @@
 				9D43864B431F9E7CF628C9FC /* ChallengeScore.swift in Sources */,
 				A028CA9ACBD697CAA9152658 /* QuoteShareCard.swift in Sources */,
 				A041AD2DDD0E877A39E92CE1 /* QuoteTranslationTask.swift in Sources */,
+				A0D69470C4E6805AD4123BCE /* QuoteMood.swift in Sources */,
 				A3D90B6FADFCC61019998A1C /* PlusLockedCard.swift in Sources */,
 				A3EFD6A913446758F74885C6 /* RecurrencePicker.swift in Sources */,
+				ACA65269CEE14B3CD0A96260 /* MonthlyReviewView.swift in Sources */,
 				B2A65AB6AA7F9C3D6377A514 /* DeepLink.swift in Sources */,
 				B36E03D938949E98FEE3A7B3 /* QuoteLibraryData.swift in Sources */,
 				B78B3FC0A7AE7152AF91B06C /* HeartSyncing.swift in Sources */,
@@ -2053,6 +2140,7 @@
 				58B328AA57C1FE89104D2D7F /* ReleaseHistoryTests.swift in Sources */,
 				5DDC79D5A4AC1C12557D4CF3 /* DailyQuoteTimeTests.swift in Sources */,
 				63D6B94494F72829BABCE2AE /* ShareCardTests.swift in Sources */,
+				7610430AF12E013BE3BBC284 /* JournalLookbackTests.swift in Sources */,
 				8E15686E7289912954E9CD80 /* WidgetAgreementTests.swift in Sources */,
 				A611F1A0E3957787978AA87E /* ScheduleAndNavigationTests.swift in Sources */,
 				B52FB5A70E62136175EC2E56 /* JournalStreakTests.swift in Sources */,
@@ -2070,6 +2158,7 @@
 			files = (
 				04CF373CAA31F6A3444EADED /* WidgetSnapshot.swift in Sources */,
 				0A6F4E37C647050960521F68 /* NameKey.swift in Sources */,
+				0B0AAEE81BF7C06D9516052C /* MonthlyReview.swift in Sources */,
 				0BC92BE8C6F0A38AFCD2EA41 /* ChallengeScore.swift in Sources */,
 				1314A0A9DED7C01BB9141B24 /* AppCategory.swift in Sources */,
 				134479D26EC3823B9CA59EA5 /* QuoteWidgetViews.swift in Sources */,
@@ -2110,6 +2199,7 @@
 				F164468D03689FC548713012 /* DisputedAttribution.swift in Sources */,
 				F36722AB805F041C420331F6 /* BehindStory.swift in Sources */,
 				F6FE661AFF02CB3F39530485 /* JournalArchive.swift in Sources */,
+				F9AE987D3226F37969F7681A /* QuoteMood.swift in Sources */,
 				FD41707ABC8F0F23C40EDD40 /* QuoteLibrary.swift in Sources */,
 				FF52E3DDF58CAC9699784E79 /* DailyQuoteSelection.swift in Sources */,
 			);

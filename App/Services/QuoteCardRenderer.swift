@@ -51,6 +51,25 @@ enum QuoteCardRenderer {
         }
     }
 
+    /// 아무 뷰나 한 장의 PNG 로. 월간 회고가 이 길로 간다.
+    ///
+    /// 명언 카드 전용으로 묶어 두지 않는 이유는, 구워 내는 설정(1배 스케일,
+    /// 임시 파일, 실패 처리)이 무엇을 그리든 같기 때문이다.
+    static func pngFile<Content: View>(_ content: Content, named name: String) -> URL? {
+        let renderer = ImageRenderer(content: content)
+        renderer.scale = 1
+        guard let data = renderer.uiImage?.pngData() else { return nil }
+
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(name)
+        do {
+            try data.write(to: url, options: .atomic)
+            return url
+        } catch {
+            AppLog.quotes.error("이미지 저장 실패: \(error.localizedDescription, privacy: .public)")
+            return nil
+        }
+    }
+
     // MARK: - 사진 앱에 저장
 
     enum SaveOutcome: Equatable {

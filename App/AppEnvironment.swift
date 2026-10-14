@@ -115,6 +115,7 @@ final class AppEnvironment {
         // 사흘 쉬고 연 사람에게 "5일째"라고 말하지 않도록 먼저 맞춘다.
         streakStore.refresh()
         await scheduleStore.refreshOnLaunch()
+        await notifications.scheduleMonthlyReview(hasRecords: !noteStore.isEmpty)
         calendarService.refreshAuthorizationStatus()
         // 백그라운드에 있는 동안 시즌이 바뀌었을 수 있다.
         challengeStore.refreshSeason()

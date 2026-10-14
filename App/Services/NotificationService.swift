@@ -270,6 +270,65 @@ final class NotificationService {
         }
     }
 
+    // MARK: - 월간 회고
+
+    private static let monthlyReviewPrefix = "monthly-review-"
+    /// 몇 달치를 미리 예약해 둘지. 앱을 열 때마다 다시 채운다.
+    static let monthlyReviewHorizon = 6
+
+    /// 매월 1일 아침에 지난달 회고가 왔다고 알린다.
+    ///
+    /// 기록이 없는 사람에게는 보내지 않는다 — 돌아볼 것이 없는데 돌아보라고
+    /// 하는 알림은 광고다.
+    func scheduleMonthlyReview(hour: Int = 9, hasRecords: Bool) async {
+        cancelMonthlyReview()
+        guard hasRecords, await requestAuthorizationIfNeeded() else { return }
+
+        let now = Date.now
+        for offset in 1...Self.monthlyReviewHorizon {
+            guard
+                let month = calendar.date(byAdding: .month, value: offset, to: now),
+                let first = calendar.date(
+                    from: calendar.dateComponents([.year, .month], from: month)
+                )
+            else { continue }
+
+            var components = calendar.dateComponents([.year, .month, .day], from: first)
+            components.hour = hour
+            components.minute = 0
+            components.second = 0
+
+            let content = UNMutableNotificationContent()
+            content.title = "✨ 지난달을 돌아볼 시간"
+            content.body = "한 달 동안 남긴 기록을 한 장으로 모아 두었어요."
+            content.sound = .default
+            content.userInfo = [
+                NotificationPayloadKey.deepLink: DeepLink.today.url.absoluteString
+            ]
+
+            let request = UNNotificationRequest(
+                identifier: "\(Self.monthlyReviewPrefix)\(first.dayKey(calendar: calendar))",
+                content: content,
+                trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+            )
+            do {
+                try await center.add(request)
+            } catch {
+                AppLog.notifications.error("월간 회고 예약 실패: \(error.localizedDescription, privacy: .public)")
+            }
+        }
+    }
+
+    func cancelMonthlyReview() {
+        center.getPendingNotificationRequests { requests in
+            let ids = requests
+                .map(\.identifier)
+                .filter { $0.hasPrefix(Self.monthlyReviewPrefix) }
+            guard !ids.isEmpty else { return }
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+        }
+    }
+
     func cancelDailyQuote() {
         center.getPendingNotificationRequests { requests in
             let ids = requests

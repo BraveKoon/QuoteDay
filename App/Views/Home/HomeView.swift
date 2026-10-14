@@ -7,7 +7,11 @@ struct HomeView: View {
     @Environment(AppRouter.self) private var router
     @Environment(AppEnvironment.self) private var appEnvironment
 
+    @Environment(NoteStore.self) private var notes
+
     @State private var editorTarget: ScheduleEditorTarget?
+    /// 열어 둔 월간 회고. 값이 들어오면 시트가 올라온다.
+    @State private var reviewMonth: ReviewMonth?
 
     /// 상태를 갖지 않는 뷰모델이라 매 렌더마다 새로 만들어도 비용이 없다.
     private var viewModel: HomeViewModel {
@@ -33,11 +37,18 @@ struct HomeView: View {
                 JournalCard(presentation: presentation)
                     .clayAppear(delay: 0.1)
 
-                nextScheduleSection
+                // 있을 때만 그린다. 빈 카드로 자리를 채우지 않는다.
+                ThrowbackCard()
                     .clayAppear(delay: 0.15)
 
-                todaySection
+                monthlyReviewRow
+                    .clayAppear(delay: 0.15)
+
+                nextScheduleSection
                     .clayAppear(delay: 0.2)
+
+                todaySection
+                    .clayAppear(delay: 0.25)
             }
             .padding(.horizontal, ClayTheme.Spacing.m)
             .padding(.top, ClayTheme.Spacing.m)
@@ -48,6 +59,9 @@ struct HomeView: View {
         .clayBackground()
         .sheet(item: $editorTarget) { target in
             ScheduleEditorView(target: target)
+        }
+        .sheet(item: $reviewMonth) { target in
+            MonthlyReviewView(month: target.date)
         }
     }
 
@@ -85,6 +99,44 @@ struct HomeView: View {
         }
         // 날짜가 바뀌면 카드가 부드럽게 교체된다.
         .animation(.easeInOut(duration: 0.35), value: presentation.id)
+    }
+
+    // MARK: - 지난달 회고
+
+    /// 지난달에 쓸 만큼 쌓였을 때만 뜬다.
+    ///
+    /// 회고는 이 앱에서 한 달을 넘긴 사람에게만 보이는 보상이다. 아무 때나
+    /// 열리면 보상이 아니라 메뉴가 된다.
+    @ViewBuilder
+    private var monthlyReviewRow: some View {
+        let month = MonthlyReview.previousMonth()
+        let review = MonthlyReview.make(from: notes.notes.map(\.archived), month: month)
+        if review.isWorthShowing {
+            Button {
+                reviewMonth = ReviewMonth(date: month)
+            } label: {
+                HStack(spacing: ClayTheme.Spacing.s) {
+                    Image(systemName: "sparkles")
+                        .foregroundStyle(ClayTheme.accent)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(Formatters.monthTitle.string(from: month)) 돌아보기")
+                            .font(ClayFont.headline())
+                            .foregroundStyle(ClayTheme.textPrimary)
+                        Text(review.headline)
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.textSecondary)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(ClayTheme.textSecondary)
+                }
+                .padding(ClayTheme.Spacing.m)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .clayCard(cornerRadius: ClayTheme.Radius.card)
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // MARK: - 다음 일정

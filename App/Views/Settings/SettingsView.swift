@@ -272,8 +272,10 @@ struct SettingsView: View {
         }
     }
 
-    private func finishImport(_ result: Result<[URL], Error>) {
-        guard case .success(let urls) = result, let url = urls.first else { return }
+    /// 한 개만 고르게 두었으므로 결과는 `URL` 하나다. 배열로 받는 쪽은
+    /// `allowsMultipleSelection: true` 오버로드다.
+    private func finishImport(_ result: Result<URL, Error>) {
+        guard case .success(let url) = result else { return }
         // 파일 앱에서 고른 파일은 보안 범위 밖에 있다. 열기 전에 권한을 얻는다.
         let needsScope = url.startAccessingSecurityScopedResource()
         defer { if needsScope { url.stopAccessingSecurityScopedResource() } }

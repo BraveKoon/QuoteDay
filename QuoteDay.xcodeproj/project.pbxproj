@@ -171,6 +171,10 @@
 			isa = PBXBuildFile;
 			fileRef = C7334277AFD709E5C8CED783 /* ClayTheme.swift */;
 		};
+		4AC5B1D7D37905FF6B5A63CD = {
+			isa = PBXBuildFile;
+			fileRef = 7C13A07D91909A20A491001F /* MoodLibrary.swift */;
+		};
 		4AE0697B1039CE2285796789 = {
 			isa = PBXBuildFile;
 			fileRef = 648ADB8AEFB7172F5548AA76 /* CalendarViewModel.swift */;
@@ -199,6 +203,10 @@
 			isa = PBXBuildFile;
 			fileRef = 0C72FE8A99F4B0AC2C0F8233 /* NotePDFExporter.swift */;
 		};
+		52DF7E751CB3D204FF93FA36 = {
+			isa = PBXBuildFile;
+			fileRef = 09739FDD3C2C6F256089D22C /* MoodPickerRow.swift */;
+		};
 		53CF9C696774D664286B73C9 = {
 			isa = PBXBuildFile;
 			fileRef = 0293EB7A04D7197ABA9121F6 /* QuoteHeart.swift */;
@@ -210,6 +218,10 @@
 		57637725F7B19FA9A01C258B = {
 			isa = PBXBuildFile;
 			fileRef = E40F4F782E2301BB3B796F80 /* RemoteQuoteService.swift */;
+		};
+		587CB05D950839E8586AD944 = {
+			isa = PBXBuildFile;
+			fileRef = 7C13A07D91909A20A491001F /* MoodLibrary.swift */;
 		};
 		58B328AA57C1FE89104D2D7F = {
 			isa = PBXBuildFile;
@@ -238,6 +250,10 @@
 		5F003B30F5F8E9CAA14E8991 = {
 			isa = PBXBuildFile;
 			fileRef = 28CBEC6F5FCB6ADF1B531D5E /* RankSyncing.swift */;
+		};
+		6006205ED7302DCFF31829EF = {
+			isa = PBXBuildFile;
+			fileRef = D250451E90B990AE36C4E151 /* MoodTests.swift */;
 		};
 		63BB596460B1911768956F65 = {
 			isa = PBXBuildFile;
@@ -740,6 +756,12 @@
 			path = QuoteHeart.swift;
 			sourceTree = "<group>";
 		};
+		09739FDD3C2C6F256089D22C = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = MoodPickerRow.swift;
+			sourceTree = "<group>";
+		};
 		0BB2796F07DA2C7345006812 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -1121,6 +1143,12 @@
 			path = Assets.xcassets;
 			sourceTree = "<group>";
 		};
+		7C13A07D91909A20A491001F = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = MoodLibrary.swift;
+			sourceTree = "<group>";
+		};
 		7CA9E13CF0D451B629400AEF = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -1395,6 +1423,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = JournalRepository.swift;
+			sourceTree = "<group>";
+		};
+		D250451E90B990AE36C4E151 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = MoodTests.swift;
 			sourceTree = "<group>";
 		};
 		D550BB8FC789EF2AFF6F4056 = {
@@ -1688,6 +1722,7 @@
 				9B0DEE8D640A384D6F87D320 /* BehindStoryLibrary.swift */,
 				59B6C17D3DA747A1AEC34046 /* DisputedAttribution.swift */,
 				1626CA185D5265345E8A5A43 /* ForeignNameLibrary.swift */,
+				7C13A07D91909A20A491001F /* MoodLibrary.swift */,
 				2DF738E3E3185302E795EF07 /* NameKey.swift */,
 				78432620EB5EAAD902F01C15 /* QuoteLibrary.swift */,
 				2B5CC22705DFC11BC2CCAF19 /* QuoteLibraryData.swift */,
@@ -1747,6 +1782,7 @@
 				50CD69602916AD33BDBF6BED /* JournalComposeTests.swift */,
 				4001857FE0FB8E98F00A1AC4 /* JournalLookbackTests.swift */,
 				17B521BCB3D8D3E83345FE0C /* JournalStreakTests.swift */,
+				D250451E90B990AE36C4E151 /* MoodTests.swift */,
 				8778F843E1DE59586B67E419 /* NoteStoreDayTests.swift */,
 				7CA9E13CF0D451B629400AEF /* PlusTests.swift */,
 				330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */,
@@ -1766,6 +1802,7 @@
 			children = (
 				29751952A88730ACE801F76E /* HomeView.swift */,
 				C5DF8588F87B5BD0225D365F /* JournalCard.swift */,
+				09739FDD3C2C6F256089D22C /* MoodPickerRow.swift */,
 				121082B9D88AA9959100226C /* ThrowbackCard.swift */,
 			);
 			path = Home;
@@ -2044,12 +2081,14 @@
 				3E6A55054D28D9F84F8933A7 /* Quote.swift in Sources */,
 				4706E6882841E6C00D09382C /* DailyQuoteSelection.swift in Sources */,
 				4730F9757A07E3B91A3A7686 /* ClayTheme.swift in Sources */,
+				4AC5B1D7D37905FF6B5A63CD /* MoodLibrary.swift in Sources */,
 				4AE0697B1039CE2285796789 /* CalendarViewModel.swift in Sources */,
 				4D3473BCA45CD1A27F8F1AD3 /* WidgetSnapshot.swift in Sources */,
 				4D56B876F58BCD01D5D9E2BD /* ThrowbackCard.swift in Sources */,
 				4ED0E76EF2481887A6F1DBFF /* DisputedAttribution.swift in Sources */,
 				4EEF53F6DED2F27B88DD39F4 /* JournalArchive.swift in Sources */,
 				502D4DF22951B28133F5383B /* NotePDFExporter.swift in Sources */,
+				52DF7E751CB3D204FF93FA36 /* MoodPickerRow.swift in Sources */,
 				56A6E646A60B69B5B93458BA /* QuoteDetailView.swift in Sources */,
 				57637725F7B19FA9A01C258B /* RemoteQuoteService.swift in Sources */,
 				590A70C51E3A0296F2295B81 /* CalendarDayCell.swift in Sources */,
@@ -2139,6 +2178,7 @@
 				22D9B961ED114C362B1AD363 /* JournalComposeTests.swift in Sources */,
 				58B328AA57C1FE89104D2D7F /* ReleaseHistoryTests.swift in Sources */,
 				5DDC79D5A4AC1C12557D4CF3 /* DailyQuoteTimeTests.swift in Sources */,
+				6006205ED7302DCFF31829EF /* MoodTests.swift in Sources */,
 				63D6B94494F72829BABCE2AE /* ShareCardTests.swift in Sources */,
 				7610430AF12E013BE3BBC284 /* JournalLookbackTests.swift in Sources */,
 				8E15686E7289912954E9CD80 /* WidgetAgreementTests.swift in Sources */,
@@ -2172,6 +2212,7 @@
 				41FF65102516302AB634EBE8 /* ChallengeMode.swift in Sources */,
 				4F287646E538AD5343972CFE /* PlusFeature.swift in Sources */,
 				53CF9C696774D664286B73C9 /* QuoteHeart.swift in Sources */,
+				587CB05D950839E8586AD944 /* MoodLibrary.swift in Sources */,
 				5BB5BFB55A83ADC63177D70E /* ReleaseHistory.swift in Sources */,
 				5F003B30F5F8E9CAA14E8991 /* RankSyncing.swift in Sources */,
 				749CFE7565FB3E4B60D37605 /* JournalStreak.swift in Sources */,

@@ -620,6 +620,62 @@ def check_quote_data() -> None:
 # ---------------------------------------------------------------- SwiftData
 
 
+MIN_QUOTES_PER_MOOD = 12
+
+
+def check_mood_data() -> None:
+    """기분 꼬리표가 쓸 만큼 붙어 있는지.
+
+    기분을 골랐는데 문장이 서너 편뿐이면 매번 같은 것만 나오고, 그 기능은
+    한 번 쓰고 다시 안 쓰게 된다. 반대로 억지로 다 채우면 고른 기분과
+    상관없는 문장이 섞인다. 양쪽을 여기서 막는다.
+    """
+    path = ROOT / "Shared/Data/MoodLibrary.swift"
+    if not path.exists():
+        fail("MoodLibrary.swift 가 없습니다.")
+        return
+
+    data = path.read_text(encoding="utf-8")
+    quotes = (ROOT / "Shared/Data/QuoteLibraryData.swift").read_text(encoding="utf-8")
+    known_slugs = set(re.findall(r'Quote\(slug: "([^"]+)"', quotes))
+
+    moods_src = (ROOT / "Shared/Models/QuoteMood.swift").read_text(encoding="utf-8")
+    declared_moods = set(re.findall(r"^\s*case (\w+)$", moods_src, re.MULTILINE))
+    if not declared_moods:
+        fail("QuoteMood 에서 기분을 하나도 찾지 못했습니다.")
+        return
+
+    entries = re.findall(r'"([^"]+)": \[([^\]]+)\]', data)
+    if not entries:
+        fail("MoodLibrary 에서 항목을 하나도 찾지 못했습니다.")
+        return
+
+    per_mood: dict[str, int] = {mood: 0 for mood in declared_moods}
+    for slug, raw in entries:
+        if slug not in known_slugs:
+            fail(f"MoodLibrary 가 존재하지 않는 명언 '{slug}' 를 가리킵니다.")
+        tags = [token.strip().lstrip(".") for token in raw.split(",")]
+        if len(tags) > 2:
+            fail(f"{slug} 에 기분이 {len(tags)}개 붙었습니다. 최대 두 개입니다.")
+        if len(set(tags)) != len(tags):
+            fail(f"{slug} 에 같은 기분이 두 번 붙었습니다.")
+        for tag in tags:
+            if tag not in declared_moods:
+                fail(f"{slug} 가 모르는 기분 '{tag}' 를 씁니다.")
+            else:
+                per_mood[tag] += 1
+
+    for mood in sorted(declared_moods):
+        count = per_mood[mood]
+        if count < MIN_QUOTES_PER_MOOD:
+            fail(
+                f"기분 '{mood}' 에 명언이 {count}편뿐입니다. "
+                f"최소 {MIN_QUOTES_PER_MOOD}편이 필요합니다."
+            )
+
+    print(f"  기분 {len(declared_moods)}종 / 꼬리표 붙은 명언 {len(entries)}편 점검")
+
+
 def check_swiftdata_cloudkit() -> None:
     """모든 ModelConfiguration 이 cloudKitDatabase 를 명시하는지.
 
@@ -762,6 +818,7 @@ def main() -> int:
     check_swift_sources()
     check_resources()
     check_quote_data()
+    check_mood_data()
     check_swiftdata_cloudkit()
     check_version()
 

@@ -11,6 +11,8 @@ import SwiftUI
 /// 적을수록 좋다.
 struct JournalCard: View {
     let presentation: QuotePresentation
+    /// 오늘 고른 기분. 글과 함께 저장되어 월간 회고에서 세어진다.
+    var mood: QuoteMood?
 
     @Environment(NoteStore.self) private var notes
     @Environment(StreakStore.self) private var streaks
@@ -212,7 +214,7 @@ struct JournalCard: View {
         saveTask = nil
         guard isEditing else { return }
         // 본문이 비면 NoteStore 가 그날 글을 지운다. 빈 껍데기를 남기지 않는다.
-        notes.save(text: draft, for: presentation, source: .daily)
+        notes.save(text: draft, for: presentation, source: .daily, mood: mood?.rawValue)
 
         // 연속 기록은 글이 실제로 남았을 때만 올린다. 썼다 지운 날까지 세면
         // 숫자가 거짓말이 되고, 사용자도 그걸 안다.

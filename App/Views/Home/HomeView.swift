@@ -12,6 +12,8 @@ struct HomeView: View {
     @State private var editorTarget: ScheduleEditorTarget?
     /// 열어 둔 월간 회고. 값이 들어오면 시트가 올라온다.
     @State private var reviewMonth: ReviewMonth?
+    /// 오늘 고른 기분. 고르면 명언이 그 기분의 것으로 바뀐다.
+    @State private var mood: QuoteMood?
 
     /// 상태를 갖지 않는 뷰모델이라 매 렌더마다 새로 만들어도 비용이 없다.
     private var viewModel: HomeViewModel {
@@ -23,7 +25,11 @@ struct HomeView: View {
             // 오늘의 명언이 바뀌거나 번역이 끝나면 이 값이 올라 화면이 다시 그려진다.
             // (RemoteQuoteStore 는 UserDefaults 를 직접 읽는 값 타입이라 관찰되지 않는다)
             let _ = appEnvironment.remoteQuoteRevision
-            let presentation = viewModel.quoteOfTheDay()
+            // 기분을 골랐으면 그 기분의 문장으로 바꿔 보여 준다. 그 기분에
+            // 붙은 명언이 없으면 조용히 오늘의 명언으로 돌아간다.
+            let presentation = mood
+                .flatMap { QuoteService.shared.presentation(for: $0) }
+                ?? viewModel.quoteOfTheDay()
 
             VStack(alignment: .leading, spacing: ClayTheme.Spacing.l) {
                 header
@@ -32,9 +38,12 @@ struct HomeView: View {
                 quoteSection(presentation)
                     .clayAppear(delay: 0.05)
 
+                MoodPickerRow(selection: $mood)
+                    .clayAppear(delay: 0.07)
+
                 // 오늘의 명언 바로 아래가 이 릴리스의 중심이다. 기록이 설정
                 // 세 단계 아래에 있는 한 아무도 쓰지 않는다.
-                JournalCard(presentation: presentation)
+                JournalCard(presentation: presentation, mood: mood)
                     .clayAppear(delay: 0.1)
 
                 // 있을 때만 그린다. 빈 카드로 자리를 채우지 않는다.

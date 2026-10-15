@@ -203,10 +203,6 @@
 			isa = PBXBuildFile;
 			fileRef = 0C72FE8A99F4B0AC2C0F8233 /* NotePDFExporter.swift */;
 		};
-		52DF7E751CB3D204FF93FA36 = {
-			isa = PBXBuildFile;
-			fileRef = 09739FDD3C2C6F256089D22C /* MoodPickerRow.swift */;
-		};
 		53CF9C696774D664286B73C9 = {
 			isa = PBXBuildFile;
 			fileRef = 0293EB7A04D7197ABA9121F6 /* QuoteHeart.swift */;
@@ -516,6 +512,10 @@
 			isa = PBXBuildFile;
 			fileRef = AEB41383E28A9477BAEF8B7E /* QuoteNote.swift */;
 		};
+		C3A939F02078D33F4E7ECD16 = {
+			isa = PBXBuildFile;
+			fileRef = BDE2B3362CAC8662453454BC /* MoodPickerCard.swift */;
+		};
 		C64F40DB2035491678ED700C = {
 			isa = PBXBuildFile;
 			fileRef = C743F8AFE729F3DF80CF247C /* ScheduleEditorView.swift */;
@@ -754,12 +754,6 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = QuoteHeart.swift;
-			sourceTree = "<group>";
-		};
-		09739FDD3C2C6F256089D22C = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.swift;
-			path = MoodPickerRow.swift;
 			sourceTree = "<group>";
 		};
 		0BB2796F07DA2C7345006812 = {
@@ -1341,6 +1335,12 @@
 			path = CalendarService.swift;
 			sourceTree = "<group>";
 		};
+		BDE2B3362CAC8662453454BC = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = MoodPickerCard.swift;
+			sourceTree = "<group>";
+		};
 		BE73433C5222A7AF14D1B59F = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -1802,7 +1802,7 @@
 			children = (
 				29751952A88730ACE801F76E /* HomeView.swift */,
 				C5DF8588F87B5BD0225D365F /* JournalCard.swift */,
-				09739FDD3C2C6F256089D22C /* MoodPickerRow.swift */,
+				BDE2B3362CAC8662453454BC /* MoodPickerCard.swift */,
 				121082B9D88AA9959100226C /* ThrowbackCard.swift */,
 			);
 			path = Home;
@@ -2088,7 +2088,6 @@
 				4ED0E76EF2481887A6F1DBFF /* DisputedAttribution.swift in Sources */,
 				4EEF53F6DED2F27B88DD39F4 /* JournalArchive.swift in Sources */,
 				502D4DF22951B28133F5383B /* NotePDFExporter.swift in Sources */,
-				52DF7E751CB3D204FF93FA36 /* MoodPickerRow.swift in Sources */,
 				56A6E646A60B69B5B93458BA /* QuoteDetailView.swift in Sources */,
 				57637725F7B19FA9A01C258B /* RemoteQuoteService.swift in Sources */,
 				590A70C51E3A0296F2295B81 /* CalendarDayCell.swift in Sources */,
@@ -2137,6 +2136,7 @@
 				BF3A3EB3861D93AB320DCD3B /* ChallengeQuizView.swift in Sources */,
 				C0344652D1E0D3C7BE60D901 /* SharedStore.swift in Sources */,
 				C33D6DCAD6ABCACE80630E9E /* QuoteNote.swift in Sources */,
+				C3A939F02078D33F4E7ECD16 /* MoodPickerCard.swift in Sources */,
 				C64F40DB2035491678ED700C /* ScheduleEditorView.swift in Sources */,
 				C7067E6BB33CA992609FD093 /* ChallengeStore.swift in Sources */,
 				C8E376C22BBED15C31B7BCF6 /* RankStore.swift in Sources */,
@@ -2267,9 +2267,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -2285,7 +2285,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -2293,7 +2293,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				QD_CLOUDKIT_CONTAINER = iCloud.com.quoteday.app;
@@ -2309,7 +2309,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -2317,7 +2317,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				QD_CLOUDKIT_CONTAINER = iCloud.com.quoteday.app;
@@ -2365,7 +2365,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -2375,7 +2375,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2414,9 +2414,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -2432,7 +2432,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -2442,7 +2442,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

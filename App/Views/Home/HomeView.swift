@@ -38,13 +38,15 @@ struct HomeView: View {
                 quoteSection(presentation)
                     .clayAppear(delay: 0.05)
 
-                MoodPickerRow(selection: $mood)
-                    .clayAppear(delay: 0.07)
-
                 // 오늘의 명언 바로 아래가 이 릴리스의 중심이다. 기록이 설정
                 // 세 단계 아래에 있는 한 아무도 쓰지 않는다.
                 JournalCard(presentation: presentation, mood: mood)
                     .clayAppear(delay: 0.1)
+
+                // 기분 고르기는 그 아래다. 카드로 키우고 나니 위에 두면 중심을
+                // 아래로 밀어낸다. 읽고 → 쓰고 → (다른 문장이 필요하면) 바꾼다.
+                MoodPickerCard(selection: $mood)
+                    .clayAppear(delay: 0.13)
 
                 // 있을 때만 그린다. 빈 카드로 자리를 채우지 않는다.
                 ThrowbackCard()

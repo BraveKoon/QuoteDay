@@ -15,6 +15,10 @@
 			isa = PBXBuildFile;
 			fileRef = 363B856753BBFF85DDF29B95 /* HeartStore.swift */;
 		};
+		062E385523163697E8EE579E = {
+			isa = PBXBuildFile;
+			fileRef = E8656E6C40FEF8DCC9B3A335 /* JournalSyncing.swift */;
+		};
 		06EB63164C69F620778374A9 = {
 			isa = PBXBuildFile;
 			fileRef = 0C684115641DDB67BC23BCC1 /* ChallengeMode.swift */;
@@ -111,6 +115,10 @@
 			isa = PBXBuildFile;
 			fileRef = C7334277AFD709E5C8CED783 /* ClayTheme.swift */;
 		};
+		297E6C860EC4113D4EF329AA = {
+			isa = PBXBuildFile;
+			fileRef = B21770CDBE5B17794C3AC4AC /* JournalSyncPlan.swift */;
+		};
 		2C03B956BA894037B8B31130 = {
 			isa = PBXBuildFile;
 			fileRef = 586489CE3066FA1123FEA5AF /* NoteEditorSheet.swift */;
@@ -158,6 +166,10 @@
 		41FF65102516302AB634EBE8 = {
 			isa = PBXBuildFile;
 			fileRef = 0C684115641DDB67BC23BCC1 /* ChallengeMode.swift */;
+		};
+		444F935F78C5AA6C99A76ADC = {
+			isa = PBXBuildFile;
+			fileRef = B21770CDBE5B17794C3AC4AC /* JournalSyncPlan.swift */;
 		};
 		44B09ABE3978623FDF062BBB = {
 			isa = PBXBuildFile;
@@ -294,6 +306,10 @@
 		711F3758473F7E78AD08E137 = {
 			isa = PBXBuildFile;
 			fileRef = 28CBEC6F5FCB6ADF1B531D5E /* RankSyncing.swift */;
+		};
+		721DD6BBD592F9109FE00211 = {
+			isa = PBXBuildFile;
+			fileRef = E8656E6C40FEF8DCC9B3A335 /* JournalSyncing.swift */;
 		};
 		737B0A4DD5677888DE82CBEB = {
 			isa = PBXBuildFile;
@@ -595,6 +611,10 @@
 		E6605CA807A6EC44477CB24C = {
 			isa = PBXBuildFile;
 			fileRef = 8778F843E1DE59586B67E419 /* NoteStoreDayTests.swift */;
+		};
+		E6E88F46D14955CC11BBBD56 = {
+			isa = PBXBuildFile;
+			fileRef = A6C748A25B759CEAECF9DA70 /* JournalSyncPlanTests.swift */;
 		};
 		E8BC090335169404E3110D47 = {
 			isa = PBXBuildFile;
@@ -1293,6 +1313,12 @@
 			path = ShareCardSheet.swift;
 			sourceTree = "<group>";
 		};
+		A6C748A25B759CEAECF9DA70 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalSyncPlanTests.swift;
+			sourceTree = "<group>";
+		};
 		A891BF38ED152A6472BE1E46 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
@@ -1321,6 +1347,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = QuoteNote.swift;
+			sourceTree = "<group>";
+		};
+		B21770CDBE5B17794C3AC4AC = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalSyncPlan.swift;
 			sourceTree = "<group>";
 		};
 		B663D4D8413004C8C4FE767E = {
@@ -1477,6 +1509,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = BlankMaker.swift;
+			sourceTree = "<group>";
+		};
+		E8656E6C40FEF8DCC9B3A335 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = JournalSyncing.swift;
 			sourceTree = "<group>";
 		};
 		EA6908188FDC58BA5247C0CD = {
@@ -1707,6 +1745,7 @@
 				82FCF876C19CAED5F3B07A00 /* DailyQuoteNotification.swift */,
 				C640241792192143993F65B3 /* DailyQuoteSelection.swift */,
 				FE324088DA0E0BBF5B136CA7 /* HeartSyncing.swift */,
+				E8656E6C40FEF8DCC9B3A335 /* JournalSyncing.swift */,
 				977166F8078E4665587F2B0B /* QuoteService.swift */,
 				28CBEC6F5FCB6ADF1B531D5E /* RankSyncing.swift */,
 				E40F4F782E2301BB3B796F80 /* RemoteQuoteService.swift */,
@@ -1782,6 +1821,7 @@
 				50CD69602916AD33BDBF6BED /* JournalComposeTests.swift */,
 				4001857FE0FB8E98F00A1AC4 /* JournalLookbackTests.swift */,
 				17B521BCB3D8D3E83345FE0C /* JournalStreakTests.swift */,
+				A6C748A25B759CEAECF9DA70 /* JournalSyncPlanTests.swift */,
 				D250451E90B990AE36C4E151 /* MoodTests.swift */,
 				8778F843E1DE59586B67E419 /* NoteStoreDayTests.swift */,
 				7CA9E13CF0D451B629400AEF /* PlusTests.swift */,
@@ -1890,6 +1930,7 @@
 				A891BF38ED152A6472BE1E46 /* DeepLink.swift */,
 				199940478C3A59423BFEF3C6 /* JournalArchive.swift */,
 				E2C5EC365FEE2CB9A2D02BB0 /* JournalStreak.swift */,
+				B21770CDBE5B17794C3AC4AC /* JournalSyncPlan.swift */,
 				3EC44F41FB368CAB28BEB47F /* MonthlyReview.swift */,
 				BE73433C5222A7AF14D1B59F /* PlusFeature.swift */,
 				EE249BE91E4B13A46667234E /* Quote.swift */,
@@ -2072,6 +2113,7 @@
 				1A57FEA2BCB63A0691680521 /* CategoryChip.swift in Sources */,
 				1A7BA782ECC63DC98933A63A /* PlusFeature.swift in Sources */,
 				23D20C0FBF76308CB79CC0AA /* CloudKitRankService.swift in Sources */,
+				297E6C860EC4113D4EF329AA /* JournalSyncPlan.swift in Sources */,
 				2C03B956BA894037B8B31130 /* NoteEditorSheet.swift in Sources */,
 				2EA55067F038930D99FA1934 /* ShareCardSheet.swift in Sources */,
 				30DC1167F132F2A4C3EC3DD3 /* AuthorDetailView.swift in Sources */,
@@ -2102,6 +2144,7 @@
 				6E0CA61B847417D4E9B3AD25 /* EmptyStateView.swift in Sources */,
 				6FB94A170979DC02460FEDF1 /* QuoteCard.swift in Sources */,
 				711F3758473F7E78AD08E137 /* RankSyncing.swift in Sources */,
+				721DD6BBD592F9109FE00211 /* JournalSyncing.swift in Sources */,
 				737B0A4DD5677888DE82CBEB /* MonthlyReview.swift in Sources */,
 				748E74B04BDC23B0F23072D6 /* ChallengeHomeView.swift in Sources */,
 				76BB2F69333B3FCD80F7E683 /* QuoteDayApp.swift in Sources */,
@@ -2185,6 +2228,7 @@
 				A611F1A0E3957787978AA87E /* ScheduleAndNavigationTests.swift in Sources */,
 				B52FB5A70E62136175EC2E56 /* JournalStreakTests.swift in Sources */,
 				E6605CA807A6EC44477CB24C /* NoteStoreDayTests.swift in Sources */,
+				E6E88F46D14955CC11BBBD56 /* JournalSyncPlanTests.swift in Sources */,
 				E90E1911D37099FEB85CD56F /* QuoteEngineTests.swift in Sources */,
 				EA127D7DA9AF5DD3A378C517 /* RecurrenceTests.swift in Sources */,
 				ED6C441865728C4A92D08B9D /* RankingTests.swift in Sources */,
@@ -2197,6 +2241,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				04CF373CAA31F6A3444EADED /* WidgetSnapshot.swift in Sources */,
+				062E385523163697E8EE579E /* JournalSyncing.swift in Sources */,
 				0A6F4E37C647050960521F68 /* NameKey.swift in Sources */,
 				0B0AAEE81BF7C06D9516052C /* MonthlyReview.swift in Sources */,
 				0BC92BE8C6F0A38AFCD2EA41 /* ChallengeScore.swift in Sources */,
@@ -2210,6 +2255,7 @@
 				3B4F33BFA3D0EB1D44B7D95E /* AuthorLibrary.swift in Sources */,
 				3E9ACAD08D64C3B230BE8CC3 /* DeepLink.swift in Sources */,
 				41FF65102516302AB634EBE8 /* ChallengeMode.swift in Sources */,
+				444F935F78C5AA6C99A76ADC /* JournalSyncPlan.swift in Sources */,
 				4F287646E538AD5343972CFE /* PlusFeature.swift in Sources */,
 				53CF9C696774D664286B73C9 /* QuoteHeart.swift in Sources */,
 				587CB05D950839E8586AD944 /* MoodLibrary.swift in Sources */,

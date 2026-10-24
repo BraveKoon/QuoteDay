@@ -6,9 +6,17 @@ import SwiftUI
 /// 라는 유일한 진입점이었다는 것이고, 그 자리를 찾아내는 사람은 거의 없다.
 /// 이 카드는 새 기능이 아니라 **이사**다.
 ///
-/// 마찰을 전부 걷어낸다. 시트로 띄우지 않고 그 자리에서 펼치며, 저장 버튼이
-/// 없다. 버튼 하나가 습관 하나를 죽인다 — 매일 쓰게 하려면 매일 누르는 것이
-/// 적을수록 좋다.
+/// 마찰을 전부 걷어낸다. 시트로 띄우지 않고 그 자리에서 펼치고, **쓰는 대로
+/// 저장한다.** 저장을 누르지 않으면 글이 날아가는 구조는 만들지 않는다.
+///
+/// 그래도 다 쓰고 나서 누를 것은 있어야 한다. 처음에는 머리말에 "접기" 를
+/// 두었는데, 두 가지가 어긋나 있었다. 하나, 다 쓴 사람이 찾는 말은 "접기" 가
+/// 아니라 "저장" 이다 — 자동 저장을 믿어야 할지 몰라서 손이 멈춘다. 둘,
+/// 글을 쓰다 올려다보는 머리말 오른쪽은 끝맺는 자리가 아니다. 글이 끝나는
+/// 곳, 즉 입력란 바로 아래 오른쪽에 둔다.
+///
+/// 그래서 이 버튼은 **저장을 가로막는 문이 아니라 끝맺는 손잡이**다.
+/// 누르면 지금 쓴 것을 확실히 넣고, 키보드를 내리고, 카드를 접는다.
 struct JournalCard: View {
     let presentation: QuotePresentation
     /// 오늘 고른 기분. 글과 함께 저장되어 월간 회고에서 세어진다.
@@ -75,11 +83,9 @@ struct JournalCard: View {
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
             Spacer(minLength: 0)
-            if isEditing {
-                Button("접기") { finishEditing() }
-                    .font(ClayFont.caption())
-                    .foregroundStyle(ClayTheme.accent)
-            } else if let today, !today.isEmpty {
+            // 쓰는 중에는 머리말에 아무것도 두지 않는다. 끝맺는 버튼은 글이
+            // 끝나는 자리, 입력란 아래 오른쪽에 있다.
+            if !isEditing, let today, !today.isEmpty {
                 Button {
                     beginEditing()
                 } label: {
@@ -158,9 +164,28 @@ struct JournalCard: View {
                     }
                 }
 
-            Text("쓰는 대로 저장돼요.")
-                .font(ClayFont.caption())
-                .foregroundStyle(ClayTheme.textSecondary)
+            // 안내와 버튼이 한 줄에 있다. 둘이 같은 말을 하는 것처럼 보이지만
+            // 역할이 다르다 — 왼쪽은 "안 눌러도 안 날아간다", 오른쪽은
+            // "다 썼으니 덮는다".
+            HStack(alignment: .center, spacing: ClayTheme.Spacing.xs) {
+                Text("쓰는 대로 저장돼요.")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Spacer(minLength: ClayTheme.Spacing.xs)
+
+                Button("저장") { finishEditing() }
+                    // 기본 여백은 전면 버튼용이라 카드 안에서는 과하다. 줄이되
+                    // 44pt 아래로는 내려가지 않게 둔다(ClayButtonStyle 의 굵은 글씨
+                    // 한 줄에 위아래 12pt 면 46pt 쯤이다).
+                    .buttonStyle(ClayButtonStyle(
+                        prominence: .primary,
+                        horizontalPadding: ClayTheme.Spacing.m,
+                        verticalPadding: ClayTheme.Spacing.s
+                    ))
+                    .accessibilityHint("글을 저장하고 키보드를 내려요")
+            }
         }
         .onChange(of: draft) { _, _ in scheduleSave() }
     }

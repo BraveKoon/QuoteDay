@@ -20,9 +20,6 @@ public struct QuoteExplanation: Codable, Hashable, Sendable {
         self.practice = practice
     }
 
-    /// 이 해설을 만든 엔진의 이름. 화면 표기에 쓴다.
-    public static let engineName = L("온디바이스 AI")
-
     /// 세 칸이 모두 비어 있지 않은지. 부분 생성 도중에는 비어 있을 수 있다.
     public var isComplete: Bool {
         !summary.trimmed.isEmpty && !context.trimmed.isEmpty && !practice.trimmed.isEmpty

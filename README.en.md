@@ -732,6 +732,20 @@ The Release workflow creates its tag with `GITHUB_TOKEN`, and events created by 
 **don't trigger other workflows** (GitHub blocks the recursion). A `push: tags` trigger would
 simply never fire. The workflow listens for `workflow_run` — "Release succeeded" — instead.
 
+### The macOS runner must be 26 (Xcode 26)
+App Store Connect only accepts apps built with the **iOS 26 SDK or later (Xcode 26 or later)**. An
+`.ipa` built with the iOS 18.5 SDK is rejected during upload validation:
+
+```
+SDK version issue. This app was built with the iOS 18.5 SDK. All iOS and iPadOS apps
+must be built with the iOS 26 SDK or later ... (409)
+```
+
+So the macOS jobs in `testflight.yml` and `ci.yml` run on `runs-on: macos-26`, and the archive step
+checks `xcrun --sdk iphoneos --show-sdk-version` first, failing **before** the two-minute archive if
+the SDK is older than 26. The deployment target is still iOS 17 — a newer SDK and a newer minimum OS
+are different things.
+
 ### Build numbers
 
 Re-uploading the same version with the same build number is rejected. `run_number` restarts at 1

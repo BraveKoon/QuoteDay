@@ -125,7 +125,10 @@ public final class FoundationModelsQuoteExplainer: QuoteExplaining {
                 generating: GeneratedExplanation.self,
                 includeSchemaInPrompt: false
             )
-            for try await partial in stream {
+            // 스트림이 주는 것은 스냅숏(`Snapshot`)이고, 부분 결과는 그 안의
+            // `content` 에 있다. 세 칸은 모두 옵셔널이라 채워지는 대로 그린다.
+            for try await snapshot in stream {
+                let partial = snapshot.content
                 latest = QuoteExplanation(
                     summary: partial.summary ?? "",
                     context: partial.context ?? "",

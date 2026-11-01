@@ -666,6 +666,20 @@ Release 워크플로는 `GITHUB_TOKEN` 으로 태그를 만든다. 그 토큰으
 **다른 워크플로를 깨우지 않는다**(깃허브가 재귀 실행을 막는다). 그래서 `push: tags` 로는
 아무 일도 일어나지 않는다. `workflow_run` 으로 "Release 가 성공했다"를 신호로 받는다.
 
+### 러너는 macOS 26(Xcode 26) 이어야 한다
+App Store Connect 는 **iOS 26 SDK 이상, 즉 Xcode 26 이상**으로 빌드한 앱만 받는다. iOS 18.5 SDK 로
+만든 `.ipa` 는 업로드 검증에서 다음처럼 거부된다:
+
+```
+SDK version issue. This app was built with the iOS 18.5 SDK. All iOS and iPadOS apps
+must be built with the iOS 26 SDK or later ... (409)
+```
+
+그래서 `testflight.yml` 과 `ci.yml` 의 macOS 잡은 `runs-on: macos-26` 을 쓴다. 아카이브 전에
+`xcrun --sdk iphoneos --show-sdk-version` 을 확인해 26 미만이면 **2분짜리 아카이브를 시작하기 전에**
+멈춘다. 배포 타깃(`deploymentTarget`)은 여전히 iOS 17 이다 — SDK 가 올라가는 것과 최소 지원 버전은
+별개다.
+
 ### 빌드 번호
 
 같은 버전에 같은 빌드 번호를 다시 올리면 App Store Connect 가 거부한다. 실행 번호(`run_number`)는

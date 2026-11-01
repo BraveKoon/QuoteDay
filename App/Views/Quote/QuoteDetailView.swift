@@ -65,6 +65,7 @@ struct QuoteDetailView: View {
                 header(for: presentation)
                 quoteCard(for: presentation)
                 heartSection(for: presentation)
+                QuoteExplanationCard(presentation: presentation)
                 behindStorySection(for: presentation)
                 noteSection(for: presentation)
                 authorProfileSection(for: presentation)

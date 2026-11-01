@@ -13,6 +13,7 @@ struct SettingsView: View {
     @Environment(PlusStore.self) private var plus
     @Environment(NoteStore.self) private var notes
     @Environment(AppRouter.self) private var router
+    @Environment(QuoteExplanationStore.self) private var explanations
 
     @State private var pendingNotificationCount = 0
     @State private var isRefreshingRemoteQuote = false
@@ -57,6 +58,7 @@ struct SettingsView: View {
                 appearanceCard(settings: settings)
                 calendarCard(settings: settings)
                 widgetGuideCard
+                explanationCard
                 if AppFeatureFlags.isSupportEnabled {
                     supportCard
                 }
@@ -828,6 +830,51 @@ struct SettingsView: View {
                     .padding(.top, 2)
             }
         }
+    }
+
+    /// AI 해설이 이 기기에서 도는지, 저장된 해설이 몇 편인지 알린다.
+    ///
+    /// 해설은 기기 안에만 쌓인다. 사용자가 그 양을 직접 지울 수 있어야
+    /// "내 데이터"를 스스로 관리한다고 느낀다. 기기 모델을 못 쓰는 경우에도
+    /// 왜 못 쓰는지 여기서 한 번 더 알려 준다.
+    private var explanationCard: some View {
+        let availability = explanations.availability(for: settings.language)
+        let count = explanations.savedCount(for: settings.language)
+
+        return VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+            SectionHeader("AI 해설")
+
+            Text(availability.canExplain
+                 ? L("이 기기에서 쓸 수 있어요")
+                 : (availability.explanation ?? L("이 기기에서는 AI 해설을 쓸 수 없어요.")))
+                .font(ClayFont.callout())
+                .foregroundStyle(ClayTheme.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(L("해설은 기기 안에서 만들어지고, 인터넷으로 보내지 않아요."))
+                .font(ClayFont.caption())
+                .foregroundStyle(ClayTheme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if count > 0 {
+                ClayDivider()
+                HStack {
+                    Text(L("저장된 해설 %d편", count))
+                        .font(ClayFont.callout())
+                        .foregroundStyle(ClayTheme.textPrimary)
+                    Spacer()
+                    Button(L("지우기")) {
+                        explanations.clearSaved()
+                    }
+                    .font(ClayFont.callout())
+                    .buttonStyle(.plain)
+                    .foregroundStyle(ClayTheme.accent)
+                }
+            }
+        }
+        .padding(ClayTheme.Spacing.l)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .clayCard()
     }
 
     /// "v1.0부터 11개". 목록이 비어 있으면 (있을 수 없지만) 아무것도 쓰지 않는다.

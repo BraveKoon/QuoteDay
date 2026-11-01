@@ -206,7 +206,10 @@ jobs:
     name: 아카이브와 업로드
     needs: prepare
     if: needs.prepare.outputs.ready == 'true'
-    runs-on: macos-15
+    # **macos-26** 이어야 한다. App Store Connect 는 iOS 26 SDK(Xcode 26) 이상으로
+    # 빌드한 앱만 받는다 — iOS 18.5 SDK 로 만든 .ipa 는 업로드 검증에서
+    # "SDK version issue ... must be built with the iOS 26 SDK or later" 로 거부된다.
+    runs-on: macos-26
     # 실패 로그를 커밋 코멘트로 남기려면 쓰기 권한이 필요하다.
     permissions:
       contents: write
@@ -219,6 +222,17 @@ jobs:
       - name: 툴체인 확인
         run: |
           xcodebuild -version
+          SDK=$(xcrun --sdk iphoneos --show-sdk-version)
+          echo "iOS SDK $SDK"
+          # 애플이 요구하는 최소 SDK. 여기서 걸러야 2분짜리 아카이브를 마친 뒤
+          # 업로드 검증에서 거부당하는 일이 없다.
+          MAJOR=${SDK%%.*}
+          if [ "${MAJOR:-0}" -lt 26 ]; then
+            echo "::error::iOS SDK $SDK — App Store Connect requires the iOS 26 SDK or later (Xcode 26)."
+            echo "### ❌ Xcode 가 너무 낮습니다 (iOS SDK $SDK)" >> "$GITHUB_STEP_SUMMARY"
+            echo "러너 이미지를 macos-26 으로 올리거나 Xcode 26 이상을 골라야 합니다." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
           command -v xcbeautify >/dev/null || brew install xcbeautify
 
       - name: 서명 키 준비
@@ -418,10 +432,12 @@ jobs:
           echo "올릴 파일: $IPA ($(du -h "$IPA" | cut -f1))" | tee -a "$LOG"
 
           UPLOADED=false
-          echo "── 경로 1: App Store Connect Build Upload API ──" | tee -a "$LOG"
+          # REST 로그를 따로 남긴다. altool 이 쏟는 줄에 묻히면 원인을 못 본다.
+          REST_LOG="$RUNNER_TEMP/rest.log"
+          echo "── 경로 1: App Store Connect Build Upload API ──" | tee -a "$LOG" "$REST_LOG"
           if python3 tools/asc_upload.py --upload "$IPA" \
                --key "$PWD/AuthKey.p8" --key-id "$KEY_ID" --issuer "$ISSUER_ID" \
-               --version "$VERSION" --build "$BUILD" 2>&1 | tee -a "$LOG"; then
+               --version "$VERSION" --build "$BUILD" 2>&1 | tee -a "$LOG" "$REST_LOG"; then
             UPLOADED=true
           fi
 
@@ -487,6 +503,18 @@ jobs:
             echo "run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
             echo ""
             echo '```'
+            if [ -s "$REST_LOG" ]; then
+              echo ""
+              echo "**경로 1 (Build Upload API)**"
+              echo ""
+              echo '```'
+              tail -12 "$REST_LOG" | sed -E 's/[[:cntrl:]]//g'
+              echo '```'
+            fi
+            echo ""
+            echo "**경로 2 (altool)**"
+            echo ""
+            echo '```'
             tail -60 "$LOG" | sed -E 's/[[:cntrl:]]//g'
             echo '```'
           } > "$RUNNER_TEMP/comment.md"
@@ -504,6 +532,8 @@ jobs:
           name: QuoteDay-${{ needs.prepare.outputs.version }}-${{ needs.prepare.outputs.build }}
           path: |
             build/export/*.ipa
+            ${{ runner.temp }}/upload.log
+            ${{ runner.temp }}/rest.log
             build/QuoteDay.xcarchive/dSYMs
           if-no-files-found: warn
           retention-days: 14

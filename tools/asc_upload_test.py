@@ -236,6 +236,16 @@ class ClientTests(unittest.TestCase):
         finally:
             asc_upload.request_json = original
 
+    def test_state_is_read_from_both_shapes(self) -> None:
+        # API 가 객체로 줄 때와 문자열로 줄 때가 있다. 둘 다 읽어야
+        # 업로드가 끝난 뒤에 형식 때문에 실패로 보이지 않는다.
+        self.assertEqual(
+            asc_upload.upload_state({"state": {"state": "COMPLETE", "errors": []}}),
+            ("COMPLETE", []),
+        )
+        self.assertEqual(asc_upload.upload_state({"state": "PROCESSING"}), ("PROCESSING", []))
+        self.assertEqual(asc_upload.upload_state({}), ("UNKNOWN", []))
+
     def test_wait_gives_up_on_failed_state(self) -> None:
         original = asc_upload.request_json
         asc_upload.request_json = lambda *a, **k: (

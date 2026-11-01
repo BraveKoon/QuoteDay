@@ -312,18 +312,32 @@ def finish_file(client: Asc, upload_id: str, file_id: str) -> None:
     client.call("PATCH", f"/v1/buildUploadFiles/{file_id}", body)
 
 
+def upload_state(attributes: dict) -> tuple[str, list[dict]]:
+    """`buildUploads` 의 state 를 읽는다.
+
+    API 가 이 값을 문자열로 줄 때와 `{state: ..., errors: [...]}` 객체로 줄 때가
+    있어 둘 다 받는다. 한쪽만 가정하면 업로드가 **끝난 뒤에** 형식 때문에
+    실패로 보인다.
+    """
+    raw = attributes.get("state")
+    if isinstance(raw, dict):
+        return str(raw.get("state", "UNKNOWN")), raw.get("errors") or []
+    if isinstance(raw, str):
+        return raw, attributes.get("errors") or []
+    return "UNKNOWN", []
+
+
 def wait_for_upload(client: Asc, upload_id: str, timeout: int = 1800) -> dict:
     deadline = time.time() + timeout
     state = "UNKNOWN"
     while time.time() < deadline:
         payload = client.call("GET", f"/v1/buildUploads/{upload_id}")
         attributes = payload["data"]["attributes"]
-        state = (attributes.get("state") or {}).get("state", "UNKNOWN")
-        errors = (attributes.get("state") or {}).get("errors") or []
+        state, errors = upload_state(attributes)
         print(f"  상태: {state}", flush=True)
-        if state == "COMPLETE":
+        if state in ("COMPLETE", "SUCCEEDED"):
             return attributes
-        if state == "FAILED" or errors:
+        if state in ("FAILED", "FAILED_VALIDATION") or errors:
             detail = " / ".join(
                 f"{item.get('code', '')} {item.get('description', '')}".strip()
                 for item in errors

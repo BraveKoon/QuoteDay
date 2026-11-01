@@ -74,8 +74,8 @@ struct Throwback: Equatable {
     var headline: String {
         if monthsAgo >= 12 {
             let years = monthsAgo / 12
-            return "\(years)년 전 오늘, 이렇게 적었어요"
+            return L("%d년 전 오늘, 이렇게 적었어요", years)
         }
-        return "\(monthsAgo)개월 전 오늘, 이렇게 적었어요"
+        return L("%d개월 전 오늘, 이렇게 적었어요", monthsAgo)
     }
 }

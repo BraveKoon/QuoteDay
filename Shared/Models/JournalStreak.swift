@@ -170,15 +170,15 @@ public extension JournalStreak {
     var homeText: String {
         guard hasEverRecorded else { return "" }
         if current > 0 {
-            return "\(current)일째 · 지금까지 \(totalDays)번"
+            return L("%d일째 · 지금까지 %d번", current, totalDays)
         }
         // 끊겼을 때 "3일 연속이 끝났어요"라고 말하지 않는다. 줄지 않는 쪽을 보여 준다.
-        return "지금까지 \(totalDays)번 기록했어요"
+        return L("지금까지 %d번 기록했어요", totalDays)
     }
 
     /// 유예를 써서 이어진 날에만 보여 주는 안내.
     var freezeNote: String? {
         guard usedFreezeOnLastRecord else { return nil }
-        return "하루 쉬었지만 유예로 이어졌어요. 남은 유예 \(freezesLeft)개"
+        return L("하루 쉬었지만 유예로 이어졌어요. 남은 유예 %d개", freezesLeft)
     }
 }

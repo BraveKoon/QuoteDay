@@ -38,16 +38,16 @@ public enum AppCategory: String, CaseIterable, Codable, Sendable, Identifiable, 
     /// 사용자에게 보여줄 이름.
     public var title: String {
         switch self {
-        case .work: "직장"
-        case .leisure: "여가"
-        case .meal: "식사"
-        case .study: "학업"
-        case .exercise: "운동"
-        case .health: "건강"
-        case .relationship: "인간관계"
-        case .growth: "자기계발"
-        case .daily: "일상"
-        case .etc: "기타"
+        case .work: L("직장")
+        case .leisure: L("여가")
+        case .meal: L("식사")
+        case .study: L("학업")
+        case .exercise: L("운동")
+        case .health: L("건강")
+        case .relationship: L("인간관계")
+        case .growth: L("자기계발")
+        case .daily: L("일상")
+        case .etc: L("기타")
         }
     }
 
@@ -56,16 +56,16 @@ public enum AppCategory: String, CaseIterable, Codable, Sendable, Identifiable, 
     /// 알림 제목에 쓰이는 짧은 안내 문구.
     public var notificationLead: String {
         switch self {
-        case .work: "일에 집중할 시간이에요"
-        case .leisure: "즐거운 시간을 보내세요"
-        case .meal: "맛있는 식사 하세요"
-        case .study: "지금은 공부할 시간이에요"
-        case .exercise: "몸을 움직일 시간이에요"
-        case .health: "나를 돌볼 시간이에요"
-        case .relationship: "함께할 시간이에요"
-        case .growth: "한 걸음 더 나아갈 시간이에요"
-        case .daily: "오늘 하루를 챙겨요"
-        case .etc: "잠시 숨을 고르세요"
+        case .work: L("일에 집중할 시간이에요")
+        case .leisure: L("즐거운 시간을 보내세요")
+        case .meal: L("맛있는 식사 하세요")
+        case .study: L("지금은 공부할 시간이에요")
+        case .exercise: L("몸을 움직일 시간이에요")
+        case .health: L("나를 돌볼 시간이에요")
+        case .relationship: L("함께할 시간이에요")
+        case .growth: L("한 걸음 더 나아갈 시간이에요")
+        case .daily: L("오늘 하루를 챙겨요")
+        case .etc: L("잠시 숨을 고르세요")
         }
     }
 

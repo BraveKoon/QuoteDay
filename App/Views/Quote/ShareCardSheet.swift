@@ -142,7 +142,7 @@ struct ShareCardSheet: View {
                         }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("\(preset.name) 배경색")
+                .accessibilityLabel(L("%@ 배경색", preset.name))
                 .accessibilityAddTraits(isSelected(preset.color) ? [.isSelected, .isButton] : .isButton)
             }
         }
@@ -241,7 +241,7 @@ struct ShareCardSheet: View {
                     .strokeBorder(ClayTheme.accent, lineWidth: 2)
             }
         }
-        .accessibilityLabel(isLocked ? "\(candidate.title) 프리셋, Quote Plus 필요" : "\(candidate.title) 프리셋")
+        .accessibilityLabel(isLocked ? L("%@ 프리셋, Quote Plus 필요", candidate.title) : L("%@ 프리셋", candidate.title))
         .accessibilityAddTraits(isActive ? [.isSelected, .isButton] : .isButton)
     }
 

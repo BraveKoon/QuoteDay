@@ -57,6 +57,60 @@ public struct Author: Identifiable, Hashable, Codable, Sendable {
 
     public var displayName: String { koreanName ?? name }
 
+    /// 번역된 사본.
+    ///
+    /// 필드마다 따로 찾는다. 소개는 번역이 없고 직업만 있어도 직업은 바뀐다 —
+    /// 한 항목이 비었다고 인물 전체가 한국어로 돌아가면 더 어색하다.
+    public func localized(in language: AppLanguage = Localization.language) -> Author {
+        guard language.usesTranslationTable else { return self }
+
+        let key = "author.\(id)"
+        func text(_ field: String, fallback: String) -> String {
+            let fieldKey = "\(key).\(field)"
+            return Localization.hasTranslation(fieldKey, language: language)
+                ? Localization.string(fieldKey, language: language)
+                : fallback
+        }
+
+        // 이름은 언어마다 다르게 적는다. 영어권 인물은 이미 영어 이름을 갖고 있다.
+        let localizedName = text("name", fallback: language == .english ? name : displayName)
+        let localizedKoreanName: String? = {
+            if language == .english { return nil }
+            return localizedName == name ? koreanName : localizedName
+        }()
+
+        return Author(
+            id: id,
+            name: name,
+            koreanName: localizedKoreanName,
+            birthYear: birthYear,
+            deathYear: deathYear,
+            occupation: text("occupation", fallback: occupation),
+            nationality: text("nationality", fallback: nationality),
+            biography: text("biography", fallback: biography),
+            achievements: Self.localizedList(achievements, key: "\(key).achievement", language: language),
+            era: era.map { text("era", fallback: $0) },
+            notableWorks: Self.localizedList(notableWorks, key: "\(key).work", language: language),
+            portraitAssetName: portraitAssetName
+        )
+    }
+
+    /// 배열 항목은 `...achievement.0` 처럼 번호로 찾는다.
+    /// 하나라도 번역이 없으면 그 항목만 한국어로 남는다.
+    static func localizedList(
+        _ values: [String],
+        key: String,
+        language: AppLanguage
+    ) -> [String] {
+        guard !values.isEmpty else { return values }
+        return values.enumerated().map { index, value in
+            let itemKey = "\(key).\(index)"
+            return Localization.hasTranslation(itemKey, language: language)
+                ? Localization.string(itemKey, language: language)
+                : value
+        }
+    }
+
     /// "1874 — 1965" / "1955 — " / 연도 미상이면 nil.
     public var lifespanText: String? {
         switch (birthYear, deathYear) {
@@ -78,11 +132,11 @@ public struct Author: Identifiable, Hashable, Codable, Sendable {
     /// 데이터가 비어 있을 때 UI 가 참조하는 안전한 기본값.
     public static let unknown = Author(
         id: "unknown",
-        name: "미상",
+        name: L("미상"),
         birthYear: nil,
-        occupation: "알 수 없음",
-        nationality: "미상",
-        biography: "이 인물에 대한 정보를 아직 준비하지 못했습니다.",
+        occupation: L("알 수 없음"),
+        nationality: L("미상"),
+        biography: L("이 인물에 대한 정보를 아직 준비하지 못했습니다."),
         achievements: []
     )
 }

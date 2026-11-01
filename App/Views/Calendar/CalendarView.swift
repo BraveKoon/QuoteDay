@@ -122,7 +122,7 @@ struct CalendarView: View {
         return VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
             SectionHeader(
                 Formatters.fullDate.string(from: viewModel.selectedDate),
-                subtitle: schedules.isEmpty ? "일정 없음" : "\(schedules.count)개"
+                subtitle: schedules.isEmpty ? L("일정 없음") : L("%d개", schedules.count)
             ) {
                 Button {
                     editorTarget = .create(date: viewModel.selectedDate)

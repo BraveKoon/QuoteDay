@@ -473,6 +473,42 @@ The result goes into the App Group cache, so **the widget shows the same Korean*
 app has been opened. If the date rolls over to a different quote before the translation
 finishes, that translation is discarded.
 
+### Language — 한국어 · English · 简体中文 · 繁體中文
+- The language is chosen **inside the app** (Settings → Language, and the first-run flow).
+  It does not follow the system language.
+- The choice is stored in App Group `UserDefaults` (`settings.language`); the app and the
+  **widgets read the same value**. Changing it redraws screens, quotes, authors and widget
+  timelines on the spot.
+- Screen copy is keyed by its Korean source. SwiftUI reads the `\.locale` at the root and
+  finds the same key in `en.lproj` / `zh-Hans.lproj` / `zh-Hant.lproj`, so view code just keeps
+  writing `Text("설정")`.
+- Strings that come out of models (quotes, author name/occupation/nationality) are plain
+  `String`s and can't be localized by SwiftUI; `L(...)` looks them up directly. Keys point at
+  **content** (`quote.<slug>.text`, `author.<id>.name`), so editing a sentence never breaks
+  hearts, notes or deep links.
+- A missing key falls back to the Korean source. Nothing goes blank and no key name leaks
+  into the UI — but `tools/check_localization.py` reports every missing key as a failure.
+- The nine classical Chinese quotes (Analects, Art of War, Tao Te Ching) keep their original
+  text; the translation carries the meaning.
+- The Traditional Chinese table is never written by hand:
+  `python tools/localization/build_traditional.py` converts the Simplified table with OpenCC
+  (`s2twp`, Taiwan vocabulary). Only the Simplified table is edited.
+- On the English screen the ZenQuotes **English original** is used as-is. On-device translation
+  exists only for the Korean screen.
+
+### First run (sign in → language → nickname)
+- Three steps, shown only on first launch. While `ProfileStore.hasCompletedOnboarding` is
+  false the app doesn't render the tab bar at all.
+- Step 1 is **Sign in with Apple** (`SignInWithAppleButton`, `ASAuthorizationAppleIDProvider`) or
+  **continue without signing in**. The user identifier, name and email Apple returns are stored
+  on the device only (there is no server, so no token is sent anywhere). A cancel is not
+  reported as an error.
+- Step 2 picks the language. It comes after sign-in so the nickname screen is already in the
+  chosen language.
+- Step 3 is the nickname (20 characters max). The home greeting becomes "민지님, 좋은 아침이에요".
+- Settings → My account lets you change the nickname or sign in with Apple later; signing out
+  returns to the first screen and **keeps quotes and notes**.
+
 ### Notifications
 - Permission is requested **when the user turns quote notifications on**, not at launch.
 - Event notification: one `UNCalendarNotificationTrigger` at the start time.
@@ -528,6 +564,8 @@ There's a static check that runs anywhere, not just on macOS.
 
 ```bash
 python tools/check_project.py
+python tools/check_localization.py
+python tools/localization/build_traditional.py --check
 ```
 
 - Parses `project.pbxproj` directly to check structure, cross-references, and that files exist on disk
@@ -543,6 +581,12 @@ python tools/check_project.py
 - **That the version agrees in three places** — `MARKETING_VERSION` in `project.yml`, the
   newest entry in `CHANGELOG.md`, and the first entry of the generated `ReleaseHistory.swift`
   (see "One source for the version" below)
+- **That no translated string is missing** (`check_localization.py`) — it collects the Korean
+  copy in the sources, all 201 quotes and every author name/occupation/nationality, then checks
+  the three language tables. Placeholder counts, empty values and per-language key sets are
+  checked too. `--todo` prints the missing keys as `.strings` lines. Author biographies,
+  achievements and behind-the-story fields are tracked as a coverage percentage, not a failure.
+- **That the Traditional table still matches the Simplified one** (`build_traditional.py --check`)
 
 On macOS, additionally:
 
@@ -608,7 +652,99 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (S
 
 ---
 
-## 6. Data
+## 6. Shipping to TestFlight
+
+`.github/workflows/testflight.yml` archives the app and uploads it to App Store Connect —
+no Xcode, no local runner. A tag starts it automatically.
+
+```
+merge to main  →  Release workflow (tag + release)  →  TestFlight workflow (archive + upload)
+```
+
+To upload by hand: Actions tab → **TestFlight** → *Run workflow*, pick a branch, run.
+
+### One-time setup (four secrets)
+
+Repository → Settings → Secrets and variables → **Actions**:
+
+| Secret | Value |
+|---|---|
+| `APP_STORE_CONNECT_KEY_ID` | API key ID (e.g. `2X9ABCDEFG`) |
+| `APP_STORE_CONNECT_ISSUER_ID` | Issuer ID (a UUID) |
+| `APP_STORE_CONNECT_KEY` | Contents of `AuthKey_XXXX.p8` — **as-is**, or base64 |
+| `APPLE_TEAM_ID` | Your 10-character team ID |
+
+Create the key in App Store Connect → **Users and Access → Integrations → App Store Connect API**.
+The role must be **App Manager** or better: it both signs (creating certificates and profiles)
+and uploads.
+
+Either form works — the secret field accepts multi-line values as-is.
+
+```bash
+# Option 1: open the file and paste the whole thing
+open -e AuthKey_2X9ABCDEFG.p8
+#    everything from -----BEGIN PRIVATE KEY----- through -----END PRIVATE KEY-----
+
+# Option 2: base64, single line
+base64 -i AuthKey_2X9ABCDEFG.p8 | tr -d '\n' | pbcopy
+```
+
+`tools/prepare_asc_key.py` figures out which one it got: multi-line PEM, a single line with the
+newlines lost, literal `\n` escapes, base64 (wrapped lines are fine), or a quoted value. It then
+**verifies the key actually loads with openssl** before writing it — a bad key stops here with a
+reason instead of failing later with "Failed to authenticate" during archive. The key itself never
+reaches the log (only its byte count).
+
+Check it locally first if you like:
+
+```bash
+python3 tools/prepare_asc_key.py --from-file ~/Downloads/AuthKey_2X9ABCDEFG.p8
+# AuthKey_2X9ABCDEFG.p8 → AuthKey.p8 (241 bytes, p8 원문, openssl 확인 통과)
+```
+
+**Prerequisites** — automatic signing creates certificates and profiles, which needs these on the
+account: App IDs `com.quoteday.QuoteDay` and `com.quoteday.QuoteDay.Widget`, App Group
+`group.com.quoteday.app`, iCloud container `iCloud.com.quoteday.app`, and the Sign in with Apple
+capability. Running once from Xcode usually creates them; if they're missing the archive step stops
+with a provisioning error. Using your own identifiers? Follow Section 1 first.
+
+### Why it starts on Release completion, not on the tag
+
+The Release workflow creates its tag with `GITHUB_TOKEN`, and events created by that token
+**don't trigger other workflows** (GitHub blocks the recursion). A `push: tags` trigger would
+simply never fire. The workflow listens for `workflow_run` — "Release succeeded" — instead.
+
+### Build numbers
+
+Re-uploading the same version with the same build number is rejected. `run_number` restarts at 1
+per workflow, so the default is the **UTC timestamp `YYYYMMDDHHMM`**; a manual run can set it
+explicitly. `concurrency: testflight` keeps two uploads from racing.
+
+### After the upload
+
+The upload itself takes minutes, but App Store Connect then processes the build for 5–15 minutes.
+The build is simply invisible in TestFlight during that window — not a failure. Internal testers
+can install it as soon as processing finishes; external testers need one beta app review.
+
+- The very first build can stop for the **export compliance** question. This app pre-answers it
+  with `ITSAppUsesNonExemptEncryption = false` in `Info.plist`.
+- `MARKETING_VERSION` in `project.yml` remains the single source for the version. Uploading again
+  without bumping it just raises the build number for the same version — that's normal.
+
+### Archiving without uploading
+
+Turn **upload** off in a manual run and the workflow stops at the `.ipa` and dSYMs, kept as an
+artifact. Useful for checking signing, provisioning and the build number.
+
+If the `destination=upload` step fails (firewall, transient network), re-run with **upload off**,
+download the `.ipa` artifact and drop it onto [Transporter](https://apps.apple.com/app/transporter/id1450874784).
+Re-uploading the same build number is rejected, so pass a higher one via `build_number`.
+
+`workflow_run` only reacts to workflows on the **default branch**, so automatic uploads begin once
+this file reaches main. Don't want automatic uploads? Delete this file — the Release workflow keeps
+working on its own.
+
+## 7. Data
 
 - **201 quotes**, **116 people**. At least 12 per category (more once secondary categories count).
 - **360 Korean spellings** for people outside the bundle (`ForeignNameLibrary`), used for the
@@ -625,7 +761,7 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (S
 - To add a portrait, put the image in `Assets.xcassets` and fill in `portraitAssetName`.
   Without one, an initials placeholder is drawn.
 
-## 7. Known limits
+## 8. Known limits
 
 - No portrait images are included (licensing). Initials placeholders for now.
 - iOS Calendar sync is **read + export** only. Edits made in the device calendar don't come

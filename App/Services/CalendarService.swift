@@ -100,7 +100,7 @@ final class CalendarService {
     ) async -> String? {
         guard await requestWriteAccess() else { return nil }
         guard let target = store.defaultCalendarForNewEvents else {
-            lastErrorMessage = "기본 캘린더를 찾을 수 없습니다."
+            lastErrorMessage = L("기본 캘린더를 찾을 수 없습니다.")
             return nil
         }
 

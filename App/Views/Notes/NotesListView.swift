@@ -71,7 +71,7 @@ struct NotesListView: View {
                             ProgressView().tint(ClayTheme.textPrimary)
                         } else {
                             Label(
-                                exportedFile == nil ? "기록 \(notes.notes.count)편 인쇄용 PDF 로 묶기" : "다시 만들기",
+                                exportedFile == nil ? L("기록 %d편 인쇄용 PDF 로 묶기", notes.notes.count) : L("다시 만들기"),
                                 systemImage: "doc.richtext"
                             )
                         }
@@ -84,7 +84,7 @@ struct NotesListView: View {
         } else {
             PlusLockedCard(
                 feature: .noteExport,
-                message: "기록 \(notes.notes.count)편을 표지가 있는 PDF 한 권으로 묶어 드려요. 백업은 설정에서 따로 하세요."
+                message: L("기록 %d편을 표지가 있는 PDF 한 권으로 묶어 드려요. 백업은 설정에서 따로 하세요.", notes.notes.count)
             ) {
                 showsPaywall = true
             }

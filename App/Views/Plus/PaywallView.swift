@@ -181,21 +181,26 @@ struct PaywallView: View {
     /// App Store Connect 에서 주기를 바꿨을 때 화면만 거짓말을 하게 된다.
     private func subtitle(for product: Product) -> String {
         guard let period = product.subscription?.subscriptionPeriod else {
-            return "한 번 결제하면 계속 사용"
+            return L("한 번 결제하면 계속 사용")
         }
-        return "\(Self.periodText(period)) 갱신 · 언제든 해지"
+        return L("%@ 갱신 · 언제든 해지", Self.periodText(period))
     }
 
     private static func periodText(_ period: Product.SubscriptionPeriod) -> String {
-        let unit: String
+        // 주기 이름은 언어마다 다르다. "매월" 과 "every month" 처럼 단위와
+        // "마다" 의 어순이 달라서, 문장을 통째로 번역 표에 넣는다.
         switch period.unit {
-        case .day: unit = "일"
-        case .week: unit = "주"
-        case .month: unit = "개월"
-        case .year: unit = "년"
-        @unknown default: unit = "기간"
+        case .day:
+            return period.value == 1 ? L("매일") : L("%d일마다", period.value)
+        case .week:
+            return period.value == 1 ? L("매주") : L("%d주마다", period.value)
+        case .month:
+            return period.value == 1 ? L("매월") : L("%d개월마다", period.value)
+        case .year:
+            return period.value == 1 ? L("매년") : L("%d년마다", period.value)
+        @unknown default:
+            return L("정기 결제")
         }
-        return period.value == 1 ? "매\(unit)" : "\(period.value)\(unit)마다"
     }
 
     private var restoreButton: some View {

@@ -74,6 +74,22 @@ RESOURCE_DIRS = {
     TEST_TARGET: [],
 }
 
+# 언어별 번역 사전. 앱과 위젯이 **같은 파일**을 번들에 넣는다.
+#
+# Xcode 에서는 이 파일들이 `Localizable.strings` 라는 하나의 변형 그룹
+# (PBXVariantGroup)으로 묶인다. 그렇게 해야 빌드 결과물이 `en.lproj/`,
+# `zh-Hans.lproj/`, `zh-Hant.lproj/` 폴더로 나뉘어 들어가고, SwiftUI 가 `\.locale` 에 맞는
+# 파일을 골라 쓸 수 있다. 낱개 파일로 넣으면 번들 최상위에 섞여 들어가
+# 번역이 조용히 무시된다.
+LOCALIZATION_FILES = {
+    "en": "App/Resources/en.lproj/Localizable.strings",
+    "zh-Hans": "App/Resources/zh-Hans.lproj/Localizable.strings",
+    # 번체는 간체 사전을 OpenCC 로 옮겨 만든다. (tools/localization/build_traditional.py)
+    "zh-Hant": "App/Resources/zh-Hant.lproj/Localizable.strings",
+}
+LOCALIZATION_VARIANT_NAME = "Localizable.strings"
+LOCALIZATION_GROUP_DIR = "App/Resources"
+
 # 그룹에는 넣되 빌드 페이즈에는 넣지 않는 파일.
 NON_BUILD_FILES = [
     "App/Resources/Info.plist",
@@ -143,6 +159,7 @@ class Project:
             "PBXResourcesBuildPhase",
             "PBXSourcesBuildPhase",
             "PBXTargetDependency",
+            "PBXVariantGroup",
             "XCBuildConfiguration",
             "XCConfigurationList",
         ]
@@ -197,8 +214,18 @@ def quote(value: str) -> str:
     return f'"{escaped}"'
 
 
-def build_groups(project: Project, paths: set[str]) -> dict[str, str]:
-    """디렉터리 구조를 그대로 PBXGroup 트리로 만든다."""
+def build_groups(
+    project: Project,
+    paths: set[str],
+    extra_children: dict[str, list[str]] | None = None,
+) -> dict[str, str]:
+    """디렉터리 구조를 그대로 PBXGroup 트리로 만든다.
+
+    `extra_children` 은 특정 디렉터리 그룹에 끼워 넣을 항목이다.
+    번역 사전처럼 **파일 경로가 아니라 변형 그룹으로** 들어가는 것은
+    경로 트리로 표현할 수 없어서 이렇게 따로 넣는다.
+    """
+    extra_children = extra_children or {}
     children: dict[str, set[str]] = {}
     for path in paths:
         parts = path.split("/")
@@ -213,7 +240,7 @@ def build_groups(project: Project, paths: set[str]) -> dict[str, str]:
         group_id = oid("group", dir_path or "<root>")
         group_ids[dir_path] = group_id
 
-        entries: list[str] = []
+        entries: list[str] = list(extra_children.get(dir_path, []))
         for child in sorted(children.get(dir_path, ())):
             name = child.split("/")[-1]
             if child in paths:
@@ -257,6 +284,40 @@ def main() -> int:
             raise SystemExit(f"파일을 찾을 수 없습니다: {extra}")
         every_path.add(extra)
 
+    # --- 번역 사전 (변형 그룹)
+    #
+    # `en.lproj/Localizable.strings` 처럼 언어 폴더가 붙은 파일은 낱개
+    # 파일 참조로 넣으면 번들 최상위로 섞여 들어간다. 변형 그룹으로 묶어야
+    # Xcode 가 언어 폴더를 유지한 채 복사한다.
+    for language, path in LOCALIZATION_FILES.items():
+        if not (ROOT / path).exists():
+            raise SystemExit(f"번역 파일을 찾을 수 없습니다: {path}")
+        project.add(
+            "PBXFileReference",
+            oid("fileref", path),
+            dict_body([
+                ("isa", "PBXFileReference"),
+                ("lastKnownFileType", "text.plist.strings"),
+                ("name", quote(language)),
+                ("path", quote(path.split(f"{LOCALIZATION_GROUP_DIR}/", 1)[-1])),
+                ("sourceTree", quote("<group>")),
+            ]),
+        )
+    localization_group_id = oid("variantgroup", LOCALIZATION_VARIANT_NAME)
+    project.add(
+        "PBXVariantGroup",
+        localization_group_id,
+        dict_body([
+            ("isa", "PBXVariantGroup"),
+            ("children", list_value([
+                f"{oid('fileref', path)} /* {language} */"
+                for language, path in LOCALIZATION_FILES.items()
+            ])),
+            ("name", quote(LOCALIZATION_VARIANT_NAME)),
+            ("sourceTree", quote("<group>")),
+        ]),
+    )
+
     # --- PBXFileReference (소스/리소스)
     for path in sorted(every_path):
         name = path.split("/")[-1]
@@ -294,7 +355,13 @@ def main() -> int:
         )
 
     # --- 그룹
-    group_ids = build_groups(project, every_path)
+    group_ids = build_groups(
+        project,
+        every_path,
+        extra_children={
+            LOCALIZATION_GROUP_DIR: [f"{localization_group_id} /* {LOCALIZATION_VARIANT_NAME} */"]
+        },
+    )
 
     products_group = oid("group", "Products")
     project.add(
@@ -370,6 +437,19 @@ def main() -> int:
 
         # Resources
         resource_files = []
+        if target in (APP_TARGET, WIDGET_TARGET):
+            localization_build_id = oid("buildfile", target, LOCALIZATION_VARIANT_NAME)
+            resource_files.append(
+                f"{localization_build_id} /* {LOCALIZATION_VARIANT_NAME} in Resources */"
+            )
+            project.add(
+                "PBXBuildFile",
+                localization_build_id,
+                dict_body([
+                    ("isa", "PBXBuildFile"),
+                    ("fileRef", f"{localization_group_id} /* {LOCALIZATION_VARIANT_NAME} */"),
+                ]),
+            )
         for path in RESOURCE_DIRS[target]:
             build_id = oid("buildfile", target, path)
             resource_files.append(f"{build_id} /* {path.split('/')[-1]} in Resources */")
@@ -644,7 +724,8 @@ def main() -> int:
             ("compatibilityVersion", quote("Xcode 14.0")),
             ("developmentRegion", "ko"),
             ("hasScannedForEncodings", "0"),
-            ("knownRegions", list_value(["ko", "en", "Base"])),
+            # 지원 언어. ko 는 developmentRegion 이고 원문 언어다(파일 없음).
+            ("knownRegions", list_value(["ko", "en", "zh-Hans", "zh-Hant", "Base"])),
             ("mainGroup", main_group),
             ("productRefGroup", f"{products_group} /* Products */"),
             ("projectDirPath", quote("")),

@@ -18,9 +18,9 @@ public struct HeartSnapshot: Codable, Hashable, Sendable {
         switch count {
         case ..<0: "0"
         case ..<1_000: "\(count)"
-        case ..<10_000: String(format: "%.1f천", Double(count) / 1_000)
-        case ..<1_000_000: String(format: "%.1f만", Double(count) / 10_000)
-        default: "\(count / 10_000)만"
+        case ..<10_000: L("%.1f천", Double(count) / 1_000)
+        case ..<1_000_000: L("%.1f만", Double(count) / 10_000)
+        default: L("%d만", count / 10_000)
         }
     }
 }
@@ -46,9 +46,9 @@ public enum CloudSyncAvailability: Hashable, Sendable {
     public func message(subject: String) -> String? {
         switch self {
         case .ready: nil
-        case .noAccount: "iCloud 에 로그인하면 \(subject)이 다른 사람들과 함께 집계돼요."
-        case .notConfigured: "이 빌드에서는 \(subject)이 이 기기에만 저장돼요."
-        case .failed: "지금은 서버에서 값을 불러오지 못했어요. 연결되면 반영됩니다."
+        case .noAccount: L("iCloud에 로그인하면 %@이(가) 다른 사람들과 함께 집계돼요.", subject)
+        case .notConfigured: L("이 빌드에서는 %@이(가) 이 기기에만 저장돼요.", subject)
+        case .failed: L("지금은 서버에서 값을 불러오지 못했어요. 연결되면 반영됩니다.")
         }
     }
 }

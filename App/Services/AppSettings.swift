@@ -17,9 +17,9 @@ final class AppSettings {
 
         var title: String {
             switch self {
-            case .system: "시스템"
-            case .light: "라이트"
-            case .dark: "다크"
+            case .system: L("시스템")
+            case .light: L("라이트")
+            case .dark: L("다크")
             }
         }
 
@@ -39,6 +39,7 @@ final class AppSettings {
     @ObservationIgnored private var storedDailyQuoteMinute: Int
     @ObservationIgnored private var storedPreferredCategory: AppCategory?
     @ObservationIgnored private var storedAppearance: Appearance
+    @ObservationIgnored private var storedLanguage: AppLanguage
     @ObservationIgnored private var storedMirrorsToSystemCalendar: Bool
     @ObservationIgnored private var storedUsesRemoteQuote: Bool
     @ObservationIgnored private var storedTranslatesRemoteQuote: Bool
@@ -55,6 +56,7 @@ final class AppSettings {
             .flatMap(AppCategory.init(rawValue:))
         self.storedAppearance = Appearance(rawValue: defaults.string(forKey: SharedDefaultsKey.appearance) ?? "")
             ?? .system
+        self.storedLanguage = AppLanguage.stored(in: defaults)
         self.storedMirrorsToSystemCalendar = defaults.bool(forKey: SharedDefaultsKey.mirrorToSystemCalendar)
         // 값이 없으면 켜 둔 상태로 시작한다.
         self.storedUsesRemoteQuote = defaults.object(forKey: SharedDefaultsKey.remoteQuoteEnabled) as? Bool ?? true
@@ -62,6 +64,31 @@ final class AppSettings {
             defaults.object(forKey: SharedDefaultsKey.remoteQuoteTranslate) as? Bool ?? true
         self.storedShareCardTheme = defaults.string(forKey: SharedDefaultsKey.shareCardTheme) ?? ShareCardTheme.paper.rawValue
         self.storedShareCardColor = defaults.string(forKey: SharedDefaultsKey.shareCardColor)
+
+        // 앱이 그리는 언어를 첫 화면이 뜨기 전에 맞춰 둔다.
+        Localization.activate(self.storedLanguage)
+    }
+
+    // MARK: - 언어
+
+    /// 앱이 그리는 언어. 바꾸면 **재시작 없이** 화면과 위젯이 함께 바뀐다.
+    ///
+    /// 화면 문구는 루트의 `\.locale` 이, 명언·인물 같은 데이터는
+    /// `Localization` 이 이 값을 보고 고른다.
+    var language: AppLanguage {
+        get {
+            access(keyPath: \.language)
+            return storedLanguage
+        }
+        set {
+            withMutation(keyPath: \.language) {
+                storedLanguage = newValue
+                newValue.store(in: defaults)
+                Localization.activate(newValue)
+            }
+            // 위젯은 자기 타임라인으로 살아 있다. 언어가 바뀌면 다시 그리게 한다.
+            Self.reloadWidgets()
+        }
     }
 
     /// 공유 카드에서 마지막으로 고른 배경색. nil 이면 카드가 QuoteDay 보라로 시작한다.
@@ -165,6 +192,8 @@ final class AppSettings {
     /// 앱과 위젯은 각자 계산하므로, 앱에서 설정을 바꿔도 위젯은 자기 타임라인이
     /// 만료될 때까지 예전 기준으로 그린 화면을 붙들고 있다.
     private static func reloadWidgets() {
+        // 단위 테스트에서는 위젯 프로세스가 없다. 부르면 로그만 시끄러워진다.
+        guard !AppLanguage.isRunningTests else { return }
         for kind in AppGroup.allWidgetKinds {
             WidgetCenter.shared.reloadTimelines(ofKind: kind)
         }

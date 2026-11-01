@@ -4,6 +4,18 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>ko</string>
+	<!--
+	    지원 언어. 앱 안에서 언어를 바꾸기 때문에 시스템 언어와 다를 수 있지만,
+	    이 목록이 없으면 App Store 가 지원 언어를 잘못 표시하고 일부 시스템
+	    문구(권한 안내 등)가 한국어로만 나온다.
+	-->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>ko</string>
+		<string>en</string>
+		<string>zh-Hans</string>
+		<string>zh-Hant</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>QuoteDay</string>
 	<key>CFBundleExecutable</key>

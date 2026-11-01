@@ -97,7 +97,7 @@ struct NoteEditorSheet: View {
                 }
 
             if let updatedAt = existing?.updatedAt {
-                Text("마지막 수정 \(Formatters.shortDateTime.string(from: updatedAt))")
+                Text(L("마지막 수정 %@", Formatters.shortDateTime.string(from: updatedAt)))
                     .font(ClayFont.caption())
                     .foregroundStyle(ClayTheme.textSecondary)
             }

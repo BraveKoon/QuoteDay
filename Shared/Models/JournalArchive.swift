@@ -96,11 +96,11 @@ public struct JournalMergeResult: Equatable, Sendable {
 
     /// 사용자에게 보여 줄 한 줄.
     public var summary: String {
-        if isEmpty { return "이미 다 가지고 있는 기록이에요." }
+        if isEmpty { return L("이미 다 가지고 있는 기록이에요.") }
         var parts: [String] = []
-        if !added.isEmpty { parts.append("새 기록 \(added.count)편") }
-        if !updated.isEmpty { parts.append("고쳐 쓴 기록 \(updated.count)편") }
-        return parts.joined(separator: " · ") + "을 가져왔어요."
+        if !added.isEmpty { parts.append(L("새 기록 %d편", added.count)) }
+        if !updated.isEmpty { parts.append(L("고쳐 쓴 기록 %d편", updated.count)) }
+        return L("%@ 가져왔어요.", parts.joined(separator: " · "))
     }
 }
 
@@ -164,6 +164,6 @@ public enum JournalArchive {
 
     /// `QuoteDay-기록-2026-10-14.json`
     public static func fileName(on date: Date = .now, calendar: Calendar = .current) -> String {
-        "QuoteDay-기록-\(date.dayKey(calendar: calendar))"
+        L("QuoteDay-기록-%@", date.dayKey(calendar: calendar))
     }
 }

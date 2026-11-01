@@ -15,7 +15,7 @@ struct AuthorDetailView: View {
                 profileCard
 
                 VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
-                    SectionHeader("남긴 명언", subtitle: "\(quotes.count)개")
+                    SectionHeader("남긴 명언", subtitle: L("%d개", quotes.count))
 
                     if quotes.isEmpty {
                         EmptyStateView(
@@ -94,7 +94,7 @@ struct AuthorDetailView: View {
     }
 
     private func infoPill(_ text: String) -> some View {
-        Text(text)
+        Text(L(text))
             .font(ClayFont.caption())
             .foregroundStyle(ClayTheme.textSecondary)
             .padding(.horizontal, ClayTheme.Spacing.s)

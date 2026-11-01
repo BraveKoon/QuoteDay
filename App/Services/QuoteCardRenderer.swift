@@ -82,7 +82,7 @@ enum QuoteCardRenderer {
             switch self {
             case .saved: "사진 앱에 저장했어요."
             case .denied: "사진 추가 권한이 없어요. 설정 > QuoteDay 에서 허용해 주세요."
-            case .failed(let reason): "저장하지 못했어요. \(reason)"
+            case .failed(let reason): L("저장하지 못했어요. %@", reason)
             }
         }
     }

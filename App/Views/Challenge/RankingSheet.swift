@@ -141,7 +141,7 @@ struct RankingSheet: View {
 
             Spacer(minLength: 0)
 
-            Text("\(best)문제 × \(difficulty.pointsPerQuestion)점")
+            Text(L("%d문제 × %d점", best, difficulty.pointsPerQuestion))
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
                 .monospacedDigit()
@@ -153,7 +153,7 @@ struct RankingSheet: View {
                 .frame(minWidth: 40, alignment: .trailing)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(mode.title) \(difficulty.rawValue)단계 \(points)점")
+        .accessibilityLabel(L("%@ %d단계 %d점", mode.title, difficulty.rawValue, points))
     }
 
     // MARK: - 규칙
@@ -167,7 +167,7 @@ struct RankingSheet: View {
             line("맞힌 문제 하나에 단계 배점만큼 점수가 붙어요. 1단계 10점부터 5단계 80점까지입니다.")
             line("**같은 판을 여러 번 돌아도 오르지 않아요.** 모드·단계마다 최고 기록만 셉니다.")
             line("안 해 본 단계를 해 보면 오릅니다. 5단계를 절반만 맞혀도 1단계를 다 맞힌 것보다 높아요.")
-            line("\(RankStanding.rankDisplayLimit)등 안에 들면 등수로, 그 아래는 상위 몇 %로 보여 드려요.")
+            line(L("%d등 안에 들면 등수로, 그 아래는 상위 몇 %%로 보여 드려요.", RankStanding.rankDisplayLimit))
             line("**랭킹은 석 달마다 리셋돼요.** 1월·4월·7월·10월 1일에 모두가 0에서 다시 시작합니다. 통산 기록은 그대로 남아요.")
             line("다른 사람의 이름이나 점수는 보여 주지 않아요. 내가 어디쯤인지만 알려 드립니다.")
         }

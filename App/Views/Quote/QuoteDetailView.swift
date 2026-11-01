@@ -184,7 +184,7 @@ struct QuoteDetailView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    Text("출처 · \(story.source)")
+                    Text(L("출처 · %@", story.source))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
                         .padding(.top, 2)
@@ -196,7 +196,7 @@ struct QuoteDetailView: View {
             } else {
                 PlusLockedPreview(
                     feature: .behindStory,
-                    message: "\(story.occasion). 이 문장이 어떤 상황에서 나왔는지 읽어 보세요."
+                    message: L("%@. 이 문장이 어떤 상황에서 나왔는지 읽어 보세요.", story.occasion)
                 ) {
                     paywallFeature = .behindStory
                 } content: {
@@ -238,7 +238,7 @@ struct QuoteDetailView: View {
                     .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("마지막 수정 \(Formatters.shortDateTime.string(from: existing.updatedAt))")
+                Text(L("마지막 수정 %@", Formatters.shortDateTime.string(from: existing.updatedAt)))
                     .font(ClayFont.caption())
                     .foregroundStyle(ClayTheme.textSecondary)
             } else {
@@ -249,7 +249,7 @@ struct QuoteDetailView: View {
             }
 
             if !past.isEmpty {
-                Text("이 명언에 예전에 남긴 글이 \(past.count)편 있어요.")
+                Text(L("이 명언에 예전에 남긴 글이 %d편 있어요.", past.count))
                     .font(ClayFont.caption())
                     .foregroundStyle(ClayTheme.accent)
                     .fixedSize(horizontal: false, vertical: true)
@@ -326,7 +326,7 @@ struct QuoteDetailView: View {
         } else {
             PlusLockedPreview(
                 feature: .authorProfile,
-                message: "\(author.displayName)이(가) 어떤 삶을 살았고 무엇을 남겼는지 한 장에 정리해 드려요."
+                message: L("%@이(가) 어떤 삶을 살았고 무엇을 남겼는지 한 장에 정리해 드려요.", author.displayName)
             ) {
                 paywallFeature = .authorProfile
             } content: {
@@ -347,7 +347,7 @@ struct QuoteDetailView: View {
 
     private func profileRow(_ label: String, _ value: String) -> some View {
         HStack(alignment: .top, spacing: ClayTheme.Spacing.s) {
-            Text(label)
+            Text(L(label))
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
                 .frame(width: 34, alignment: .leading)
@@ -395,7 +395,7 @@ struct QuoteDetailView: View {
 
                 Text(siblings.isEmpty
                      ? "이 인물의 다른 명언은 아직 없어요."
-                     : "이 인물의 다른 명언 \(siblings.count)편")
+                     : L("이 인물의 다른 명언 %d편", siblings.count))
                     .font(ClayFont.caption())
                     .foregroundStyle(ClayTheme.textSecondary)
 
@@ -422,8 +422,8 @@ struct QuoteDetailView: View {
             PlusLockedPreview(
                 feature: .relatedWorks,
                 message: siblings.isEmpty
-                    ? "\(author.displayName)의 저서를 함께 볼 수 있어요."
-                    : "\(author.displayName)의 저서와 다른 명언 \(siblings.count)편으로 이어 볼 수 있어요.",
+                    ? L("%@의 저서를 함께 볼 수 있어요.", author.displayName)
+                    : L("%@의 저서와 다른 명언 %d편으로 이어 볼 수 있어요.", author.displayName, siblings.count),
                 previewHeight: 150
             ) {
                 paywallFeature = .relatedWorks

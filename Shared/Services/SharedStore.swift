@@ -62,6 +62,19 @@ public enum SharedDefaultsKey {
     public static let remoteQuoteEnabled = "settings.remoteQuote.enabled"
     /// ZenQuotes 영어 명언을 기기에서 한국어로 옮길지.
     public static let remoteQuoteTranslate = "settings.remoteQuote.translate"
+    /// 앱 안에서 고른 표시 언어(`AppLanguage.rawValue`). 위젯도 이 값을 따른다.
+    public static let language = "settings.language"
+    /// 첫 실행 안내(로그인 → 언어 → 닉네임)를 끝냈는지.
+    public static let onboardingCompleted = "onboarding.completed"
+    /// 사용자가 정한 닉네임. 홈 인사말과 설정에 쓰인다.
+    public static let nickname = "profile.nickname"
+    /// 로그인 방식(`ProfileStore.SignInProvider.rawValue`).
+    public static let signInProvider = "profile.provider"
+    /// Sign in with Apple 이 돌려준 사용자 식별자. 재로그인 때 같은 사람인지 확인한다.
+    public static let appleUserIdentifier = "profile.appleUserIdentifier"
+    /// Apple 이 준 이름·이메일. 애플은 **최초 1회만** 주므로 받은 즉시 저장한다.
+    public static let appleDisplayName = "profile.appleDisplayName"
+    public static let appleEmail = "profile.appleEmail"
     public static let remoteQuote = "remoteQuote.cache.v1"
     public static let remoteQuoteLastAttempt = "remoteQuote.lastAttempt"
     public static let remoteQuoteLastError = "remoteQuote.lastError"

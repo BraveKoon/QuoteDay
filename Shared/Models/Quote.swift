@@ -43,6 +43,33 @@ public struct Quote: Identifiable, Hashable, Codable, Sendable {
     public func matches(_ category: AppCategory) -> Bool {
         categories.contains(category)
     }
+
+    /// 번역된 사본.
+    ///
+    /// 한국어 원문은 언제나 `text` 에 남아 있고(사전 키가 slug 라 문장이 바뀌어도
+    /// 키는 그대로다), 화면에 보이는 문장만 언어에 따라 바뀐다.
+    /// 사전에 번역이 없으면 **한국어 원문을 그대로** 돌려준다.
+    public func localized(in language: AppLanguage = Localization.language) -> Quote {
+        guard language.usesTranslationTable else { return self }
+
+        let key = "quote.\(slug).text"
+        guard Localization.hasTranslation(key, language: language) else { return self }
+
+        let translated = Localization.string(key, language: language)
+        // 영어에서는 원문과 번역문이 같은 경우가 많다. 같은 문장을 두 번 쓰지 않는다.
+        let original = translated.compare(originalText ?? "", options: .caseInsensitive) == .orderedSame
+            ? nil
+            : originalText
+
+        return Quote(
+            slug: slug,
+            text: translated,
+            originalText: original,
+            authorID: authorID,
+            category: category,
+            secondaryCategories: secondaryCategories
+        )
+    }
 }
 
 /// 명언 + 인물을 한 번에 넘기기 위한 표시용 묶음.

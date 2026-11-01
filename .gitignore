@@ -21,3 +21,7 @@ wordwall_solver/
 # 에이전트 스킬 설치물 (개인 도구, 앱 저장소에는 포함하지 않는다)
 .claude/skills/
 skills-lock.json
+
+# App Store Connect API 키. 절대 커밋하지 않는다.
+*.p8
+AuthKey_*.p8

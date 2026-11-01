@@ -53,7 +53,7 @@ struct HeartButton: View {
         .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: snapshot)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(snapshot.isMine ? "하트 취소" : "하트")
-        .accessibilityValue("전체 \(snapshot.count)개")
+        .accessibilityValue(L("전체 %d개", snapshot.count))
         .accessibilityAddTraits(snapshot.isMine ? [.isSelected, .isButton] : .isButton)
     }
 }

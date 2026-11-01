@@ -79,7 +79,7 @@ struct QuoteBrowserView: View {
                         .foregroundStyle(ClayTheme.textPrimary)
                     Text(notes.isEmpty
                          ? "홈에서 오늘 한 줄을 남기면 여기 쌓여요."
-                         : "\(notes.recordedDayCount)일 동안 \(notes.notes.count)편을 남겼어요.")
+                         : L("%d일 동안 %d편을 남겼어요.", notes.recordedDayCount, notes.notes.count))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
                         .multilineTextAlignment(.leading)
@@ -133,7 +133,7 @@ struct QuoteBrowserView: View {
             Text("명언 모음")
                 .font(ClayFont.hero())
                 .foregroundStyle(ClayTheme.textPrimary)
-            Text("총 \(quoteService.quoteCount)개 · 표시 중 \(results.count)개")
+            Text(L("총 %d개 · 표시 중 %d개", quoteService.quoteCount, results.count))
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
         }
@@ -199,7 +199,7 @@ struct QuoteBrowserView: View {
         } label: {
             HStack(spacing: 4) {
                 Text(emoji)
-                Text(title)
+                Text(L(title))
                     .font(ClayFont.callout())
             }
             .foregroundStyle(isSelected ? ClayTheme.textOnTint : ClayTheme.textSecondary)

@@ -194,10 +194,10 @@ enum ScheduleValidator {
 
         var errorDescription: String? {
             switch self {
-            case .emptyTitle: "일정 제목을 입력해 주세요."
-            case .endBeforeStart: "종료 시간이 시작 시간보다 빠릅니다."
-            case .tooFarInPast: "너무 과거의 날짜입니다. 다시 확인해 주세요."
-            case .recurrenceEndBeforeStart: "반복 종료일이 시작 날짜보다 빠릅니다."
+            case .emptyTitle: L("일정 제목을 입력해 주세요.")
+            case .endBeforeStart: L("종료 시간이 시작 시간보다 빠릅니다.")
+            case .tooFarInPast: L("너무 과거의 날짜입니다. 다시 확인해 주세요.")
+            case .recurrenceEndBeforeStart: L("반복 종료일이 시작 날짜보다 빠릅니다.")
             }
         }
     }

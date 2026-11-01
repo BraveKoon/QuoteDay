@@ -29,7 +29,7 @@ struct QuoteCard: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(quote.text). \(author.displayName)의 명언")
+        .accessibilityLabel(L("%@. %@의 명언", quote.text, author.displayName))
         .accessibilityHint(action == nil ? "" : "두 번 탭하면 상세 화면으로 이동합니다.")
     }
 

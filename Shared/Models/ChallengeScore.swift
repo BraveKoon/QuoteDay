@@ -84,18 +84,18 @@ public struct RankStanding: Hashable, Sendable {
 
     /// 화면에 크게 띄우는 한 줄.
     public var headline: String {
-        if let rank, rank <= Self.rankDisplayLimit { return "\(rank)등" }
-        if let percentile { return "상위 \(percentile)%" }
-        if let rank { return "\(rank)등" }
-        return "\(total)점"
+        if let rank, rank <= Self.rankDisplayLimit { return L("%d등", rank) }
+        if let percentile { return L("상위 %d%%", percentile) }
+        if let rank { return L("%d등", rank) }
+        return L("%d점", total)
     }
 
     /// 그 아래 설명.
     public var detail: String {
         guard percentile != nil || rank != nil else {
-            return "아직 순위를 계산하지 못했어요."
+            return L("아직 순위를 계산하지 못했어요.")
         }
-        return "\(playerCount)명 중 \(total)점"
+        return L("%d명 중 %d점", playerCount, total)
     }
 
     /// 구간을 세어 순위를 낸다.

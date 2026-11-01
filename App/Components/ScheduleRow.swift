@@ -111,7 +111,7 @@ struct ScheduleRow: View {
             occurrence.category.title
         ]
         if occurrence.isRecurring {
-            parts.append("반복 일정, \(occurrence.item.recurrence.summary(anchor: occurrence.item.startDate))")
+            parts.append(L("반복 일정, %@", occurrence.item.recurrence.summary(anchor: occurrence.item.startDate)))
         }
         if occurrence.isQuoteNotificationEnabled { parts.append("명언 알림 켜짐") }
         if showsCountdown, let countdown = Formatters.countdown(to: occurrence.start) {

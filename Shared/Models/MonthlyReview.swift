@@ -106,7 +106,7 @@ public extension MonthlyReview {
 
     /// "이번 달, 12일 동안 18편을 남겼어요"
     var headline: String {
-        "\(recordedDays)일 동안 \(noteCount)편을 남겼어요"
+        L("%d일 동안 %d편을 남겼어요", recordedDays, noteCount)
     }
 
     // MARK: - 셈

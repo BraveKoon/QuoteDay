@@ -5,7 +5,8 @@ import Foundation
 /// 모든 인물은 실존 인물이며, 명언은 해당 인물이 남긴 것으로 널리 확인된 것만 사용했다.
 /// 새 인물을 추가할 때는 `all` 에 항목을 넣기만 하면 `byID` 색인이 자동으로 갱신된다.
 public enum AuthorLibrary {
-    public static let all: [Author] = [
+    /// 한국어 원본. 번역 사전의 키가 여기서 나온다.
+    static let sourceAll: [Author] = [
         Author(
             id: "churchill", name: "Winston Churchill", koreanName: "윈스턴 처칠",
             birthYear: 1874, deathYear: 1965,
@@ -844,15 +845,32 @@ public enum AuthorLibrary {
         )
     ]
 
-    /// id → Author 색인. 조회는 O(1).
+    /// 지금 언어로 옮긴 인물 목록.
+    ///
+    /// 사본은 처음 한 번만 만든다. 화면마다 116명을 다시 번역 사전에서 찾으면
+    /// 명언 목록 하나에 수백 번의 조회가 쌓인다.
+    public static var all: [Author] { localizedAll[Localization.language] ?? sourceAll }
+
+    private static let localizedAll: [AppLanguage: [Author]] = {
+        var result: [AppLanguage: [Author]] = [:]
+        for language in AppLanguage.allCases {
+            result[language] = sourceAll.map { $0.localized(in: language) }
+        }
+        return result
+    }()
+
+    /// id → Author 색인. 조회는 O(1). (한국어 원본 기준이다.)
     public static let byID: [String: Author] = Dictionary(
-        all.map { ($0.id, $0) },
+        sourceAll.map { ($0.id, $0) },
         uniquingKeysWith: { first, _ in first }
     )
 
     /// 없는 id 가 들어와도 크래시하지 않고 플레이스홀더를 돌려준다.
+    ///
+    /// 돌려주는 값은 **지금 언어로 옮긴 사본**이다. 그래야 명언 카드와
+    /// 인물 프로필이 화면 언어를 따라간다.
     public static func author(id: String) -> Author {
-        byID[id] ?? .unknown
+        (byID[id] ?? .unknown).localized(in: Localization.language)
     }
 
     /// 같은 인물을 가리키는 다른 표기. `별칭 → 인물 id`.
@@ -891,7 +909,7 @@ public enum AuthorLibrary {
     /// ZenQuotes 처럼 이름만 주는 외부 데이터에 내장 인물 소개를 붙이는 데 쓴다.
     private static let byNormalizedName: [String: Author] = {
         var index: [String: Author] = [:]
-        for author in all {
+        for author in sourceAll {
             index[NameKey.normalize(author.name)] = author
             if let korean = author.koreanName {
                 index[NameKey.normalize(korean)] = author
@@ -907,6 +925,6 @@ public enum AuthorLibrary {
     /// 이름이 일치하는 인물. 대소문자·구두점·발음 구별 기호 차이는 무시한다.
     /// (예: `"C.S. Lewis"`, `"Martin Luther King, Jr."`)
     public static func author(matchingName name: String) -> Author? {
-        byNormalizedName[NameKey.normalize(name)]
+        byNormalizedName[NameKey.normalize(name)]?.localized(in: Localization.language)
     }
 }

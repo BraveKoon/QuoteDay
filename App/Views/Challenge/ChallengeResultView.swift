@@ -65,7 +65,7 @@ struct ChallengeResultView: View {
                 .font(ClayFont.headline())
                 .foregroundStyle(ClayTheme.textPrimary)
 
-            Text("\(result.difficulty.rawValue)단계 \(result.difficulty.title) · \(result.mode.title)")
+            Text(L("%d단계 %@ · %@", result.difficulty.rawValue, result.difficulty.title, result.mode.title))
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
         }
@@ -73,7 +73,7 @@ struct ChallengeResultView: View {
         .frame(maxWidth: .infinity)
         .clayCard(cornerRadius: ClayTheme.Radius.hero)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(result.questionCount)문제 중 \(result.correctCount)문제를 맞혔습니다")
+        .accessibilityLabel(L("%d문제 중 %d문제를 맞혔습니다", result.questionCount, result.correctCount))
     }
 
     // MARK: - 세부 기록
@@ -95,7 +95,8 @@ struct ChallengeResultView: View {
                 .font(ClayFont.title())
                 .foregroundStyle(ClayTheme.textPrimary)
                 .monospacedDigit()
-            Text(title)
+            // 도우미에 넘어온 라벨도 번역한다. `Text(String)` 은 번역되지 않는다.
+            Text(L(title))
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
         }
@@ -112,24 +113,27 @@ struct ChallengeResultView: View {
         let lifetime = store.lifetimeRecord(mode: result.mode, difficulty: result.difficulty)
 
         return VStack(alignment: .leading, spacing: ClayTheme.Spacing.xs) {
-            Text("이 단계 · \(store.season.title)")
+            Text(L("이 단계 · %@", store.season.title))
                 .font(ClayFont.headline())
                 .foregroundStyle(ClayTheme.textPrimary)
 
             recordLine("최고 점수", "\(record.bestScore) / \(result.questionCount)")
             recordLine("최고 연속", "\(record.bestStreak)")
-            recordLine("푼 판", "\(record.playCount)판")
+            recordLine("푼 판", L("%d판", record.playCount))
             recordLine("누적 정답률", percentText(record.accuracy))
             recordLine(
                 "랭킹에 올라가는 점수",
-                "\(ChallengeScore.points(correctCount: record.bestScore, difficulty: result.difficulty))점"
+                L(
+                    "%d점",
+                    ChallengeScore.points(correctCount: record.bestScore, difficulty: result.difficulty)
+                )
             )
 
             if lifetime.bestScore > record.bestScore || lifetime.playCount > record.playCount {
                 ClayDivider()
                     .padding(.vertical, 2)
                 recordLine("통산 최고 점수", "\(lifetime.bestScore) / \(result.questionCount)")
-                recordLine("통산 푼 판", "\(lifetime.playCount)판")
+                recordLine("통산 푼 판", L("%d판", lifetime.playCount))
             }
         }
         .padding(ClayTheme.Spacing.m)
@@ -139,7 +143,7 @@ struct ChallengeResultView: View {
 
     private func recordLine(_ title: String, _ value: String) -> some View {
         HStack {
-            Text(title)
+            Text(L(title))
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
             Spacer()

@@ -426,6 +426,35 @@ ZenQuotes 는 영어만 준다. 한국어 앱에서 영어 한 문장이 튀는 
 캐시에 들어가므로 **위젯도 같은 한국어를 보여 준다** — 앱을 한 번 연 뒤부터다.
 번역이 끝나기 전에 날짜가 바뀌어 다른 명언을 받아 왔으면 그 번역은 버린다.
 
+### 언어 — 한국어 · English · 简体中文 · 繁體中文
+- 언어는 **앱 안에서** 고른다(설정 → 언어, 그리고 첫 실행 안내). 시스템 언어를 따라가지 않는다.
+- 고른 값은 App Group `UserDefaults`(`settings.language`)에 저장되고, 앱과 **위젯이 같은 값**을 읽는다.
+  바꾸면 화면·명언·인물·위젯 타임라인이 그 자리에서 다시 그려진다.
+- 화면 문구는 한국어 원문이 곧 키다. SwiftUI 가 루트의 `\.locale` 을 보고
+  `en.lproj` / `zh-Hans.lproj` / `zh-Hant.lproj` 에서 같은 키를 찾는다. 그래서 뷰 코드는
+  `Text("설정")` 처럼 한국어로 두면 된다.
+- 모델에서 꺼내는 글(명언, 인물 이름·직업·국적)은 `Text(String)` 이라 자동 번역이 안 된다.
+  `L(...)` 이 직접 사전을 찾는다. 키는 `quote.<slug>.text`, `author.<id>.name` 처럼 **내용**을 가리킨다
+  — 문장을 고쳐도 키가 그대로라 하트·기록·딥링크가 끊기지 않는다.
+- 사전에 없는 키는 **한국어 원문을 그대로** 돌려준다. 번역이 빠진 항목이 있어도 화면이 비거나
+  키 이름이 드러나지 않는다. 대신 `tools/check_localization.py` 가 빠진 키를 실패로 보고한다.
+- 중국 고전(논어·손자병법·도덕경) 9편은 원문을 그대로 보여 주고, 뜻은 번역문이 맡는다.
+- 번체 사전은 손으로 쓰지 않는다. `python tools/localization/build_traditional.py` 가
+  간체 사전을 OpenCC(`s2twp`, 대만 어휘)로 옮긴다. 문구는 간체만 고친다.
+- 영어 화면에서는 ZenQuotes 의 **영어 원문**을 그대로 쓴다. 기기 번역은 한국어 화면 전용이다.
+
+### 첫 실행 안내 (로그인 → 언어 → 닉네임)
+- 첫 실행에서만 세 단계를 보여 준다. `ProfileStore.hasCompletedOnboarding` 이 false 인 동안
+  앱은 탭 화면을 아예 그리지 않는다.
+- 1단계는 **Sign in with Apple**(`SignInWithAppleButton`, `ASAuthorizationAppleIDProvider`) 또는
+  **로그인 없이 사용하기**. 애플이 준 사용자 식별자·이름·이메일을 기기에만 저장한다
+  (서버가 없으므로 토큰을 어디로 보내지 않는다). 취소는 오류로 표시하지 않는다.
+- 2단계에서 언어를 고른다. 1단계보다 뒤인 이유는, 앞에서 고른 언어로 닉네임 화면이 바로 바뀌어
+  사용자가 자기 언어로 이름을 정하게 되기 때문이다.
+- 3단계는 닉네임(최대 20자). 홈 인사말이 "민지님, 좋은 아침이에요" 가 된다.
+- 언제든 설정 → 내 계정에서 닉네임을 바꾸거나 Apple 계정으로 로그인할 수 있고,
+  로그아웃하면 첫 화면으로 돌아간다. **명언·기록은 지우지 않는다.**
+
 ### 알림
 - 권한은 앱 시작 시가 아니라 **사용자가 명언 알림을 켜는 순간** 요청한다.
 - 일정 알림: 시작 시각에 `UNCalendarNotificationTrigger` 로 1회 예약.
@@ -477,6 +506,8 @@ macOS 가 아닌 환경에서도 돌릴 수 있는 정적 검증을 넣어 두�
 
 ```bash
 python tools/check_project.py
+python tools/check_localization.py
+python tools/localization/build_traditional.py --check
 ```
 
 - `project.pbxproj` 를 직접 파싱해 구조·상호 참조·디스크 존재 여부 확인
@@ -491,6 +522,11 @@ python tools/check_project.py
 - 앱 아이콘이 1024x1024 이고 알파 채널이 없는지 (알파가 있으면 App Store 가 거부한다)
 - **버전이 세 곳에서 같은지** — `project.yml` 의 `MARKETING_VERSION`, `CHANGELOG.md` 의
   최신 항목, 생성된 `ReleaseHistory.swift` 의 첫 항목 (아래 "버전은 한 곳에서 나온다")
+- **번역이 빠진 문구가 없는지** (`check_localization.py`) — 소스의 한국어 문구, 명언 201편,
+  인물 이름·직업·국적을 모아 세 언어 사전에 있는지 본다. 자리표시자 개수와 빈 값,
+  언어별 키 집합도 함께 검사한다. `--todo` 를 붙이면 빠진 키를 `.strings` 형식으로 뽑아 준다.
+  인물 소개글·업적·비하인드 스토리는 **덮어 가며** 채우므로 실패가 아니라 진행률로 보고한다.
+- **번체 사전이 간체와 어긋나지 않았는지** (`build_traditional.py --check`)
 
 macOS 에서는 여기에 더해:
 
@@ -552,7 +588,99 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (�
 
 ---
 
-## 6. 데이터
+## 6. TestFlight 로 올리기
+
+App Store Connect 에 빌드를 올리는 워크플로가 `.github/workflows/testflight.yml` 에 있다.
+Xcode 를 열지 않아도, 태그를 달면 자동으로 이어서 올라간다.
+
+```
+main 에 머지  →  Release 워크플로(태그·릴리스)  →  TestFlight 워크플로(아카이브·업로드)
+```
+
+수동으로 올리고 싶으면 Actions 탭 → **TestFlight** → *Run workflow* 에서 브랜치를 고르고 실행한다.
+
+### 한 번만 준비하면 되는 것 (시크릿 4개)
+
+Repository → Settings → Secrets and variables → **Actions** 에 아래를 넣는다.
+
+| 시크릿 | 값 |
+|---|---|
+| `APP_STORE_CONNECT_KEY_ID` | API 키 ID (예: `2X9ABCDEFG`) |
+| `APP_STORE_CONNECT_ISSUER_ID` | 발급자 ID (UUID) |
+| `APP_STORE_CONNECT_KEY` | `AuthKey_XXXX.p8` 의 내용 — **그대로** 붙여 넣거나 base64 로 |
+| `APPLE_TEAM_ID` | 개발자 팀 ID (10자) |
+
+키는 App Store Connect → **사용자 및 액세스 → 통합 → App Store Connect API** 에서 만든다.
+역할은 **App Manager** 이상이어야 한다 — 자동 서명(인증서·프로파일 생성)과 업로드를 모두 하기 때문이다.
+
+키는 **두 가지 방법 중 편한 쪽**으로 넣으면 된다. 깃허브 시크릿 칸은 여러 줄 값을 그대로 받는다.
+
+```bash
+# ① 파일을 열어 통째로 복사 (텍스트 편집기에서)
+open -e AuthKey_2X9ABCDEFG.p8
+#    -----BEGIN PRIVATE KEY----- 부터 -----END PRIVATE KEY----- 까지 전부 붙여 넣기
+
+# ② 한 줄로 넣고 싶다면 base64
+base64 -i AuthKey_2X9ABCDEFG.p8 | tr -d '\n' | pbcopy
+```
+
+`tools/prepare_asc_key.py` 가 어느 형식인지 알아서 판별한다 — p8 원문(여러 줄), 복사하면서
+줄바꿈이 사라진 한 줄, `\n` 이 두 글자로 들어간 것, base64(줄바꿈이 섞여 있어도 된다),
+따옴표로 감싼 것까지 받는다. 그리고 **openssl 로 실제로 풀리는지 확인한 뒤** 파일을 쓴다.
+키가 잘못됐다면 아카이브 단계의 "Failed to authenticate" 대신 여기서 이유와 함께 멈춘다.
+키 내용은 로그에 남기지 않는다(바이트 수만).
+
+넣기 전에 로컬에서 확인하고 싶으면:
+
+```bash
+python3 tools/prepare_asc_key.py --from-file ~/Downloads/AuthKey_2X9ABCDEFG.p8
+# AuthKey_2X9ABCDEFG.p8 → AuthKey.p8 (241 bytes, p8 원문, openssl 확인 통과)
+```
+
+**준비물** — 자동 서명이 인증서와 프로비저닝 프로파일을 만들려면 계정에 다음이 있어야 한다:
+`com.quoteday.QuoteDay` 와 `com.quoteday.QuoteDay.Widget` App ID, App Group
+`group.com.quoteday.app`, iCloud 컨테이너 `iCloud.com.quoteday.app`, Sign in with Apple capability.
+보통 Xcode 에서 한 번 실행하면 만들어지지만, 안 되어 있으면 아카이브 단계에서 프로비저닝 오류로 멈춘다.
+자기 식별자를 쓰는 경우 1장의 "App Group" 안내를 먼저 따른다.
+
+### 왜 태그 push 가 아니라 Release 완료로 시작하나
+
+Release 워크플로는 `GITHUB_TOKEN` 으로 태그를 만든다. 그 토큰으로 만든 이벤트는
+**다른 워크플로를 깨우지 않는다**(깃허브가 재귀 실행을 막는다). 그래서 `push: tags` 로는
+아무 일도 일어나지 않는다. `workflow_run` 으로 "Release 가 성공했다"를 신호로 받는다.
+
+### 빌드 번호
+
+같은 버전에 같은 빌드 번호를 다시 올리면 App Store Connect 가 거부한다. 실행 번호(`run_number`)는
+워크플로마다 1부터 다시 시작하므로 쓰지 않고, 기본값은 **UTC 시각 `YYYYMMDDHHMM`** 이다.
+수동 실행에서는 직접 지정할 수 있다. 두 빌드가 겹치지 않도록 `concurrency: testflight` 로 한 번에 하나만 돈다.
+
+### 올라간 뒤
+
+업로드 자체는 몇 분이면 끝나지만, App Store Connect 가 빌드를 처리하는 데 5~15분이 걸린다.
+그동안 TestFlight 탭에는 빌드가 보이지 않는다 — 실패가 아니다. 처리가 끝나면 테스터에게 배포된다.
+
+- 첫 빌드는 **수출 규정(Encryption)** 질문에서 멈출 수 있다. 이 앱은 `Info.plist` 에
+  `ITSAppUsesNonExemptEncryption = false` 를 두어 그 질문을 미리 답해 둔다.
+- 내부 테스터는 빌드가 처리되는 즉시 받을 수 있고, 외부 테스터는 **베타 앱 심사**를 한 번 통과해야 한다.
+- 버전(`MARKETING_VERSION`)은 `project.yml` 이 유일한 출처다. 버전을 올리지 않고 다시 올리면
+  같은 버전의 빌드 번호만 올라간다(그것도 정상이다).
+
+### 업로드 없이 아카이브만 확인하고 싶을 때
+
+수동 실행에서 **upload** 를 끄면 `.ipa` 와 dSYM 까지만 만들고 아티팩트로 남긴다.
+서명·프로비저닝이 맞는지, 빌드 번호가 의도한 값인지 확인할 때 쓴다.
+
+업로드가 `destination=upload` 단계에서 실패하면(방화벽·일시적 네트워크 오류 등) 워크플로를
+**upload 끄고** 다시 돌려 `.ipa` 를 아티팩트로 받은 뒤, [Transporter](https://apps.apple.com/app/transporter/id1450874784)
+앱에 끌어다 놓으면 된다. 같은 빌드 번호를 다시 올리면 거부되므로, 그때는 `build_number` 를
+`202611011231` 처럼 올려서 지정한다.
+
+`workflow_run` 은 **기본 브랜치(main)에 있는 워크플로**만 신호로 받는다. 그래서 이 파일이
+main 에 머지된 뒤부터 자동 업로드가 동작한다. 업로드를 원하지 않으면 이 파일을 지우면 된다 —
+Release 워크플로는 그대로 돌아간다.
+
+## 7. 데이터
 
 - 명언 **201편**, 인물 **116명**. 카테고리별 최소 12편 이상(보조 카테고리 포함 시 더 많다).
 - 오늘의 명언(ZenQuotes)에 나오는 바깥 인물의 한국어 표기 **360개**(`ForeignNameLibrary`).
@@ -568,7 +696,7 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (�
 - 인물 사진을 넣으려면 `Assets.xcassets` 에 이미지를 추가하고 `portraitAssetName` 을 채운다.
   없으면 이니셜 플레이스홀더가 그려진다.
 
-## 7. 남아 있는 제한
+## 8. 남아 있는 제한
 
 - 인물 초상 이미지는 포함되어 있지 않다(라이선스 문제). 현재는 이니셜 플레이스홀더.
 - iOS 캘린더 연동은 **읽기 + 내보내기**만 지원한다. 기기 캘린더에서 수정한 내용이

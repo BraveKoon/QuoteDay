@@ -576,8 +576,11 @@ public enum BehindStoryLibrary {
     )
 
     /// 해당 명언의 배경. 없으면 nil — 정상적인 경우다.
+    ///
+    /// 돌려주는 값은 지금 언어로 옮긴 사본이다. Quote Plus 의 배경 설명도
+    /// 앱 언어를 따라가야 하기 때문이다.
     public static func story(for quoteSlug: String) -> BehindStory? {
-        index[quoteSlug]
+        index[quoteSlug]?.localized(in: Localization.language)
     }
 
     public static var count: Int { all.count }

@@ -11,15 +11,15 @@ public enum ChallengeMode: String, CaseIterable, Identifiable, Codable, Sendable
 
     public var title: String {
         switch self {
-        case .fillInTheBlank: "빈칸 채우기"
-        case .guessTheAuthor: "누가 말했을까"
+        case .fillInTheBlank: L("빈칸 채우기")
+        case .guessTheAuthor: L("누가 말했을까")
         }
     }
 
     public var summary: String {
         switch self {
-        case .fillInTheBlank: "명언에서 사라진 낱말을 찾아 넣습니다."
-        case .guessTheAuthor: "문장만 보고 말한 사람을 고릅니다."
+        case .fillInTheBlank: L("명언에서 사라진 낱말을 찾아 넣습니다.")
+        case .guessTheAuthor: L("문장만 보고 말한 사람을 고릅니다.")
         }
     }
 
@@ -54,11 +54,11 @@ public enum ChallengeDifficulty: Int, CaseIterable, Identifiable, Codable, Senda
 
     public var title: String {
         switch self {
-        case .beginner: "입문"
-        case .normal: "보통"
-        case .hard: "어려움"
-        case .veryHard: "매우 어려움"
-        case .extreme: "극한"
+        case .beginner: L("입문")
+        case .normal: L("보통")
+        case .hard: L("어려움")
+        case .veryHard: L("매우 어려움")
+        case .extreme: L("극한")
         }
     }
 
@@ -145,13 +145,13 @@ public enum ChallengeDifficulty: Int, CaseIterable, Identifiable, Codable, Senda
 
     /// 목록 화면에 한 줄로 요약해 보여 줄 조건.
     public func detail(for mode: ChallengeMode) -> String {
-        var parts = ["문제당 \(pointsPerQuestion)점", "보기 \(choiceCount)개"]
+        var parts = [L("문제당 %d점", pointsPerQuestion), L("보기 %d개", choiceCount)]
         if mode == .fillInTheBlank && blankCount > 1 {
-            parts.append("빈칸 \(blankCount)개")
+            parts.append(L("빈칸 %d개", blankCount))
         }
         parts.append(showsHint ? "힌트 있음" : "힌트 없음")
         if let timeLimit {
-            parts.append("\(timeLimit)초")
+            parts.append(L("%d초", timeLimit))
         }
         return parts.joined(separator: " · ")
     }

@@ -588,7 +588,83 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (�
 
 ---
 
-## 6. 데이터
+## 6. TestFlight 로 올리기
+
+App Store Connect 에 빌드를 올리는 워크플로가 `.github/workflows/testflight.yml` 에 있다.
+Xcode 를 열지 않아도, 태그를 달면 자동으로 이어서 올라간다.
+
+```
+main 에 머지  →  Release 워크플로(태그·릴리스)  →  TestFlight 워크플로(아카이브·업로드)
+```
+
+수동으로 올리고 싶으면 Actions 탭 → **TestFlight** → *Run workflow* 에서 브랜치를 고르고 실행한다.
+
+### 한 번만 준비하면 되는 것 (시크릿 4개)
+
+Repository → Settings → Secrets and variables → **Actions** 에 아래를 넣는다.
+
+| 시크릿 | 값 |
+|---|---|
+| `APP_STORE_CONNECT_KEY_ID` | API 키 ID (예: `2X9ABCDEFG`) |
+| `APP_STORE_CONNECT_ISSUER_ID` | 발급자 ID (UUID) |
+| `APP_STORE_CONNECT_KEY` | `AuthKey_XXXX.p8` 을 base64 로 인코딩한 값 |
+| `APPLE_TEAM_ID` | 개발자 팀 ID (10자) |
+
+키는 App Store Connect → **사용자 및 액세스 → 통합 → App Store Connect API** 에서 만든다.
+역할은 **App Manager** 이상이어야 한다 — 자동 서명(인증서·프로파일 생성)과 업로드를 모두 하기 때문이다.
+
+```bash
+# .p8 → base64 (줄바꿈 없이)
+base64 -i AuthKey_2X9ABCDEFG.p8 | tr -d '\n' | pbcopy
+```
+
+macOS 의 `base64` 는 줄바꿈을 넣는다. `tr -d '\n'` 없이 붙여 넣으면 디코딩에서 깨진다.
+워크플로는 디코딩 뒤 `PRIVATE KEY` 머리말이 있는지 확인하고, 없으면 업로드 전에 멈춘다.
+
+**준비물** — 자동 서명이 인증서와 프로비저닝 프로파일을 만들려면 계정에 다음이 있어야 한다:
+`com.quoteday.QuoteDay` 와 `com.quoteday.QuoteDay.Widget` App ID, App Group
+`group.com.quoteday.app`, iCloud 컨테이너 `iCloud.com.quoteday.app`, Sign in with Apple capability.
+보통 Xcode 에서 한 번 실행하면 만들어지지만, 안 되어 있으면 아카이브 단계에서 프로비저닝 오류로 멈춘다.
+자기 식별자를 쓰는 경우 1장의 "App Group" 안내를 먼저 따른다.
+
+### 왜 태그 push 가 아니라 Release 완료로 시작하나
+
+Release 워크플로는 `GITHUB_TOKEN` 으로 태그를 만든다. 그 토큰으로 만든 이벤트는
+**다른 워크플로를 깨우지 않는다**(깃허브가 재귀 실행을 막는다). 그래서 `push: tags` 로는
+아무 일도 일어나지 않는다. `workflow_run` 으로 "Release 가 성공했다"를 신호로 받는다.
+
+### 빌드 번호
+
+같은 버전에 같은 빌드 번호를 다시 올리면 App Store Connect 가 거부한다. 실행 번호(`run_number`)는
+워크플로마다 1부터 다시 시작하므로 쓰지 않고, 기본값은 **UTC 시각 `YYYYMMDDHHMM`** 이다.
+수동 실행에서는 직접 지정할 수 있다. 두 빌드가 겹치지 않도록 `concurrency: testflight` 로 한 번에 하나만 돈다.
+
+### 올라간 뒤
+
+업로드 자체는 몇 분이면 끝나지만, App Store Connect 가 빌드를 처리하는 데 5~15분이 걸린다.
+그동안 TestFlight 탭에는 빌드가 보이지 않는다 — 실패가 아니다. 처리가 끝나면 테스터에게 배포된다.
+
+- 첫 빌드는 **수출 규정(Encryption)** 질문에서 멈출 수 있다. 이 앱은 `Info.plist` 에
+  `ITSAppUsesNonExemptEncryption = false` 를 두어 그 질문을 미리 답해 둔다.
+- 내부 테스터는 빌드가 처리되는 즉시 받을 수 있고, 외부 테스터는 **베타 앱 심사**를 한 번 통과해야 한다.
+- 버전(`MARKETING_VERSION`)은 `project.yml` 이 유일한 출처다. 버전을 올리지 않고 다시 올리면
+  같은 버전의 빌드 번호만 올라간다(그것도 정상이다).
+
+### 업로드 없이 아카이브만 확인하고 싶을 때
+
+수동 실행에서 **upload** 를 끄면 `.ipa` 와 dSYM 까지만 만들고 아티팩트로 남긴다.
+서명·프로비저닝이 맞는지, 빌드 번호가 의도한 값인지 확인할 때 쓴다.
+
+업로드가 `destination=upload` 단계에서 실패하면(방화벽·일시적 네트워크 오류 등) 워크플로를
+**upload 끄고** 다시 돌려 `.ipa` 를 아티팩트로 받은 뒤, [Transporter](https://apps.apple.com/app/transporter/id1450874784)
+앱에 끌어다 놓으면 된다. 같은 빌드 번호를 다시 올리면 거부되므로, 그때는 `build_number` 를
+`202611011231` 처럼 올려서 지정한다.
+
+`workflow_run` 은 **기본 브랜치(main)에 있는 워크플로**만 신호로 받는다. 그래서 이 파일이
+main 에 머지된 뒤부터 자동 업로드가 동작한다. 업로드를 원하지 않으면 이 파일을 지우면 된다 —
+Release 워크플로는 그대로 돌아간다.
+
+## 7. 데이터
 
 - 명언 **201편**, 인물 **116명**. 카테고리별 최소 12편 이상(보조 카테고리 포함 시 더 많다).
 - 오늘의 명언(ZenQuotes)에 나오는 바깥 인물의 한국어 표기 **360개**(`ForeignNameLibrary`).
@@ -604,7 +680,7 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (�
 - 인물 사진을 넣으려면 `Assets.xcassets` 에 이미지를 추가하고 `portraitAssetName` 을 채운다.
   없으면 이니셜 플레이스홀더가 그려진다.
 
-## 7. 남아 있는 제한
+## 8. 남아 있는 제한
 
 - 인물 초상 이미지는 포함되어 있지 않다(라이선스 문제). 현재는 이니셜 플레이스홀더.
 - iOS 캘린더 연동은 **읽기 + 내보내기**만 지원한다. 기기 캘린더에서 수정한 내용이

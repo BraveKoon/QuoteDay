@@ -652,7 +652,83 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (S
 
 ---
 
-## 6. Data
+## 6. Shipping to TestFlight
+
+`.github/workflows/testflight.yml` archives the app and uploads it to App Store Connect —
+no Xcode, no local runner. A tag starts it automatically.
+
+```
+merge to main  →  Release workflow (tag + release)  →  TestFlight workflow (archive + upload)
+```
+
+To upload by hand: Actions tab → **TestFlight** → *Run workflow*, pick a branch, run.
+
+### One-time setup (four secrets)
+
+Repository → Settings → Secrets and variables → **Actions**:
+
+| Secret | Value |
+|---|---|
+| `APP_STORE_CONNECT_KEY_ID` | API key ID (e.g. `2X9ABCDEFG`) |
+| `APP_STORE_CONNECT_ISSUER_ID` | Issuer ID (a UUID) |
+| `APP_STORE_CONNECT_KEY` | `AuthKey_XXXX.p8`, base64-encoded |
+| `APPLE_TEAM_ID` | Your 10-character team ID |
+
+Create the key in App Store Connect → **Users and Access → Integrations → App Store Connect API**.
+The role must be **App Manager** or better: it both signs (creating certificates and profiles)
+and uploads.
+
+```bash
+# .p8 → base64, single line
+base64 -i AuthKey_2X9ABCDEFG.p8 | tr -d '\n' | pbcopy
+```
+
+macOS `base64` wraps lines; without `tr -d '\n'` the decoded file is corrupt. The workflow
+checks for a `PRIVATE KEY` header after decoding and stops before uploading if it's wrong.
+
+**Prerequisites** — automatic signing creates certificates and profiles, which needs these on the
+account: App IDs `com.quoteday.QuoteDay` and `com.quoteday.QuoteDay.Widget`, App Group
+`group.com.quoteday.app`, iCloud container `iCloud.com.quoteday.app`, and the Sign in with Apple
+capability. Running once from Xcode usually creates them; if they're missing the archive step stops
+with a provisioning error. Using your own identifiers? Follow Section 1 first.
+
+### Why it starts on Release completion, not on the tag
+
+The Release workflow creates its tag with `GITHUB_TOKEN`, and events created by that token
+**don't trigger other workflows** (GitHub blocks the recursion). A `push: tags` trigger would
+simply never fire. The workflow listens for `workflow_run` — "Release succeeded" — instead.
+
+### Build numbers
+
+Re-uploading the same version with the same build number is rejected. `run_number` restarts at 1
+per workflow, so the default is the **UTC timestamp `YYYYMMDDHHMM`**; a manual run can set it
+explicitly. `concurrency: testflight` keeps two uploads from racing.
+
+### After the upload
+
+The upload itself takes minutes, but App Store Connect then processes the build for 5–15 minutes.
+The build is simply invisible in TestFlight during that window — not a failure. Internal testers
+can install it as soon as processing finishes; external testers need one beta app review.
+
+- The very first build can stop for the **export compliance** question. This app pre-answers it
+  with `ITSAppUsesNonExemptEncryption = false` in `Info.plist`.
+- `MARKETING_VERSION` in `project.yml` remains the single source for the version. Uploading again
+  without bumping it just raises the build number for the same version — that's normal.
+
+### Archiving without uploading
+
+Turn **upload** off in a manual run and the workflow stops at the `.ipa` and dSYMs, kept as an
+artifact. Useful for checking signing, provisioning and the build number.
+
+If the `destination=upload` step fails (firewall, transient network), re-run with **upload off**,
+download the `.ipa` artifact and drop it onto [Transporter](https://apps.apple.com/app/transporter/id1450874784).
+Re-uploading the same build number is rejected, so pass a higher one via `build_number`.
+
+`workflow_run` only reacts to workflows on the **default branch**, so automatic uploads begin once
+this file reaches main. Don't want automatic uploads? Delete this file — the Release workflow keeps
+working on its own.
+
+## 7. Data
 
 - **201 quotes**, **116 people**. At least 12 per category (more once secondary categories count).
 - **360 Korean spellings** for people outside the bundle (`ForeignNameLibrary`), used for the
@@ -669,7 +745,7 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (S
 - To add a portrait, put the image in `Assets.xcassets` and fill in `portraitAssetName`.
   Without one, an initials placeholder is drawn.
 
-## 7. Known limits
+## 8. Known limits
 
 - No portrait images are included (licensing). Initials placeholders for now.
 - iOS Calendar sync is **read + export** only. Edits made in the device calendar don't come

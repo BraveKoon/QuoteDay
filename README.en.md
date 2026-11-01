@@ -754,9 +754,24 @@ can install it as soon as processing finishes; external testers need one beta ap
 Turn **upload** off in a manual run and the workflow stops at the `.ipa` and dSYMs, kept as an
 artifact. Useful for checking signing, provisioning and the build number.
 
-If the `destination=upload` step fails (firewall, transient network), re-run with **upload off**,
-download the `.ipa` artifact and drop it onto [Transporter](https://apps.apple.com/app/transporter/id1450874784).
-Re-uploading the same build number is rejected, so pass a higher one via `build_number`.
+### Why the upload uses the REST API, not altool
+
+`xcodebuild -exportArchive -destination upload` and `xcrun altool --upload-app` both talk to Apple's
+legacy contentdelivery service first. That service is known to reject **team API keys** with
+`Cannot verify client's JWT headers (3004)`, while the very same key, key id and issuer are accepted
+by the App Store Connect **REST API**. So the workflow
+
+1. checks REST authentication first (`tools/asc_upload.py --check`) — a bad key stops the run before
+   the two-minute archive instead of after it,
+2. uploads the exported `.ipa` through the **Build Upload API** (`tools/asc_upload.py`),
+3. falls back to altool only if that fails.
+
+Any upload failure is reported three ways: a check annotation, the run summary, and a **commit
+comment** holding the raw log (runner logs are often not readable through the API).
+
+If you still need to upload by hand, re-run with **upload off**, download the `.ipa` artifact and drop
+it onto [Transporter](https://apps.apple.com/app/transporter/id1450874784). Re-uploading the same build
+number is rejected, so pass a higher one via `build_number`.
 
 `workflow_run` only reacts to workflows on the **default branch**, so automatic uploads begin once
 this file reaches main. Don't want automatic uploads? Delete this file — the Release workflow keeps

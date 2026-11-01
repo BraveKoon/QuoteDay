@@ -10,6 +10,20 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.10.1",
+            date: "2026-11-01",
+            summary: "이번 릴리스의 고침은 화면이 아니라 검사와 배포 경로에 있다.",
+            sections: [
+                ReleaseSection(
+                    title: "고침",
+                    items: [
+                        "CI 가 잡은 테스트 3건을 고쳤다. 빌드는 처음부터 통과했고, 실패한 것은 테스트 쪽이었다.",
+                        "TestFlight 업로드가 실패하면 이유를 남긴다. 아카이브·서명은 통과하는데 마지막 업로드 단계에서 exit 70 으로 멈추면 원인을 알 수 없었다. 이제 error: 줄을 애너테이션과 요약에 남기고, 흔한 원인에는 다음 행동을 붙인다. 업로드가 실패해도 .ipa 는 아티팩트로 남겨 Transporter 로 직접 올릴 수 있다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.10.0",
             date: "2026-11-01",
             summary: "로그인 → 언어 → 닉네임을 차례로 묻는다.",

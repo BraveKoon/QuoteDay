@@ -35,6 +35,11 @@ jobs:
         # 때가 되어서야 알게 된다. 실제 키를 만들어 모든 형태를 확인한다.
         run: python3 tools/prepare_asc_key_test.py
 
+      - name: 업로드 도우미 점검
+        # Build Upload API 로 올리는 코드다. JWT 서명(DER→r||s)과 조각 업로드
+        # 오프셋이 틀어지면 업로드가 조용히 실패하므로 여기서 잡는다.
+        run: python3 tools/asc_upload_test.py
+
       - name: 번역 사전 검사
         # 번역이 빠진 문구는 화면에 한국어로 남는다. 눈으로는 잘 보이지 않아서
         # (한국어 독자에게는 자연스럽기 때문이다) 기계가 세게 한다.

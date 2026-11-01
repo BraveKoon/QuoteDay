@@ -671,10 +671,24 @@ Release 워크플로는 `GITHUB_TOKEN` 으로 태그를 만든다. 그 토큰으
 수동 실행에서 **upload** 를 끄면 `.ipa` 와 dSYM 까지만 만들고 아티팩트로 남긴다.
 서명·프로비저닝이 맞는지, 빌드 번호가 의도한 값인지 확인할 때 쓴다.
 
-업로드가 `destination=upload` 단계에서 실패하면(방화벽·일시적 네트워크 오류 등) 워크플로를
-**upload 끄고** 다시 돌려 `.ipa` 를 아티팩트로 받은 뒤, [Transporter](https://apps.apple.com/app/transporter/id1450874784)
-앱에 끌어다 놓으면 된다. 같은 빌드 번호를 다시 올리면 거부되므로, 그때는 `build_number` 를
-`202611011231` 처럼 올려서 지정한다.
+### 업로드는 왜 altool 이 아니라 REST API 인가
+
+`xcodebuild -exportArchive -destination upload` 와 `xcrun altool --upload-app` 은 애플의 옛
+contentdelivery 서비스로 먼저 인사를 한다. 이 서비스가 **팀 API 키를
+`Cannot verify client's JWT headers (3004)` 로 거부하는 사례**가 있고, 같은 키·키 ID·발급자 ID 로
+App Store Connect **REST API 는 그대로 통한다.** 그래서 이 워크플로는
+
+1. 아카이브 전에 `tools/asc_upload.py --check` 로 REST API 인증을 먼저 확인하고(키가 틀렸으면
+   여기서 바로 멈춘다 — 2분짜리 아카이브를 기다리지 않는다),
+2. `.ipa` 를 만든 뒤 **Build Upload API** 로 올리고(`tools/asc_upload.py`),
+3. 그래도 안 되면 altool 을 예비 경로로 한 번 더 시도한다.
+
+업로드가 실패하면 이유를 세 곳에 남긴다: 체크 애너테이션, 실행 요약, 그리고 **커밋 코멘트**.
+(러너의 로그는 API 로 읽기 어려운 경우가 있어 커밋 코멘트에 원문을 붙인다.)
+
+그래도 손으로 올려야 한다면 워크플로를 **upload 끄고** 돌려 `.ipa` 아티팩트를 받은 뒤
+[Transporter](https://apps.apple.com/app/transporter/id1450874784) 앱에 끌어다 놓으면 된다.
+같은 빌드 번호를 다시 올리면 거부되므로, 그때는 `build_number` 를 `202611011231` 처럼 올려서 지정한다.
 
 `workflow_run` 은 **기본 브랜치(main)에 있는 워크플로**만 신호로 받는다. 그래서 이 파일이
 main 에 머지된 뒤부터 자동 업로드가 동작한다. 업로드를 원하지 않으면 이 파일을 지우면 된다 —

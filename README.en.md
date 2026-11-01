@@ -509,6 +509,24 @@ finishes, that translation is discarded.
 - Settings → My account lets you change the nickname or sign in with Apple later; signing out
   returns to the first screen and **keeps quotes and notes**.
 
+### AI explanation — on-device, free
+- On the quote detail screen, the **AI explanation** card's "Show explanation" button streams three
+  short sections: **What it means**, **The story behind it**, **Try this today**.
+- The engine is **Apple Foundation Models** (`import FoundationModels`). Nothing is bundled, inference
+  stays on the device (works in airplane mode), and the quote never leaves the phone. With no server
+  cost it is a **free** feature.
+- The deployment target is iOS 17, so the engine sits behind `#if canImport(FoundationModels)` +
+  `@available(iOS 26, *)`. Where it cannot run, the card explains **why** instead of hiding (older iOS,
+  Apple Intelligence off, ineligible device, model still downloading, unsupported language), with a
+  Settings link when flipping a switch is all it takes.
+- Explanations are cached in `Application Support/QuoteDay/explanations.json` under
+  `slug|language|prompt-revision`, so changing the app language generates a fresh one and editing the
+  prompt never resurfaces old text. "Regenerate" replaces a single entry.
+- The on-device model can invent anecdotes, so the prompt forbids fabricated facts, hedges uncertain
+  background as interpretation, and the UI labels the text as **AI-generated** (distinct from the
+  human-written behind story). `Tests/QuoteExplanationTests.swift` guards the prompt and cache logic —
+  the model itself cannot run in CI, so a `FakeExplainer` drives the state machine.
+
 ### Notifications
 - Permission is requested **when the user turns quote notifications on**, not at launch.
 - Event notification: one `UNCalendarNotificationTrigger` at the start time.

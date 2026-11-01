@@ -26,6 +26,8 @@ final class AppEnvironment {
     let challengeStore: ChallengeStore
     let heartStore: HeartStore
     let rankStore: RankStore
+    /// 명언 AI 해설. 기기 모델이 없으면 "쓸 수 없음" 상태로 앉아 있다.
+    let explanationStore: QuoteExplanationStore
 
     /// 지금 번역이 필요한 영어 원문. 최상위 화면이 이 값을 보고 번역을 돌린다.
     private(set) var pendingTranslationSource: String?
@@ -69,6 +71,7 @@ final class AppEnvironment {
         self.challengeStore = ChallengeStore(defaults: defaults)
         self.heartStore = HeartStore(sync: heartSync, defaults: defaults)
         self.rankStore = RankStore(sync: rankSync, defaults: defaults)
+        self.explanationStore = QuoteExplanationStore()
 
         self.notificationDelegate = NotificationDelegate(router: router)
         UNUserNotificationCenter.current().delegate = notificationDelegate
@@ -271,6 +274,7 @@ extension View {
             .environment(environment.challengeStore)
             .environment(environment.heartStore)
             .environment(environment.rankStore)
+            .environment(environment.explanationStore)
             .modelContainer(environment.container)
     }
 }

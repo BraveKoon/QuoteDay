@@ -1156,3 +1156,32 @@
 /* MARK: 화면 (4) */
 "QuoteDay 에는 광고가 없습니다. 앞으로도 넣지 않습니다.\nQuote Plus 는 그 약속을 지키면서 앱을 이어 가는 방법이에요." = "QuoteDay has no ads, and never will.\nQuote Plus is how we keep that promise and keep the app going.";
 "광고 없는 쾌적한 앱을 만들기 위해 노력 중입니다.\n커피 한 잔으로 응원해 주세요!" = "We're working to keep this app calm and ad-free.\nA cup of coffee is a lovely way to cheer us on!";
+
+/* MARK: AI 해설 */
+"AI 가 만든 해설이에요. 기기에서 생성했어요." = "This explanation was written by AI, generated on your device.";
+"AI 모델을 준비하는 중이에요. 잠시 뒤 다시 열어 주세요." = "The AI model is still getting ready. Please try again shortly.";
+"iOS 26 이상에서 쓸 수 있어요." = "Available on iOS 26 or later.";
+"다시 생성" = "Regenerate";
+"다시 시도" = "Try again";
+"무료" = "Free";
+"무슨 뜻인가요" = "What it means";
+"설정 열기" = "Open Settings";
+"설정에서 Apple Intelligence 를 켜면 쓸 수 있어요." = "Turn on Apple Intelligence in Settings to use this.";
+"어떤 배경인가요" = "The story behind it";
+"오늘 해 볼 일" = "Try this today";
+"온디바이스 AI" = "On-device AI";
+"이 기기에서는 AI 해설을 쓸 수 없어요." = "AI explanations aren't available on this device.";
+"이 기기에서는 Apple Intelligence 를 쓸 수 없어요." = "This device doesn't support Apple Intelligence.";
+"이 문장이 무슨 뜻인지, 어떤 배경에서 나왔는지, 오늘 무엇을 해 볼 수 있는지 짧게 풀어 드려요." = "A short take on what this line means, where it came from, and one small thing you can try today.";
+"이 언어로는 아직 해설을 만들 수 없어요." = "Explanations aren't available in this language yet.";
+"지금은 해설을 만들 수 없어요." = "Can't create an explanation right now.";
+"해설 보기" = "Show explanation";
+"해설은 이 기기 안에서 만들어지고, 인터넷으로 보내지 않아요." = "The explanation is created on this device and never sent over the internet.";
+"해설을 만드는 중…" = "Writing the explanation…";
+"해설을 만들지 못했어요." = "Couldn't create the explanation.";
+"해설을 만들지 못했어요. 잠시 뒤 다시 시도해 주세요." = "Couldn't create the explanation. Please try again shortly.";
+"현재" = "present";
+"이 기기에서 쓸 수 있어요" = "Available on this device";
+"저장된 해설 %d편" = "Saved explanations: %d";
+"지우기" = "Delete";
+"해설은 기기 안에서 만들어지고, 인터넷으로 보내지 않아요." = "Explanations are created on this device and never sent over the internet.";

@@ -207,6 +207,9 @@ jobs:
     needs: prepare
     if: needs.prepare.outputs.ready == 'true'
     runs-on: macos-15
+    # 실패 로그를 커밋 코멘트로 남기려면 쓰기 권한이 필요하다.
+    permissions:
+      contents: write
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -224,14 +227,21 @@ jobs:
         # 하고, 키가 실제로 풀리는지 openssl 로 한 번 확인한다.
         env:
           APP_STORE_CONNECT_KEY: ${{ secrets.APP_STORE_CONNECT_KEY }}
-          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          RAW_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
         run: |
           python3 tools/prepare_asc_key.py
-          # altool 은 ~/.appstoreconnect/private_keys/AuthKey_<키 ID>.p8 을 찾는다.
-          # xcodebuild 는 경로를 직접 받으므로 $PWD/AuthKey.p8 로도 둔다.
+
+          # 시크릿에는 끝에 줄바꿈이 붙어 오는 일이 흔하다. 그대로 파일 이름에 쓰면
+          # `AuthKey_XXXX\n.p8` 이 되어 altool 이 키를 찾지 못한다.
+          KEY_ID=$(printf '%s' "$RAW_KEY_ID" | tr -d '[:space:]')
+          echo "키 ID 길이: ${#KEY_ID}자"
+          echo "KEY_ID=$KEY_ID" >> "$GITHUB_ENV"
+
           mkdir -p "$HOME/.appstoreconnect/private_keys"
           cp AuthKey.p8 "$HOME/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8"
           chmod 600 "$HOME/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8"
+          echo "altool 이 찾는 자리:"
+          ls -l "$HOME/.appstoreconnect/private_keys/"
 
       - name: 아카이브
         env:
@@ -360,26 +370,44 @@ jobs:
 
       - name: 업로드 (altool)
         # altool 은 App Store Connect **API 키**로 인증한다. Xcode 계정 로그인이
-        # 필요 없어서 러너에서 그대로 동작한다. (예전 -exportArchive 업로드 경로와
+        # 필요 없어서 러너에서 그대로 동작한다. (-exportArchive 의 업로드 경로와
         # 다른 점이 바로 이것이다.)
         if: needs.prepare.outputs.upload == 'true'
         env:
-          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
-          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          RAW_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          RAW_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -o pipefail
           LOG="$RUNNER_TEMP/upload.log"
 
+          # 시크릿에 붙어 오는 공백·줄바꿈을 지운다. 이게 남아 있으면
+          # altool 이 키 파일을 찾지 못하고 곧바로 실패한다.
+          KEY_ID=$(printf '%s' "$RAW_KEY_ID" | tr -d '[:space:]')
+          ISSUER_ID=$(printf '%s' "$RAW_ISSUER_ID" | tr -d '[:space:]')
+          echo "키 ID ${#KEY_ID}자, 발급자 ID ${#ISSUER_ID}자"
+
           IPA=$(ls build/export/*.ipa 2>/dev/null | head -1)
           if [ -z "$IPA" ]; then
-            echo "::error title=업로드 실패::내보낸 .ipa 가 없습니다."
+            echo "::error::no .ipa was exported"
             exit 1
           fi
           echo "올릴 파일: $IPA ($(du -h "$IPA" | cut -f1))"
 
           if ! xcrun --find altool >/dev/null 2>&1; then
-            echo "::error title=altool 없음::이 Xcode 에 altool 이 없습니다. .ipa 아티팩트를 Transporter 로 직접 올려 주세요."
+            echo "::error::altool not found in this Xcode; use the .ipa artifact with Transporter"
             exit 1
+          fi
+          xcrun altool --version 2>&1 | tee -a "$LOG" || true
+          ls -l "$HOME/.appstoreconnect/private_keys/" 2>&1 | tee -a "$LOG" || true
+          echo "키 ID 모양: ${KEY_ID:0:4}… (${#KEY_ID}자) / 발급자 ID ${#ISSUER_ID}자"
+
+          # 업로드 전에 인증만 먼저 확인한다. 실패하면 3초 만에 끝나 버리는
+          # 업로드 단계 대신, 인증 오류 원문이 로그에 남는다.
+          echo "── API 키 인증 확인 ──" | tee -a "$LOG"
+          if ! xcrun altool --list-providers --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID" \
+               2>&1 | tee -a "$LOG"; then
+            echo "::error::API key authentication failed (see log)"
           fi
 
           if xcrun altool --upload-app --type ios --file "$IPA" \
@@ -394,33 +422,55 @@ jobs:
             exit 0
           fi
 
-          REASONS=$(grep -E "^ERROR|ITMS-[0-9]+|error:" "$LOG" \
+          # ── 실패: 이유를 세 곳에 남긴다 ─────────────────────────────────
+          REASONS=$(grep -E "^ERROR|ITMS-[0-9]+|error:|Unable to|not valid" "$LOG" \
             | sed -E 's/^[[:space:]]+//' | sort -u | head -5)
           if [ -z "$REASONS" ]; then
-            REASONS=$(tail -20 "$LOG" | sed -E 's/^[[:space:]]+//' | grep -v '^$' | head -5)
+            REASONS=$(tail -25 "$LOG" | sed -E 's/^[[:space:]]+//' | grep -v '^$' | head -8)
           fi
-          echo "::error title=업로드 실패::$(echo "$REASONS" | head -1)"
 
+          # ① 애너테이션 — `title=` 속성과 한글을 쓰지 않는다. 워크플로 명령이
+          #    조용히 무시되는 경우가 있어, 로그 원문(영문)만 그대로 싣는다.
+          echo "$REASONS" | while IFS= read -r line; do
+            [ -n "$line" ] && echo "::error::$line"
+          done
+
+          # ② 단계 요약
           {
-            echo "### ❌ 업로드 실패"
+            echo "### ❌ TestFlight 업로드 실패"
             echo ""
             echo '```'
             echo "$REASONS"
             echo '```'
             echo ""
             if grep -qi "No suitable application records\|does not exist" "$LOG"; then
-              echo "App Store Connect 에 앱 레코드가 없습니다. **내 앱 → 새 앱** 에서"
-              echo "번들 ID \`com.quoteday.QuoteDay\` 로 먼저 만들어 주세요."
+              echo "App Store Connect 에 앱 레코드가 없습니다. **내 앱 → 새 앱** 에서 번들 ID \`com.quoteday.QuoteDay\` 로 먼저 만들어 주세요."
             elif grep -qi "already been used\|Redundant Binary" "$LOG"; then
               echo "같은 빌드 번호가 이미 올라가 있습니다. \`build_number\` 를 올려 다시 실행하세요."
-            elif grep -qi "authenticate\|401\|403" "$LOG"; then
+            elif grep -qi "authenticate\|401\|403\|not valid" "$LOG"; then
               echo "API 키 인증에 실패했습니다. 키 ID·발급자 ID·팀 ID 와 키 역할(App Manager 이상)을 확인하세요."
             elif grep -qi "ITMS-90\|privacy" "$LOG"; then
-              echo "개인정보 처리방침·수출 규정 같은 메타데이터 문제입니다. App Store Connect 에서 해당 빌드를 여세요."
+              echo "개인정보 처리방침·수출 규정 같은 메타데이터 문제입니다. App Store Connect 에서 빌드를 확인하세요."
             fi
             echo ""
             echo "지금 내려받을 수 있는 \`.ipa\` 아티팩트를 Transporter 로 직접 올려도 됩니다."
           } >> "$GITHUB_STEP_SUMMARY"
+
+          # ③ 커밋 코멘트 — 러너가 사라져도 남는 유일한 통로.
+          #    (애너테이션·단계 요약은 API 로 읽기 어렵다.)
+          {
+            echo "### TestFlight 업로드 실패"
+            echo ""
+            echo "run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo ""
+            echo '```'
+            tail -60 "$LOG" | sed -E 's/[[:cntrl:]]//g'
+            echo '```'
+          } > "$RUNNER_TEMP/comment.md"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/comments" \
+            -f body="$(cat "$RUNNER_TEMP/comment.md")" \
+            || echo "커밋 코멘트를 남기지 못했습니다(권한)."
+
           exit 1
 
       - name: 아티팩트로 남기기

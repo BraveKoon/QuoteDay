@@ -59,7 +59,7 @@ final class LocalizationTests: XCTestCase {
     /// 번체 사전은 간체 사전에서 만들어지므로, 글자만 바뀌고 빠진 문구가 없어야 한다.
     func testTraditionalMirrorsSimplified() {
         Localization.activate(.traditionalChinese)
-        XCTAssertEqual(L("%@ 돌아보기", "11월"), "回顧 11月")
+        XCTAssertEqual(L("%@ 돌아보기", "11月"), "回顧 11月")
         XCTAssertEqual(L("설정"), "設定")
         XCTAssertEqual(L("언어"), "語言")
     }
@@ -122,7 +122,8 @@ final class LocalizationTests: XCTestCase {
         XCTAssertEqual(AuthorLibrary.author(id: "churchill").displayName, "温斯顿·丘吉尔")
 
         Localization.activate(.traditionalChinese)
-        XCTAssertEqual(AuthorLibrary.author(id: "churchill").displayName, "溫斯頓·邱吉爾")
+        // 번체는 OpenCC 가 간체에서 만든 값이다. `丘` 는 번체에서도 `丘` 로 남는다.
+        XCTAssertEqual(AuthorLibrary.author(id: "churchill").displayName, "溫斯頓·丘吉爾")
     }
 
     /// 번역이 아직 없는 소개글은 한국어로 남는다. (화면이 비지 않는다)
@@ -322,21 +323,22 @@ final class FormatterLanguageTests: XCTestCase {
     }
 
     func testDateFormatterFollowsTheAppLanguage() {
+        // 기준 시각을 고정한다. `.now` 를 두 번 읽으면 그 사이 흐른 시간만큼
+        // 분이 깎여 "1시간 29분" 이 나온다 — 러너가 느리면 실패하는 테스트였다.
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let target = now.addingTimeInterval(60 * 90)
+
         Localization.activate(.korean)
-        let korean = Formatters.countdown(to: .now.addingTimeInterval(60 * 90))
-        XCTAssertEqual(korean, "1시간 30분 후")
+        XCTAssertEqual(Formatters.countdown(to: target, from: now), "1시간 30분 후")
 
         Localization.activate(.english)
-        let english = Formatters.countdown(to: .now.addingTimeInterval(60 * 90))
-        XCTAssertEqual(english, "in 1 hr 30 min")
+        XCTAssertEqual(Formatters.countdown(to: target, from: now), "in 1 hr 30 min")
 
         Localization.activate(.simplifiedChinese)
-        let chinese = Formatters.countdown(to: .now.addingTimeInterval(60 * 90))
-        XCTAssertEqual(chinese, "1 小时 30 分钟后")
+        XCTAssertEqual(Formatters.countdown(to: target, from: now), "1 小时 30 分钟后")
 
         Localization.activate(.traditionalChinese)
-        let traditional = Formatters.countdown(to: .now.addingTimeInterval(60 * 90))
-        XCTAssertEqual(traditional, "1 小時 30 分鐘後")
+        XCTAssertEqual(Formatters.countdown(to: target, from: now), "1 小時 30 分鐘後")
     }
 
     func testFullDateUsesTheAppLanguage() {

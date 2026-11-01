@@ -607,19 +607,35 @@ Repository → Settings → Secrets and variables → **Actions** 에 아래를 
 |---|---|
 | `APP_STORE_CONNECT_KEY_ID` | API 키 ID (예: `2X9ABCDEFG`) |
 | `APP_STORE_CONNECT_ISSUER_ID` | 발급자 ID (UUID) |
-| `APP_STORE_CONNECT_KEY` | `AuthKey_XXXX.p8` 을 base64 로 인코딩한 값 |
+| `APP_STORE_CONNECT_KEY` | `AuthKey_XXXX.p8` 의 내용 — **그대로** 붙여 넣거나 base64 로 |
 | `APPLE_TEAM_ID` | 개발자 팀 ID (10자) |
 
 키는 App Store Connect → **사용자 및 액세스 → 통합 → App Store Connect API** 에서 만든다.
 역할은 **App Manager** 이상이어야 한다 — 자동 서명(인증서·프로파일 생성)과 업로드를 모두 하기 때문이다.
 
+키는 **두 가지 방법 중 편한 쪽**으로 넣으면 된다. 깃허브 시크릿 칸은 여러 줄 값을 그대로 받는다.
+
 ```bash
-# .p8 → base64 (줄바꿈 없이)
+# ① 파일을 열어 통째로 복사 (텍스트 편집기에서)
+open -e AuthKey_2X9ABCDEFG.p8
+#    -----BEGIN PRIVATE KEY----- 부터 -----END PRIVATE KEY----- 까지 전부 붙여 넣기
+
+# ② 한 줄로 넣고 싶다면 base64
 base64 -i AuthKey_2X9ABCDEFG.p8 | tr -d '\n' | pbcopy
 ```
 
-macOS 의 `base64` 는 줄바꿈을 넣는다. `tr -d '\n'` 없이 붙여 넣으면 디코딩에서 깨진다.
-워크플로는 디코딩 뒤 `PRIVATE KEY` 머리말이 있는지 확인하고, 없으면 업로드 전에 멈춘다.
+`tools/prepare_asc_key.py` 가 어느 형식인지 알아서 판별한다 — p8 원문(여러 줄), 복사하면서
+줄바꿈이 사라진 한 줄, `\n` 이 두 글자로 들어간 것, base64(줄바꿈이 섞여 있어도 된다),
+따옴표로 감싼 것까지 받는다. 그리고 **openssl 로 실제로 풀리는지 확인한 뒤** 파일을 쓴다.
+키가 잘못됐다면 아카이브 단계의 "Failed to authenticate" 대신 여기서 이유와 함께 멈춘다.
+키 내용은 로그에 남기지 않는다(바이트 수만).
+
+넣기 전에 로컬에서 확인하고 싶으면:
+
+```bash
+python3 tools/prepare_asc_key.py --from-file ~/Downloads/AuthKey_2X9ABCDEFG.p8
+# AuthKey_2X9ABCDEFG.p8 → AuthKey.p8 (241 bytes, p8 원문, openssl 확인 통과)
+```
 
 **준비물** — 자동 서명이 인증서와 프로비저닝 프로파일을 만들려면 계정에 다음이 있어야 한다:
 `com.quoteday.QuoteDay` 와 `com.quoteday.QuoteDay.Widget` App ID, App Group

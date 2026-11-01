@@ -671,20 +671,36 @@ Repository → Settings → Secrets and variables → **Actions**:
 |---|---|
 | `APP_STORE_CONNECT_KEY_ID` | API key ID (e.g. `2X9ABCDEFG`) |
 | `APP_STORE_CONNECT_ISSUER_ID` | Issuer ID (a UUID) |
-| `APP_STORE_CONNECT_KEY` | `AuthKey_XXXX.p8`, base64-encoded |
+| `APP_STORE_CONNECT_KEY` | Contents of `AuthKey_XXXX.p8` — **as-is**, or base64 |
 | `APPLE_TEAM_ID` | Your 10-character team ID |
 
 Create the key in App Store Connect → **Users and Access → Integrations → App Store Connect API**.
 The role must be **App Manager** or better: it both signs (creating certificates and profiles)
 and uploads.
 
+Either form works — the secret field accepts multi-line values as-is.
+
 ```bash
-# .p8 → base64, single line
+# Option 1: open the file and paste the whole thing
+open -e AuthKey_2X9ABCDEFG.p8
+#    everything from -----BEGIN PRIVATE KEY----- through -----END PRIVATE KEY-----
+
+# Option 2: base64, single line
 base64 -i AuthKey_2X9ABCDEFG.p8 | tr -d '\n' | pbcopy
 ```
 
-macOS `base64` wraps lines; without `tr -d '\n'` the decoded file is corrupt. The workflow
-checks for a `PRIVATE KEY` header after decoding and stops before uploading if it's wrong.
+`tools/prepare_asc_key.py` figures out which one it got: multi-line PEM, a single line with the
+newlines lost, literal `\n` escapes, base64 (wrapped lines are fine), or a quoted value. It then
+**verifies the key actually loads with openssl** before writing it — a bad key stops here with a
+reason instead of failing later with "Failed to authenticate" during archive. The key itself never
+reaches the log (only its byte count).
+
+Check it locally first if you like:
+
+```bash
+python3 tools/prepare_asc_key.py --from-file ~/Downloads/AuthKey_2X9ABCDEFG.p8
+# AuthKey_2X9ABCDEFG.p8 → AuthKey.p8 (241 bytes, p8 원문, openssl 확인 통과)
+```
 
 **Prerequisites** — automatic signing creates certificates and profiles, which needs these on the
 account: App IDs `com.quoteday.QuoteDay` and `com.quoteday.QuoteDay.Widget`, App Group

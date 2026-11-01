@@ -15,8 +15,9 @@ name: TestFlight
 #
 #   APP_STORE_CONNECT_KEY_ID    App Store Connect API 키 ID (예: 2X9ABCDEFG)
 #   APP_STORE_CONNECT_ISSUER_ID 발급자 ID (UUID)
-#   APP_STORE_CONNECT_KEY       AuthKey_XXXX.p8 파일을 base64 로 인코딩한 값
-#                               base64 -i AuthKey_XXXX.p8 | tr -d '\n'
+#   APP_STORE_CONNECT_KEY       AuthKey_XXXX.p8 의 내용. **그대로** 붙여 넣어도 되고
+#                               base64 로 넣어도 된다 — tools/prepare_asc_key.py 가
+#                               어느 쪽인지 알아서 판별한다.
 #   APPLE_TEAM_ID               개발자 팀 ID (10자)
 #
 # 키는 App Store Connect → 사용자 및 액세스 → 통합 → App Store Connect API 에서
@@ -208,24 +209,12 @@ jobs:
           command -v xcbeautify >/dev/null || brew install xcbeautify
 
       - name: 서명 키 준비
-        # .p8 을 base64 로 저장해 두면 줄바꿈이 깨질 걱정이 없다.
-        # 파일은 러너 안에서만 쓰이고, 로그에는 경로만 남는다.
+        # 시크릿에는 .p8 을 **그대로** 붙여 넣어도 되고 base64 로 넣어도 된다.
+        # (깃허브 시크릿은 여러 줄 값을 받는다.) 둘을 구분하는 일은 이 스크립트가
+        # 하고, 키가 실제로 풀리는지 openssl 로 한 번 확인한다.
         env:
-          KEY: ${{ secrets.APP_STORE_CONNECT_KEY }}
-        run: |
-          python3 - <<'PY'
-          import base64, os, pathlib
-          raw = os.environ["KEY"].strip()
-          data = base64.b64decode(raw + "=" * (-len(raw) % 4))
-          path = pathlib.Path("AuthKey.p8")
-          path.write_bytes(data)
-          path.chmod(0o600)
-          # p8 은 PEM 이다. 형식이 맞는지만 확인하고 내용은 찍지 않는다.
-          head = data.splitlines()[0].decode("utf-8", "replace")
-          if "PRIVATE KEY" not in head:
-              raise SystemExit("APP_STORE_CONNECT_KEY 가 .p8 파일의 base64 가 아닙니다.")
-          print(f"서명 키 준비 완료: AuthKey.p8 ({len(data)} bytes)")
-          PY
+          APP_STORE_CONNECT_KEY: ${{ secrets.APP_STORE_CONNECT_KEY }}
+        run: python3 tools/prepare_asc_key.py
 
       - name: 아카이브
         env:

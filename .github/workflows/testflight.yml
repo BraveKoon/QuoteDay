@@ -64,8 +64,11 @@ jobs:
   # 여기서 걸리면 비싼 macOS 러너를 켤 이유가 없다.
   verify:
     name: 정적 검증
+    # 수동(workflow_dispatch) · 스크립트(repository_dispatch) 는 사용자가 시작한 것이다.
+    # 자동(workflow_run)은 Release 가 성공했을 때만.
     if: >-
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'repository_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:

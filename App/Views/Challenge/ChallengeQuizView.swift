@@ -85,7 +85,7 @@ struct ChallengeQuizView: View {
             .accessibilityLabel("챌린지 그만두기")
 
             VStack(alignment: .leading, spacing: 1) {
-                Text("\(session.difficulty.rawValue)단계 · \(session.difficulty.title)")
+                Text(L("%d단계 · %@", session.difficulty.rawValue, session.difficulty.title))
                     .font(ClayFont.caption())
                     .foregroundStyle(ClayTheme.textSecondary)
                 Text(session.mode.title)
@@ -161,7 +161,7 @@ struct ChallengeQuizView: View {
                     .font(ClayFont.caption())
                     .foregroundStyle(ClayTheme.textSecondary)
                 Spacer()
-                Text("\(remaining)초")
+                Text(L("%d초", remaining))
                     .font(ClayFont.caption())
                     .foregroundStyle(ratio <= 0.25 ? ClayTheme.danger : ClayTheme.textPrimary)
                     .monospacedDigit()
@@ -179,7 +179,7 @@ struct ChallengeQuizView: View {
             .animation(.linear(duration: 0.25), value: remaining)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("남은 시간 \(remaining)초")
+        .accessibilityLabel(L("남은 시간 %d초", remaining))
     }
 
     private func promptCard(_ question: ChallengeQuestion) -> some View {
@@ -279,7 +279,7 @@ struct ChallengeQuizView: View {
             .foregroundStyle(correct ? ClayTheme.accent : ClayTheme.danger)
 
             if !correct {
-                Text("정답: \(question.correctAnswer)")
+                Text(L("정답: %@", question.correctAnswer))
                     .font(ClayFont.callout())
                     .foregroundStyle(ClayTheme.textPrimary)
             }

@@ -322,7 +322,7 @@ struct ScheduleEditorView: View {
     }
 
     private func fieldLabel(_ text: String) -> some View {
-        Text(text)
+        Text(L(text))
             .font(ClayFont.caption())
             .foregroundStyle(ClayTheme.textSecondary)
     }

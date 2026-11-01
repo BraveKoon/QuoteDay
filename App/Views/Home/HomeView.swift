@@ -8,6 +8,7 @@ struct HomeView: View {
     @Environment(AppEnvironment.self) private var appEnvironment
 
     @Environment(NoteStore.self) private var notes
+    @Environment(ProfileStore.self) private var profile
 
     @State private var editorTarget: ScheduleEditorTarget?
     /// 열어 둔 월간 회고. 값이 들어오면 시트가 올라온다.
@@ -80,7 +81,7 @@ struct HomeView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(viewModel.greeting())
+            Text(viewModel.greeting(name: profile.nickname))
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
             Text(viewModel.dateText())
@@ -130,7 +131,7 @@ struct HomeView: View {
                     Image(systemName: "sparkles")
                         .foregroundStyle(ClayTheme.accent)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("\(Formatters.monthTitle.string(from: month)) 돌아보기")
+                        Text(L("%@ 돌아보기", Formatters.monthTitle.string(from: month)))
                             .font(ClayFont.headline())
                             .foregroundStyle(ClayTheme.textPrimary)
                         Text(review.headline)
@@ -206,7 +207,7 @@ struct HomeView: View {
                             }
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("이 일정에 예약된 명언: \(quote.quote.text)")
+                        .accessibilityLabel(L("이 일정에 예약된 명언: %@", quote.quote.text))
                     }
                 }
                 .padding(ClayTheme.Spacing.m)
@@ -258,7 +259,7 @@ struct HomeView: View {
 
     private var subtitleText: String {
         let count = viewModel.todaySchedules.count
-        return count == 0 ? "일정 없음" : "\(count)개"
+        return count == 0 ? L("일정 없음") : L("%d개", count)
     }
 }
 

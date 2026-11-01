@@ -137,7 +137,7 @@ struct JournalCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("오늘 쓴 글: \(note.text)")
+        .accessibilityLabel(L("오늘 쓴 글: %@", note.text))
         .accessibilityHint("두 번 탭하면 고칠 수 있어요")
     }
 

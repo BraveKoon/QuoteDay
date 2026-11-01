@@ -24,21 +24,21 @@ public enum PlusFeature: String, CaseIterable, Identifiable, Sendable {
     /// 페이월에서 이 기능을 소개할 때 쓰는 제목.
     public var title: String {
         switch self {
-        case .authorProfile: "인물 프로필"
-        case .behindStory: "비하인드 스토리"
-        case .relatedWorks: "관련 저서와 연관 인물"
-        case .noteExport: "인쇄용 PDF"
-        case .premiumShareTheme: "프리미엄 카드 테마"
+        case .authorProfile: L("인물 프로필")
+        case .behindStory: L("비하인드 스토리")
+        case .relatedWorks: L("관련 저서와 연관 인물")
+        case .noteExport: L("인쇄용 PDF")
+        case .premiumShareTheme: L("프리미엄 카드 테마")
         }
     }
 
     public var detail: String {
         switch self {
-        case .authorProfile: "생애, 주요 업적, 활동한 시대를 한 장에 정리해 드려요."
-        case .behindStory: "이 문장이 어떤 상황에서 나왔는지 배경을 읽어 보세요."
-        case .relatedWorks: "인물의 저서와 이어서 볼 만한 인물·명언을 추천해요."
-        case .noteExport: "적어 둔 생각을 한 권으로 묶어 인쇄하거나 간직할 수 있어요. 백업은 설정의 \"기록 내보내기\"로 하세요."
-        case .premiumShareTheme: "감성 배경과 프리미엄 서체로 카드를 꾸며 보세요."
+        case .authorProfile: L("생애, 주요 업적, 활동한 시대를 한 장에 정리해 드려요.")
+        case .behindStory: L("이 문장이 어떤 상황에서 나왔는지 배경을 읽어 보세요.")
+        case .relatedWorks: L("인물의 저서와 이어서 볼 만한 인물·명언을 추천해요.")
+        case .noteExport: L("적어 둔 생각을 한 권으로 묶어 인쇄하거나 간직할 수 있어요. 백업은 설정의 \"기록 내보내기\"로 하세요.")
+        case .premiumShareTheme: L("감성 배경과 프리미엄 서체로 카드를 꾸며 보세요.")
         }
     }
 

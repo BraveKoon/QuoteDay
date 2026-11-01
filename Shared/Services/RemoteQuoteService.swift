@@ -32,8 +32,16 @@ public struct RemoteQuote: Codable, Hashable, Sendable {
         self.translatedText = translatedText
     }
 
-    /// 화면에 띄울 문장. 번역이 있으면 한국어, 없으면 영어 원문.
-    public var displayText: String { translatedText ?? text }
+    /// 화면에 띄울 문장.
+    ///
+    /// 기기 번역은 **한국어로만** 한다. 영어·중국어 사용자에게는 번역된 한국어가
+    /// 아니라 영어 원문을 보여 준다 — 읽을 수 없는 문장보다는 낫다.
+    public var displayText: String {
+        switch Localization.language {
+        case .korean: translatedText ?? text
+        case .english, .simplifiedChinese, .traditionalChinese: text
+        }
+    }
 
     /// 아직 번역하지 않았는지.
     public var needsTranslation: Bool {
@@ -273,9 +281,9 @@ public enum RemoteQuoteError: LocalizedError, Equatable {
 
     public var errorDescription: String? {
         switch self {
-        case .emptyResponse: "명언을 받아 오지 못했습니다."
-        case .rateLimited: "요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요."
-        case .badStatus(let code): "서버 응답 오류 (\(code))"
+        case .emptyResponse: L("명언을 받아 오지 못했습니다.")
+        case .rateLimited: L("요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.")
+        case .badStatus(let code): L("서버 응답 오류 (%@)", String(code))
         }
     }
 }

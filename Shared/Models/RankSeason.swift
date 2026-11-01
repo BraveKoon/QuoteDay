@@ -49,7 +49,7 @@ public struct RankSeason: Hashable, Sendable {
     public var id: String { "\(year)Q\(quarter)" }
 
     /// 화면에 쓰는 이름.
-    public var title: String { "\(year)년 \(quarter)분기" }
+    public var title: String { L("%d년 %d분기", year, quarter) }
 
     /// 이 시즌이 시작한 달(1·4·7·10).
     public var startMonth: Int { (quarter - 1) * Self.months + 1 }
@@ -81,9 +81,9 @@ public struct RankSeason: Hashable, Sendable {
     public func resetNotice(from date: Date = .now, calendar: Calendar = .current) -> String {
         let start = next.startMonth
         switch daysRemaining(from: date, calendar: calendar) {
-        case 0: return "곧 리셋돼요. \(start)월 1일에 처음부터 다시 시작합니다."
-        case 1: return "내일 \(start)월 1일에 리셋돼요."
-        case let days: return "\(start)월 1일에 리셋돼요. \(days)일 남았어요."
+        case 0: return L("곧 리셋돼요. %d월 1일에 처음부터 다시 시작합니다.", start)
+        case 1: return L("내일 %d월 1일에 리셋돼요.", start)
+        case let days: return L("%d월 1일에 리셋돼요. %d일 남았어요.", start, days)
         }
     }
 }

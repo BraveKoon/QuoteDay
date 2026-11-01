@@ -44,7 +44,7 @@ struct CategoryChip: View {
         .padding(.vertical, size.verticalPadding)
         .clayCard(cornerRadius: ClayTheme.Radius.chip, tint: category.tint)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("카테고리 \(category.title)")
+        .accessibilityLabel(L("카테고리 %@", category.title))
     }
 }
 

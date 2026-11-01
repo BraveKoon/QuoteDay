@@ -13,6 +13,8 @@ import WidgetKit
 final class AppEnvironment {
     let container: ModelContainer
     let settings: AppSettings
+    /// 로그인 상태와 닉네임. 첫 실행 안내가 이 값을 보고 화면을 고른다.
+    let profile: ProfileStore
     let notifications: NotificationService
     let calendarService: CalendarService
     let router: AppRouter
@@ -44,11 +46,13 @@ final class AppEnvironment {
     ) {
         self.container = container
         let settings = AppSettings(defaults: defaults)
+        let profile = ProfileStore(defaults: defaults)
         let notifications = NotificationService()
         let calendarService = CalendarService()
         let router = AppRouter()
 
         self.settings = settings
+        self.profile = profile
         self.notifications = notifications
         self.calendarService = calendarService
         self.router = router
@@ -76,7 +80,9 @@ final class AppEnvironment {
 
     /// 번역할 것이 남아 있는지 다시 본다.
     func refreshTranslationTarget() {
-        pendingTranslationSource = settings.translatesRemoteQuote
+        // 번역은 한국어 화면을 위한 것이다. 영어·중국어로 보는 중에는
+        // 원문을 그대로 보여 주므로 번역을 돌리지 않는다.
+        pendingTranslationSource = (settings.translatesRemoteQuote && settings.language == .korean)
             ? RemoteQuoteStore.shared.pendingTranslationSource()
             : nil
     }
@@ -255,6 +261,7 @@ extension View {
             .environment(environment)
             .environment(environment.router)
             .environment(environment.settings)
+            .environment(environment.profile)
             .environment(environment.notifications)
             .environment(environment.calendarService)
             .environment(environment.scheduleStore)

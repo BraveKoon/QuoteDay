@@ -41,15 +41,24 @@ final class HomeViewModel {
     }
 
     /// 시간대에 따른 인사말.
-    func greeting(for date: Date = .now) -> String {
+    ///
+    /// 첫 실행 안내에서 정한 닉네임이 있으면 앞에 붙인다. 이름을 부르는 것과
+    /// 부르지 않는 것의 차이가, 앱이 나를 아는 앱인지 아닌지를 가른다.
+    func greeting(for date: Date = .now, name: String? = nil) -> String {
         let hour = calendar.component(.hour, from: date)
+        let greeting: String
         switch hour {
-        case 5..<11: return "좋은 아침이에요"
-        case 11..<14: return "점심 무렵이에요"
-        case 14..<18: return "오후를 보내고 있어요"
-        case 18..<22: return "저녁이에요"
-        default: return "늦은 밤이에요"
+        case 5..<11: greeting = L("좋은 아침이에요")
+        case 11..<14: greeting = L("점심 무렵이에요")
+        case 14..<18: greeting = L("오후를 보내고 있어요")
+        case 18..<22: greeting = L("저녁이에요")
+        default: greeting = L("늦은 밤이에요")
         }
+
+        guard let name = name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else {
+            return greeting
+        }
+        return L("%@님, %@", name, greeting)
     }
 
     // MARK: - 일정

@@ -18,8 +18,8 @@ struct QuoteLockScreenWidget: Widget {
                 // 잠금화면 위젯은 시스템이 배경을 관리하므로 비워 둔다.
                 .containerBackground(.clear, for: .widget)
         }
-        .configurationDisplayName("잠금화면 명언")
-        .description("잠금화면과 대기 화면에서 오늘의 명언과 다음 일정을 확인합니다.")
+        .configurationDisplayName(LocalizedStringKey(L("잠금화면 명언")))
+        .description(LocalizedStringKey(L("잠금화면과 대기 화면에서 오늘의 명언과 다음 일정을 확인합니다.")))
         .supportedFamilies([.accessoryInline, .accessoryCircular, .accessoryRectangular])
     }
 }
@@ -38,6 +38,7 @@ struct LockScreenWidgetView: View {
             }
         }
         .widgetURL(entry.deepLink)
+        .environment(\.locale, AppLanguage.stored().locale)
     }
 
     // MARK: - Inline : 시계 위 한 줄
@@ -86,9 +87,9 @@ struct LockScreenWidgetView: View {
 
     private var circularAccessibilityLabel: String {
         if let next = entry.nextSchedule {
-            return "다음 일정 \(next.title), \(Formatters.time.string(from: next.start))"
+            return L("다음 일정 %@, %@", next.title, Formatters.time.string(from: next.start))
         }
-        return "오늘의 명언, \(entry.author.displayName)"
+        return L("오늘의 명언, %@", entry.author.displayName)
     }
 
     // MARK: - Rectangular : 3줄
@@ -136,7 +137,7 @@ struct LockScreenWidgetView: View {
     private func timeLabel(for date: Date, calendar: Calendar = .current) -> String {
         let time = Formatters.time.string(from: date)
         if calendar.isDateInToday(date) { return time }
-        if calendar.isDateInTomorrow(date) { return "내일 \(time)" }
+        if calendar.isDateInTomorrow(date) { return L("내일 %@", time) }
         return "\(Formatters.dayAndWeekday.string(from: date)) \(time)"
     }
 }

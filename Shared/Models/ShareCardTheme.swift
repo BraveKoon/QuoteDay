@@ -18,12 +18,12 @@ public enum ShareCardTheme: String, CaseIterable, Identifiable, Sendable {
 
     public var title: String {
         switch self {
-        case .paper: "종이"
-        case .ink: "먹지"
-        case .dawn: "새벽"
-        case .forest: "숲"
-        case .dusk: "노을"
-        case .sand: "모래"
+        case .paper: L("종이")
+        case .ink: L("먹지")
+        case .dawn: L("새벽")
+        case .forest: L("숲")
+        case .dusk: L("노을")
+        case .sand: L("모래")
         }
     }
 

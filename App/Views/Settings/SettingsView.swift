@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 /// 설정 화면. 클레이 스타일을 유지하기 위해 `Form` 대신 카드로 구성한다.
 struct SettingsView: View {
     @Environment(AppSettings.self) private var settings
+    @Environment(ProfileStore.self) private var profile
     @Environment(NotificationService.self) private var notifications
     @Environment(CalendarService.self) private var calendarService
     @Environment(ScheduleStore.self) private var store
@@ -29,6 +30,10 @@ struct SettingsView: View {
     @State private var archiveMessage: String?
     /// 마지막 백업 시각을 다시 읽게 만드는 트리거.
     @State private var backupToken = 0
+    /// 로그아웃 확인 창.
+    @State private var showsSignOutConfirmation = false
+    /// 설정에서 Apple 로그인을 시도했을 때의 실패 메시지.
+    @State private var signInMessage: String?
 
     var body: some View {
         @Bindable var settings = settings
@@ -37,6 +42,8 @@ struct SettingsView: View {
             ScrollView {
             VStack(spacing: ClayTheme.Spacing.m) {
                 header
+                accountCard
+                languageCard
 
                 if plus.isStoreVisible {
                     plusCard
@@ -174,7 +181,7 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
                 Text(notes.isEmpty
                      ? "홈에서 오늘 한 줄을 남기면 명언 탭의 \u{201C}내 기록\u{201D}에 쌓여요."
-                     : "지금까지 \(notes.recordedDayCount)일 동안 \(notes.notes.count)편을 남겼어요.")
+                     : L("%d일 동안 %d편을 남겼어요.", notes.recordedDayCount, notes.notes.count))
                     .font(ClayFont.callout())
                     .foregroundStyle(ClayTheme.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -216,11 +223,11 @@ struct SettingsView: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 if let lastBackup {
-                    Text("마지막 백업 \(Formatters.shortDateTime.string(from: lastBackup))")
+                    Text(L("마지막 백업 %@", Formatters.shortDateTime.string(from: lastBackup)))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
                 } else if needsWarning {
-                    Text("마지막 백업: 없음 — 지금 기기를 잃으면 기록 \(notes.notes.count)편이 함께 사라집니다.")
+                    Text(L("마지막 백업: 없음 — 지금 기기를 잃으면 기록 %d편이 함께 사라집니다.", notes.notes.count))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.danger)
                         .fixedSize(horizontal: false, vertical: true)
@@ -276,7 +283,7 @@ struct SettingsView: View {
         case .success:
             JournalBackupMark.markBackedUp()
             backupToken += 1
-            archiveMessage = "기록 \(notes.notes.count)편을 내보냈어요."
+            archiveMessage = L("기록 %d편을 내보냈어요.", notes.notes.count)
         case .failure(let error):
             // 사용자가 취소한 것도 실패로 온다. 조용히 넘어간다.
             AppLog.notes.debug("내보내기 종료: \(error.localizedDescription, privacy: .public)")
@@ -295,7 +302,7 @@ struct SettingsView: View {
             let merged = try notes.importArchive(try Data(contentsOf: url))
             archiveMessage = merged.summary
         } catch JournalArchiveError.tooNew(let schema) {
-            archiveMessage = "더 새로운 버전에서 만든 파일이에요(형식 \(schema)). 앱을 업데이트해 주세요."
+            archiveMessage = L("더 새로운 버전에서 만든 파일이에요(형식 %@). 앱을 업데이트해 주세요.", String(schema))
         } catch {
             archiveMessage = "읽을 수 없는 파일이에요. QuoteDay 가 내보낸 파일인지 확인해 주세요."
             AppLog.notes.error("가져오기 실패: \(error.localizedDescription, privacy: .public)")
@@ -331,7 +338,7 @@ struct SettingsView: View {
             Link(destination: url) {
                 supportRowLabel(option, trailingSymbol: "arrow.up.right")
             }
-            .accessibilityLabel("\(option.title) 열기")
+            .accessibilityLabel(L("%@ 열기", option.title))
 
         case .account:
             // 계좌는 나가는 링크가 아니라 복사해 가는 정보다.
@@ -362,7 +369,7 @@ struct SettingsView: View {
                 Text(option.title)
                     .font(ClayFont.headline())
                 if let subtitle {
-                    Text(subtitle)
+                    Text(L(subtitle))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
                         .monospacedDigit()
@@ -423,7 +430,7 @@ struct SettingsView: View {
                         .font(ClayFont.callout())
                         .foregroundStyle(ClayTheme.textPrimary)
                     Spacer()
-                    Text("\(pendingNotificationCount)건")
+                    Text(L("%d건", pendingNotificationCount))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
                         .monospacedDigit()
@@ -442,10 +449,10 @@ struct SettingsView: View {
 
     private var authorizationText: String {
         switch notifications.authorizationStatus {
-        case .authorized, .provisional, .ephemeral: "허용됨"
-        case .denied: "거부됨"
-        case .notDetermined: "미설정"
-        @unknown default: "알 수 없음"
+        case .authorized, .provisional, .ephemeral: L("허용됨")
+        case .denied: L("거부됨")
+        case .notDetermined: L("미설정")
+        @unknown default: L("알 수 없음")
         }
     }
 
@@ -545,7 +552,7 @@ struct SettingsView: View {
                     }
 
                     if let attempt = store.lastAttemptDate {
-                        Text("마지막 확인 \(Formatters.shortDateTime.string(from: attempt))")
+                        Text(L("마지막 확인 %@", Formatters.shortDateTime.string(from: attempt)))
                             .font(ClayFont.caption())
                             .foregroundStyle(ClayTheme.textSecondary)
                     }
@@ -609,7 +616,7 @@ struct SettingsView: View {
                         Task { await applyDailyQuoteSetting(isOn: true) }
                     }
 
-                    Text("앞으로 \(NotificationService.dailyQuoteHorizonDays)일치를 미리 예약합니다. 앱을 열 때마다 자동으로 갱신돼요.")
+                    Text(L("앞으로 %d일치를 미리 예약합니다. 앱을 열 때마다 자동으로 갱신돼요.", NotificationService.dailyQuoteHorizonDays))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -721,10 +728,10 @@ struct SettingsView: View {
 
     private var calendarStatusText: String {
         switch calendarService.authorizationStatus {
-        case .fullAccess: "전체 접근이 허용되어 기기 일정도 함께 볼 수 있어요."
-        case .writeOnly: "쓰기 권한만 허용되어 있어요. 일정을 내보낼 수는 있지만 불러올 수는 없습니다."
-        case .denied, .restricted: "캘린더 접근이 거부되어 있어요. 앱 내부 일정 기능은 그대로 사용할 수 있습니다."
-        default: "아직 권한을 요청하지 않았어요."
+        case .fullAccess: L("전체 접근이 허용되어 기기 일정도 함께 볼 수 있어요.")
+        case .writeOnly: L("쓰기 권한만 허용되어 있어요. 일정을 내보낼 수는 있지만 불러올 수는 없습니다.")
+        case .denied, .restricted: L("캘린더 접근이 거부되어 있어요. 앱 내부 일정 기능은 그대로 사용할 수 있습니다.")
+        default: L("아직 권한을 요청하지 않았어요.")
         }
     }
 
@@ -775,7 +782,7 @@ struct SettingsView: View {
                 .foregroundStyle(.white)
                 .frame(width: 18, height: 18)
                 .background(Circle().fill(ClayTheme.accent))
-            Text(text)
+            Text(L(text))
                 .font(ClayFont.callout())
                 .foregroundStyle(ClayTheme.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -790,8 +797,8 @@ struct SettingsView: View {
                 // 이 태그는 번들 버전에서 만든다. 릴리스 워크플로도 같은 값으로
                 // 태그를 달기 때문에 깃허브와 어긋날 수가 없다.
                 infoRow("깃허브 태그", AppVersion.tag)
-                infoRow("수록 명언", "\(QuoteService.shared.quoteCount)개")
-                infoRow("수록 인물", "\(AuthorLibrary.all.count)명")
+                infoRow("수록 명언", L("%d개", QuoteService.shared.quoteCount))
+                infoRow("수록 인물", L("%d명", AuthorLibrary.all.count))
 
                 ClayDivider().padding(.vertical, 2)
 
@@ -826,18 +833,132 @@ struct SettingsView: View {
     /// "v1.0부터 11개". 목록이 비어 있으면 (있을 수 없지만) 아무것도 쓰지 않는다.
     private var releaseNotesSubtitle: String {
         guard let oldest = ReleaseHistory.all.last else { return "" }
-        return "v\(oldest.version)부터 \(ReleaseHistory.all.count)개"
+        return L("v%@부터 %d개", oldest.version, ReleaseHistory.all.count)
     }
 
     private func infoRow(_ label: String, _ value: String) -> some View {
         HStack {
-            Text(label)
+            Text(L(label))
                 .font(ClayFont.callout())
                 .foregroundStyle(ClayTheme.textSecondary)
             Spacer()
             Text(value)
                 .font(ClayFont.callout())
                 .foregroundStyle(ClayTheme.textPrimary)
+        }
+    }
+
+    // MARK: - 계정
+
+    /// 로그인 상태와 닉네임. 첫 실행 안내에서 정한 값을 여기서 바꿀 수 있다.
+    private var accountCard: some View {
+        card(title: "내 계정", symbol: "person.crop.circle") {
+            VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+                HStack(spacing: ClayTheme.Spacing.xs) {
+                    Image(systemName: profile.isSignedInWithApple ? "apple.logo" : "person.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(ClayTheme.accent)
+                    Text(providerTitle)
+                        .font(ClayFont.callout())
+                        .foregroundStyle(ClayTheme.textPrimary)
+                    Spacer(minLength: 0)
+                }
+
+                if let email = profile.appleEmail {
+                    Text(email)
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+
+                ClayDivider()
+
+                VStack(alignment: .leading, spacing: ClayTheme.Spacing.xs) {
+                    Text("닉네임")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.textSecondary)
+                    TextField("닉네임", text: Binding(
+                        get: { profile.nickname },
+                        set: { profile.nickname = $0 }
+                    ))
+                    .font(ClayFont.callout())
+                    .foregroundStyle(ClayTheme.textPrimary)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .submitLabel(.done)
+                    .padding(.horizontal, ClayTheme.Spacing.s)
+                    .padding(.vertical, ClayTheme.Spacing.xs + 4)
+                    .claySunken(cornerRadius: ClayTheme.Radius.tiny)
+                    .onChange(of: profile.nickname) { _, newValue in
+                        let cleaned = ProfileStore.cleaned(newValue)
+                        if cleaned != newValue { profile.nickname = cleaned }
+                    }
+                }
+
+                if !profile.isSignedInWithApple {
+                    AppleSignInButton(
+                        onCredential: { credential in
+                            profile.applyAppleCredential(credential)
+                            if profile.nickname.isEmpty, let name = credential.displayName {
+                                profile.nickname = name
+                            }
+                            signInMessage = nil
+                        },
+                        onFailure: { message in signInMessage = message }
+                    )
+                    .padding(.top, ClayTheme.Spacing.xs)
+
+                    if let signInMessage {
+                        Text(signInMessage)
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.danger)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text("나중에 Apple 계정으로 로그인해도 기록은 그대로 남아요.")
+                            .font(ClayFont.caption())
+                            .foregroundStyle(ClayTheme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+
+                Button("로그아웃") { showsSignOutConfirmation = true }
+                    .clayButton(.secondary, fullWidth: true)
+            }
+        }
+        .confirmationDialog(
+            "로그아웃할까요?",
+            isPresented: $showsSignOutConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("로그아웃", role: .destructive) { profile.signOut() }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("처음 화면으로 돌아갑니다. 명언과 기록은 이 기기에 그대로 남아요.")
+        }
+    }
+
+    private var providerTitle: String {
+        profile.isSignedInWithApple
+            ? L("Apple 계정으로 로그인됨")
+            : L("로그인 없이 사용 중")
+    }
+
+    // MARK: - 언어
+
+    private var languageCard: some View {
+        card(title: "언어", symbol: "globe") {
+            VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+                Text("앱 화면과 명언, 위젯이 모두 고른 언어로 바뀝니다. 다시 시작하지 않아도 바로 반영돼요.")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                LanguagePickerList(selection: Binding(
+                    get: { settings.language },
+                    set: { settings.language = $0 }
+                ))
+            }
         }
     }
 
@@ -849,7 +970,7 @@ struct SettingsView: View {
         @ViewBuilder content: () -> some View
     ) -> some View {
         VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
-            Label(title, systemImage: symbol)
+            Label(L(title), systemImage: symbol)
                 .font(ClayFont.headline())
                 .foregroundStyle(ClayTheme.textPrimary)
             content()

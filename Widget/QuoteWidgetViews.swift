@@ -18,6 +18,9 @@ struct QuoteWidgetEntryView: View {
             }
         }
         .widgetURL(entry.deepLink)
+        // 위젯 안의 문구도 앱에서 고른 언어를 따른다.
+        // (위젯 구성 화면의 이름은 시스템이 그리므로 여기서 바꿀 수 없다.)
+        .environment(\.locale, AppLanguage.stored().locale)
     }
 
     // MARK: - Small : 명언만
@@ -134,7 +137,7 @@ struct QuoteWidgetEntryView: View {
                         scheduleRow(schedule)
                     }
                     if entry.todaySchedules.count > 3 {
-                        Text("외 \(entry.todaySchedules.count - 3)개")
+                        Text(L("외 %d개", entry.todaySchedules.count - 3))
                             .font(.system(size: 9, weight: .medium, design: .rounded))
                             .foregroundStyle(ClayTheme.textSecondary)
                     }

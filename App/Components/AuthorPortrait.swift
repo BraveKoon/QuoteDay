@@ -24,7 +24,7 @@ struct AuthorPortrait: View {
         .overlay {
             Circle().strokeBorder(ClayTheme.separator, lineWidth: 1)
         }
-        .accessibilityLabel("\(author.displayName) 초상")
+        .accessibilityLabel(L("%@ 초상", author.displayName))
     }
 
     private var placeholder: some View {

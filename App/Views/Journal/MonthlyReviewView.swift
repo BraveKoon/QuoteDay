@@ -116,7 +116,7 @@ struct MonthlyReviewView: View {
             Image(systemName: symbol)
                 .foregroundStyle(ClayTheme.accent)
                 .frame(width: 22)
-            Text(title)
+            Text(L(title))
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
             Spacer(minLength: ClayTheme.Spacing.xs)
@@ -184,7 +184,7 @@ struct MonthlyReviewView: View {
             title: "아직 되돌아볼 것이 적어요",
             message: review.noteCount == 0
                 ? "이 달에는 남긴 기록이 없어요. 홈에서 오늘 한 줄을 남겨 보세요."
-                : "기록 \(MonthlyReview.minimumNotes)편부터 회고를 만들어요. 지금은 \(review.noteCount)편이에요."
+                : L("기록 %d편부터 회고를 만들어요. 지금은 %d편이에요.", MonthlyReview.minimumNotes, review.noteCount)
         )
         .clayCard()
     }
@@ -194,7 +194,7 @@ struct MonthlyReviewView: View {
     private func makeShareImage(_ review: MonthlyReview) -> URL? {
         QuoteCardRenderer.pngFile(
             MonthlyReviewCard(review: review, side: QuoteCardRenderer.exportSide),
-            named: "QuoteDay-회고-\(month.dayKey()).png"
+            named: L("QuoteDay-회고-%@.png", month.dayKey())
         )
     }
 }
@@ -218,7 +218,7 @@ struct MonthlyReviewCard: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             if let author = review.topAuthor {
-                Text("가장 자주 만난 인물 · \(author)")
+                Text(L("가장 자주 만난 인물 · %@", author))
                     .font(.system(size: side * 0.038))
                     .foregroundStyle(.secondary)
             }

@@ -10,6 +10,12 @@
 	<array>
 		<string>iCloud.com.quoteday.app</string>
 	</array>
+	<!-- Sign in with Apple. 서버가 없는 앱이라 토큰을 보내지는 않고,
+	     사용자가 본인 Apple 계정으로 들어왔다는 사실만 확인한다. -->
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
 	<key>com.apple.developer.icloud-services</key>
 	<array>
 		<string>CloudKit</string>

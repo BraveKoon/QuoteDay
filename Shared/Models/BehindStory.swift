@@ -32,4 +32,23 @@ public struct BehindStory: Identifiable, Hashable, Codable, Sendable {
     }
 
     public var id: String { quoteSlug }
+
+    /// 번역된 사본. 사전에 없는 항목은 한국어 원문이 그대로 남는다.
+    public func localized(in language: AppLanguage = Localization.language) -> BehindStory {
+        guard language.usesTranslationTable else { return self }
+        let key = "story.\(quoteSlug)"
+        func text(_ field: String, fallback: String) -> String {
+            let fieldKey = "\(key).\(field)"
+            return Localization.hasTranslation(fieldKey, language: language)
+                ? Localization.string(fieldKey, language: language)
+                : fallback
+        }
+        return BehindStory(
+            quoteSlug: quoteSlug,
+            occasion: text("occasion", fallback: occasion),
+            context: text("context", fallback: context),
+            takeaway: takeaway.map { text("takeaway", fallback: $0) },
+            source: source
+        )
+    }
 }

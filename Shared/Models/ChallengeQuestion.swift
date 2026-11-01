@@ -102,11 +102,11 @@ public struct ChallengeResult: Hashable, Sendable {
     /// 결과 화면 맨 위에 띄우는 한마디.
     public var headline: String {
         switch accuracy {
-        case 1: "전부 맞혔습니다"
-        case 0.8...: "거의 다 맞혔습니다"
-        case 0.5...: "절반은 넘겼습니다"
-        case 0.2...: "다음 판이 있습니다"
-        default: "한 단계 낮춰 볼까요"
+        case 1: L("전부 맞혔습니다")
+        case 0.8...: L("거의 다 맞혔습니다")
+        case 0.5...: L("절반은 넘겼습니다")
+        case 0.2...: L("다음 판이 있습니다")
+        default: L("한 단계 낮춰 볼까요")
         }
     }
 }

@@ -159,7 +159,7 @@ final class PlusStore {
             switch try await product.purchase() {
             case .success(let verification):
                 guard case .verified(let transaction) = verification else {
-                    lastErrorMessage = "구매를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요."
+                    lastErrorMessage = L("구매를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.")
                     return .failed("검증 실패")
                 }
                 await transaction.finish()
@@ -174,7 +174,7 @@ final class PlusStore {
             }
         } catch {
             AppLog.plus.error("구매 실패: \(error.localizedDescription, privacy: .public)")
-            lastErrorMessage = "결제를 완료하지 못했습니다. 네트워크 상태를 확인해 주세요."
+            lastErrorMessage = L("결제를 완료하지 못했습니다. 네트워크 상태를 확인해 주세요.")
             return .failed(error.localizedDescription)
         }
     }
@@ -185,11 +185,11 @@ final class PlusStore {
             try await AppStore.sync()
             await refreshEntitlements()
             if !hasEntitlement {
-                lastErrorMessage = "복원할 구매 내역이 없습니다."
+                lastErrorMessage = L("복원할 구매 내역이 없습니다.")
             }
         } catch {
             AppLog.plus.error("복원 실패: \(error.localizedDescription, privacy: .public)")
-            lastErrorMessage = "구매 내역을 복원하지 못했습니다."
+            lastErrorMessage = L("구매 내역을 복원하지 못했습니다.")
         }
     }
 

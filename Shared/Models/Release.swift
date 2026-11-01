@@ -35,12 +35,12 @@ public struct Release: Identifiable, Hashable, Sendable {
         URL(string: "https://github.com/BraveKoon/QuoteDay/releases/tag/\(tag)")
     }
 
-    /// "2026년 9월 9일". `DateFormatter` 를 쓰지 않는 이유는 이 값이 사람이 읽는
-    /// 고정 문자열이기 때문이다. 기기 지역 설정에 따라 표기가 흔들릴 이유가 없다.
+    /// "2026년 9월 9일" / "September 9, 2026" / "2026年9月9日".
+    ///
+    /// 날짜는 `"2026-09-09"` 처럼 고정 형식으로 저장되어 있지만, 화면에 쓸 때는
+    /// 앱이 고른 언어의 표기를 따른다. 해석하지 못하면 저장된 값을 그대로 쓴다.
     public var displayDate: String {
-        let parts = date.split(separator: "-").compactMap { Int($0) }
-        guard parts.count == 3 else { return date }
-        return "\(parts[0])년 \(parts[1])월 \(parts[2])일"
+        Formatters.releaseDate(date) ?? date
     }
 }
 

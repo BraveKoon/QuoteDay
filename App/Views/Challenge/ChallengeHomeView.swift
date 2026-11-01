@@ -174,10 +174,10 @@ struct ChallengeHomeView: View {
 
             VStack(alignment: .trailing, spacing: 2) {
                 if record.hasPlayed {
-                    Text("최고 \(record.bestScore)/\(ChallengeGenerator.questionsPerRound)")
+                    Text(L("최고 %d/%d", record.bestScore, ChallengeGenerator.questionsPerRound))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textPrimary)
-                    Text("\(record.playCount)판")
+                    Text(L("%d판", record.playCount))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
                 } else {
@@ -196,8 +196,8 @@ struct ChallengeHomeView: View {
         .clayCard()
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(difficulty.rawValue)단계 \(difficulty.title). \(difficulty.detail(for: mode))")
-        .accessibilityHint(record.hasPlayed ? "최고 기록 \(record.bestScore)점" : "아직 기록이 없습니다")
+        .accessibilityLabel(L("%d단계 %@. %@", difficulty.rawValue, difficulty.title, difficulty.detail(for: mode)))
+        .accessibilityHint(record.hasPlayed ? L("최고 기록 %d점", record.bestScore) : L("아직 기록이 없습니다"))
     }
 
     // MARK: - 규칙
@@ -208,7 +208,7 @@ struct ChallengeHomeView: View {
                 .font(ClayFont.headline())
                 .foregroundStyle(ClayTheme.textPrimary)
 
-            ruleLine("한 판은 \(ChallengeGenerator.questionsPerRound)문제입니다.")
+            ruleLine(L("한 판은 %d문제입니다.", ChallengeGenerator.questionsPerRound))
             ruleLine("단계가 올라가면 보기가 늘고, 힌트가 사라지고, 오답이 정답과 비슷해집니다.")
             ruleLine("4단계부터는 제한 시간이 있습니다. 시간을 넘기면 오답으로 칩니다.")
             ruleLine("모든 단계는 처음부터 열려 있습니다. 아무 데서나 시작하세요.")

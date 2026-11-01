@@ -101,7 +101,7 @@ struct MoodPickerCard: View {
             .contentShape(RoundedRectangle(cornerRadius: ClayTheme.Radius.control, style: .continuous))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(mood.title) 기분의 명언 보기")
+        .accessibilityLabel(L("%@ 기분의 명언 보기", mood.title))
         .accessibilityHint(mood.invitation)
         .accessibilityAddTraits(isOn ? [.isSelected] : [])
     }

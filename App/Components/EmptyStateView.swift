@@ -19,13 +19,13 @@ struct EmptyStateView: View {
                 // 이 컴포넌트는 카드 안에 놓이므로, 같은 흰 면 대신 한 단계 들어간 면을 쓴다.
                 .claySunken(cornerRadius: ClayTheme.Radius.control)
 
-            Text(title)
+            Text(L(title))
                 .font(ClayFont.headline())
                 .foregroundStyle(ClayTheme.textPrimary)
                 .multilineTextAlignment(.center)
 
             if let message {
-                Text(message)
+                Text(L(message))
                     .font(ClayFont.callout())
                     .foregroundStyle(ClayTheme.textSecondary)
                     .multilineTextAlignment(.center)
@@ -33,7 +33,7 @@ struct EmptyStateView: View {
             }
 
             if let actionTitle, let action {
-                Button(actionTitle, action: action)
+                Button(L(actionTitle), action: action)
                     .clayButton(.primary)
                     .padding(.top, ClayTheme.Spacing.xs)
             }
@@ -60,11 +60,11 @@ struct SectionHeader<Trailing: View>: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(L(title))
                     .font(ClayFont.title())
                     .foregroundStyle(ClayTheme.textPrimary)
                 if let subtitle {
-                    Text(subtitle)
+                    Text(L(subtitle))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
                 }

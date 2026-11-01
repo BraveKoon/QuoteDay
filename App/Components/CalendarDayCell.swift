@@ -48,8 +48,8 @@ struct CalendarDayCell: View {
 
     private var accessibilityText: String {
         var text = Formatters.dayAndWeekday.string(from: day.date)
-        if isToday { text += ", 오늘" }
-        if !categories.isEmpty { text += ", 일정 \(categories.count)종류" }
+        if isToday { text += L(", 오늘") }
+        if !categories.isEmpty { text += L(", 일정 %d종류", categories.count) }
         return text
     }
 }

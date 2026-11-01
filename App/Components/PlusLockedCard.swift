@@ -24,7 +24,7 @@ struct PlusLockedCard: View {
                 .font(ClayFont.headline())
                 .foregroundStyle(ClayTheme.textPrimary)
 
-            Text(message ?? feature.detail)
+            Text(L(message ?? feature.detail))
                 .font(ClayFont.callout())
                 .foregroundStyle(ClayTheme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -37,8 +37,8 @@ struct PlusLockedCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .clayCard()
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(feature.title), Quote Plus 필요")
-        .accessibilityHint("두 번 탭하면 Quote Plus 안내를 엽니다.")
+        .accessibilityLabel(L("%@, Quote Plus 필요", feature.title))
+        .accessibilityHint(L("두 번 탭하면 Quote Plus 안내를 엽니다."))
     }
 }
 
@@ -108,7 +108,7 @@ struct PlusLockedPreview<Content: View>: View {
                 .font(ClayFont.headline())
                 .foregroundStyle(ClayTheme.textPrimary)
 
-            Text(message ?? feature.detail)
+            Text(L(message ?? feature.detail))
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -121,8 +121,8 @@ struct PlusLockedPreview<Content: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(ClayTheme.surface)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(feature.title), Quote Plus 필요")
-        .accessibilityHint("두 번 탭하면 Quote Plus 안내를 엽니다.")
+        .accessibilityLabel(L("%@, Quote Plus 필요", feature.title))
+        .accessibilityHint(L("두 번 탭하면 Quote Plus 안내를 엽니다."))
     }
 }
 
@@ -138,7 +138,7 @@ struct ComingSoonCard: View {
                 Image(systemName: "hourglass")
                     .font(.caption)
                     .foregroundStyle(ClayTheme.textSecondary)
-                Text(message)
+                Text(L(message))
                     .font(ClayFont.callout())
                     .foregroundStyle(ClayTheme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)

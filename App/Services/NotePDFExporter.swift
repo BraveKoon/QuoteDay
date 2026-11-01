@@ -22,8 +22,8 @@ enum NotePDFExporter {
 
         var errorDescription: String? {
             switch self {
-            case .noNotes: "내보낼 노트가 없습니다."
-            case .contextUnavailable: "PDF 를 만들 수 없습니다. 저장 공간을 확인해 주세요."
+            case .noNotes: L("내보낼 노트가 없습니다.")
+            case .contextUnavailable: L("PDF 를 만들 수 없습니다. 저장 공간을 확인해 주세요.")
             }
         }
     }
@@ -33,7 +33,7 @@ enum NotePDFExporter {
         guard !notes.isEmpty else { throw ExportError.noNotes }
 
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("QuoteDay-노트-\(Formatters.fileStamp.string(from: exportedAt)).pdf")
+            .appendingPathComponent(L("QuoteDay-노트-%@.pdf", Formatters.fileStamp.string(from: exportedAt)))
 
         var mediaBox = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
         guard
@@ -73,7 +73,7 @@ enum NotePDFExporter {
         [
             kCGPDFContextTitle as String: "QuoteDay 노트",
             kCGPDFContextCreator as String: "QuoteDay",
-            kCGPDFContextSubject as String: "\(Formatters.fullDate.string(from: exportedAt)) 내보냄"
+            kCGPDFContextSubject as String: L("%@ 내보냄", Formatters.fullDate.string(from: exportedAt))
         ] as CFDictionary
     }
 }
@@ -93,7 +93,7 @@ private struct NoteCoverPage: View {
                 .font(.system(size: 40, weight: .bold, design: .serif))
                 .foregroundStyle(Color(hex: 0x2E3350))
 
-            Text("명언 \(noteCount)편에 남긴 생각")
+            Text(L("명언 %d편에 남긴 생각", noteCount))
                 .font(.system(size: 18, design: .serif))
                 .foregroundStyle(Color(hex: 0x6E7595))
 
@@ -104,7 +104,7 @@ private struct NoteCoverPage: View {
 
             Spacer()
 
-            Text(Formatters.fullDate.string(from: exportedAt) + " 내보냄")
+            Text(L("%@ 내보냄", Formatters.fullDate.string(from: exportedAt)))
                 .font(.system(size: 13, design: .serif))
                 .foregroundStyle(Color(hex: 0x9AA1B8))
         }

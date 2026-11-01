@@ -36,17 +36,23 @@ struct QuoteTimelineProvider: AppIntentTimelineProvider {
     private let remoteStore = RemoteQuoteStore.shared
 
     func placeholder(in context: Context) -> QuoteEntry {
-        .placeholder()
+        activateLanguage()
+        return .placeholder()
     }
 
     func snapshot(for configuration: SelectQuoteCategoryIntent, in context: Context) async -> QuoteEntry {
-        makeEntry(at: .now, configuration: configuration)
+        activateLanguage()
+        return makeEntry(at: .now, configuration: configuration)
     }
 
     func timeline(
         for configuration: SelectQuoteCategoryIntent,
         in context: Context
     ) async -> Timeline<QuoteEntry> {
+        // 위젯은 앱과 다른 프로세스다. 타임라인을 만들기 전에 앱에서 고른 언어를
+        // 먼저 적용해야 명언과 인물 이름이 같은 언어로 나온다.
+        activateLanguage()
+
         let now = Date.now
         let calendar = Calendar.current
         let midnight = now.nextMidnight(calendar: calendar)
@@ -73,6 +79,11 @@ struct QuoteTimelineProvider: AppIntentTimelineProvider {
 
         // 자정에 새 명언으로 바뀌어야 하므로 그 시점에 타임라인을 다시 요청한다.
         return Timeline(entries: entries, policy: .after(midnight))
+    }
+
+    /// 앱이 저장해 둔 언어를 이 프로세스에도 적용한다.
+    private func activateLanguage() {
+        Localization.activateStored()
     }
 
     private func makeEntry(at date: Date, configuration: SelectQuoteCategoryIntent) -> QuoteEntry {
@@ -110,8 +121,8 @@ struct QuoteWidget: Widget {
             QuoteWidgetEntryView(entry: entry)
                 .containerBackground(ClayTheme.background, for: .widget)
         }
-        .configurationDisplayName("오늘의 명언")
-        .description("매일 자정에 바뀌는 명언과 오늘의 일정을 보여 줍니다.")
+        .configurationDisplayName(LocalizedStringKey(L("오늘의 명언")))
+        .description(LocalizedStringKey(L("매일 자정에 바뀌는 명언과 오늘의 일정을 보여 줍니다.")))
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
         .contentMarginsDisabled()
     }

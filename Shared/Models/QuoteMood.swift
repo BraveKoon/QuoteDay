@@ -29,12 +29,12 @@ public enum QuoteMood: String, CaseIterable, Codable, Sendable, Identifiable {
 
     public var title: String {
         switch self {
-        case .tired: "지침"
-        case .burntOut: "번아웃"
-        case .studying: "공부"
-        case .challenging: "도전"
-        case .relationships: "인간관계"
-        case .joyful: "기쁨"
+        case .tired: L("지침")
+        case .burntOut: L("번아웃")
+        case .studying: L("공부")
+        case .challenging: L("도전")
+        case .relationships: L("인간관계")
+        case .joyful: L("기쁨")
         }
     }
 
@@ -52,12 +52,12 @@ public enum QuoteMood: String, CaseIterable, Codable, Sendable, Identifiable {
     /// 칩을 눌렀을 때 보여 줄 한 줄.
     public var invitation: String {
         switch self {
-        case .tired: "쉬어 가도 괜찮다고 말해 주는 문장"
-        case .burntOut: "다시 불을 붙이기 전에 읽는 문장"
-        case .studying: "오래 앉아 있는 날의 문장"
-        case .challenging: "한 발 내딛기 전에 읽는 문장"
-        case .relationships: "사람 사이가 어려운 날의 문장"
-        case .joyful: "좋은 날을 더 좋게 하는 문장"
+        case .tired: L("쉬어 가도 괜찮다고 말해 주는 문장")
+        case .burntOut: L("다시 불을 붙이기 전에 읽는 문장")
+        case .studying: L("오래 앉아 있는 날의 문장")
+        case .challenging: L("한 발 내딛기 전에 읽는 문장")
+        case .relationships: L("사람 사이가 어려운 날의 문장")
+        case .joyful: L("좋은 날을 더 좋게 하는 문장")
         }
     }
 }

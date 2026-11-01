@@ -12,13 +12,15 @@ final class AppRouter {
 
         var id: String { rawValue }
 
+        /// 탭 이름. 설정에서 언어를 바꾸면 이 값도 함께 바뀐다.
+        /// (`Text(String)` 은 번역되지 않으므로 `L` 로 직접 찾는다.)
         var title: String {
             switch self {
-            case .home: "홈"
-            case .calendar: "캘린더"
-            case .quotes: "명언"
-            case .challenge: "챌린지"
-            case .settings: "설정"
+            case .home: L("홈")
+            case .calendar: L("캘린더")
+            case .quotes: L("명언")
+            case .challenge: L("챌린지")
+            case .settings: L("설정")
             }
         }
 

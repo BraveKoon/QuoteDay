@@ -21,26 +21,26 @@ enum RecurrenceFrequency: String, CaseIterable, Identifiable, Sendable {
 
     var title: String {
         switch self {
-        case .none: "반복 안 함"
-        case .daily: "매일"
-        case .weekday: "주중 매일"
-        case .weekly: "매주"
-        case .biweekly: "2주마다"
-        case .monthly: "매월"
-        case .yearly: "매년"
+        case .none: L("반복 안 함")
+        case .daily: L("매일")
+        case .weekday: L("주중 매일")
+        case .weekly: L("매주")
+        case .biweekly: L("2주마다")
+        case .monthly: L("매월")
+        case .yearly: L("매년")
         }
     }
 
     /// 선택 버튼처럼 좁은 자리에 넣는 짧은 이름.
     var shortTitle: String {
         switch self {
-        case .none: "안 함"
-        case .daily: "매일"
-        case .weekday: "주중"
-        case .weekly: "매주"
-        case .biweekly: "격주"
-        case .monthly: "매월"
-        case .yearly: "매년"
+        case .none: L("안 함")
+        case .daily: L("매일")
+        case .weekday: L("주중")
+        case .weekly: L("매주")
+        case .biweekly: L("격주")
+        case .monthly: L("매월")
+        case .yearly: L("매년")
         }
     }
 }
@@ -74,24 +74,27 @@ extension RecurrenceRule {
     func summary(anchor: Date, calendar: Calendar = .current) -> String {
         guard isRepeating else { return RecurrenceFrequency.none.title }
 
+        // 요일 이름도 앱 언어를 따른다. `Calendar` 의 기호는 시스템 언어라
+        // 앱에서 중국어를 골라도 요일만 한국어로 남는 일이 생긴다.
         var text = frequency.title
         switch frequency {
         case .weekly, .biweekly:
-            let symbols = calendar.standaloneWeekdaySymbols
-            let index = calendar.component(.weekday, from: anchor) - 1
-            if symbols.indices.contains(index) {
-                text += " \(symbols[index])"
-            }
+            text = L("%@ %@", frequency.title, Formatters.weekdayName.string(from: anchor))
         case .monthly:
-            text += " \(calendar.component(.day, from: anchor))일"
+            text = L("%@ %d일", frequency.title, calendar.component(.day, from: anchor))
         case .yearly:
-            text += " \(calendar.component(.month, from: anchor))월 \(calendar.component(.day, from: anchor))일"
+            text = L(
+                "%@ %d월 %d일",
+                frequency.title,
+                calendar.component(.month, from: anchor),
+                calendar.component(.day, from: anchor)
+            )
         case .none, .daily, .weekday:
             break
         }
 
         if let endDate {
-            text += " · \(Formatters.dayAndWeekday.string(from: endDate))까지"
+            text = L("%@ · %@까지", text, Formatters.dayAndWeekday.string(from: endDate))
         }
         return text
     }

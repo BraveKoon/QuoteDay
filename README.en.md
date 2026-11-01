@@ -473,6 +473,42 @@ The result goes into the App Group cache, so **the widget shows the same Korean*
 app has been opened. If the date rolls over to a different quote before the translation
 finishes, that translation is discarded.
 
+### Language — 한국어 · English · 简体中文 · 繁體中文
+- The language is chosen **inside the app** (Settings → Language, and the first-run flow).
+  It does not follow the system language.
+- The choice is stored in App Group `UserDefaults` (`settings.language`); the app and the
+  **widgets read the same value**. Changing it redraws screens, quotes, authors and widget
+  timelines on the spot.
+- Screen copy is keyed by its Korean source. SwiftUI reads the `\.locale` at the root and
+  finds the same key in `en.lproj` / `zh-Hans.lproj` / `zh-Hant.lproj`, so view code just keeps
+  writing `Text("설정")`.
+- Strings that come out of models (quotes, author name/occupation/nationality) are plain
+  `String`s and can't be localized by SwiftUI; `L(...)` looks them up directly. Keys point at
+  **content** (`quote.<slug>.text`, `author.<id>.name`), so editing a sentence never breaks
+  hearts, notes or deep links.
+- A missing key falls back to the Korean source. Nothing goes blank and no key name leaks
+  into the UI — but `tools/check_localization.py` reports every missing key as a failure.
+- The nine classical Chinese quotes (Analects, Art of War, Tao Te Ching) keep their original
+  text; the translation carries the meaning.
+- The Traditional Chinese table is never written by hand:
+  `python tools/localization/build_traditional.py` converts the Simplified table with OpenCC
+  (`s2twp`, Taiwan vocabulary). Only the Simplified table is edited.
+- On the English screen the ZenQuotes **English original** is used as-is. On-device translation
+  exists only for the Korean screen.
+
+### First run (sign in → language → nickname)
+- Three steps, shown only on first launch. While `ProfileStore.hasCompletedOnboarding` is
+  false the app doesn't render the tab bar at all.
+- Step 1 is **Sign in with Apple** (`SignInWithAppleButton`, `ASAuthorizationAppleIDProvider`) or
+  **continue without signing in**. The user identifier, name and email Apple returns are stored
+  on the device only (there is no server, so no token is sent anywhere). A cancel is not
+  reported as an error.
+- Step 2 picks the language. It comes after sign-in so the nickname screen is already in the
+  chosen language.
+- Step 3 is the nickname (20 characters max). The home greeting becomes "민지님, 좋은 아침이에요".
+- Settings → My account lets you change the nickname or sign in with Apple later; signing out
+  returns to the first screen and **keeps quotes and notes**.
+
 ### Notifications
 - Permission is requested **when the user turns quote notifications on**, not at launch.
 - Event notification: one `UNCalendarNotificationTrigger` at the start time.
@@ -528,6 +564,8 @@ There's a static check that runs anywhere, not just on macOS.
 
 ```bash
 python tools/check_project.py
+python tools/check_localization.py
+python tools/localization/build_traditional.py --check
 ```
 
 - Parses `project.pbxproj` directly to check structure, cross-references, and that files exist on disk
@@ -543,6 +581,12 @@ python tools/check_project.py
 - **That the version agrees in three places** — `MARKETING_VERSION` in `project.yml`, the
   newest entry in `CHANGELOG.md`, and the first entry of the generated `ReleaseHistory.swift`
   (see "One source for the version" below)
+- **That no translated string is missing** (`check_localization.py`) — it collects the Korean
+  copy in the sources, all 201 quotes and every author name/occupation/nationality, then checks
+  the three language tables. Placeholder counts, empty values and per-language key sets are
+  checked too. `--todo` prints the missing keys as `.strings` lines. Author biographies,
+  achievements and behind-the-story fields are tracked as a coverage percentage, not a failure.
+- **That the Traditional table still matches the Simplified one** (`build_traditional.py --check`)
 
 On macOS, additionally:
 

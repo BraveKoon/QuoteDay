@@ -426,6 +426,35 @@ ZenQuotes 는 영어만 준다. 한국어 앱에서 영어 한 문장이 튀는 
 캐시에 들어가므로 **위젯도 같은 한국어를 보여 준다** — 앱을 한 번 연 뒤부터다.
 번역이 끝나기 전에 날짜가 바뀌어 다른 명언을 받아 왔으면 그 번역은 버린다.
 
+### 언어 — 한국어 · English · 简体中文 · 繁體中文
+- 언어는 **앱 안에서** 고른다(설정 → 언어, 그리고 첫 실행 안내). 시스템 언어를 따라가지 않는다.
+- 고른 값은 App Group `UserDefaults`(`settings.language`)에 저장되고, 앱과 **위젯이 같은 값**을 읽는다.
+  바꾸면 화면·명언·인물·위젯 타임라인이 그 자리에서 다시 그려진다.
+- 화면 문구는 한국어 원문이 곧 키다. SwiftUI 가 루트의 `\.locale` 을 보고
+  `en.lproj` / `zh-Hans.lproj` / `zh-Hant.lproj` 에서 같은 키를 찾는다. 그래서 뷰 코드는
+  `Text("설정")` 처럼 한국어로 두면 된다.
+- 모델에서 꺼내는 글(명언, 인물 이름·직업·국적)은 `Text(String)` 이라 자동 번역이 안 된다.
+  `L(...)` 이 직접 사전을 찾는다. 키는 `quote.<slug>.text`, `author.<id>.name` 처럼 **내용**을 가리킨다
+  — 문장을 고쳐도 키가 그대로라 하트·기록·딥링크가 끊기지 않는다.
+- 사전에 없는 키는 **한국어 원문을 그대로** 돌려준다. 번역이 빠진 항목이 있어도 화면이 비거나
+  키 이름이 드러나지 않는다. 대신 `tools/check_localization.py` 가 빠진 키를 실패로 보고한다.
+- 중국 고전(논어·손자병법·도덕경) 9편은 원문을 그대로 보여 주고, 뜻은 번역문이 맡는다.
+- 번체 사전은 손으로 쓰지 않는다. `python tools/localization/build_traditional.py` 가
+  간체 사전을 OpenCC(`s2twp`, 대만 어휘)로 옮긴다. 문구는 간체만 고친다.
+- 영어 화면에서는 ZenQuotes 의 **영어 원문**을 그대로 쓴다. 기기 번역은 한국어 화면 전용이다.
+
+### 첫 실행 안내 (로그인 → 언어 → 닉네임)
+- 첫 실행에서만 세 단계를 보여 준다. `ProfileStore.hasCompletedOnboarding` 이 false 인 동안
+  앱은 탭 화면을 아예 그리지 않는다.
+- 1단계는 **Sign in with Apple**(`SignInWithAppleButton`, `ASAuthorizationAppleIDProvider`) 또는
+  **로그인 없이 사용하기**. 애플이 준 사용자 식별자·이름·이메일을 기기에만 저장한다
+  (서버가 없으므로 토큰을 어디로 보내지 않는다). 취소는 오류로 표시하지 않는다.
+- 2단계에서 언어를 고른다. 1단계보다 뒤인 이유는, 앞에서 고른 언어로 닉네임 화면이 바로 바뀌어
+  사용자가 자기 언어로 이름을 정하게 되기 때문이다.
+- 3단계는 닉네임(최대 20자). 홈 인사말이 "민지님, 좋은 아침이에요" 가 된다.
+- 언제든 설정 → 내 계정에서 닉네임을 바꾸거나 Apple 계정으로 로그인할 수 있고,
+  로그아웃하면 첫 화면으로 돌아간다. **명언·기록은 지우지 않는다.**
+
 ### 알림
 - 권한은 앱 시작 시가 아니라 **사용자가 명언 알림을 켜는 순간** 요청한다.
 - 일정 알림: 시작 시각에 `UNCalendarNotificationTrigger` 로 1회 예약.
@@ -477,6 +506,8 @@ macOS 가 아닌 환경에서도 돌릴 수 있는 정적 검증을 넣어 두�
 
 ```bash
 python tools/check_project.py
+python tools/check_localization.py
+python tools/localization/build_traditional.py --check
 ```
 
 - `project.pbxproj` 를 직접 파싱해 구조·상호 참조·디스크 존재 여부 확인
@@ -491,6 +522,11 @@ python tools/check_project.py
 - 앱 아이콘이 1024x1024 이고 알파 채널이 없는지 (알파가 있으면 App Store 가 거부한다)
 - **버전이 세 곳에서 같은지** — `project.yml` 의 `MARKETING_VERSION`, `CHANGELOG.md` 의
   최신 항목, 생성된 `ReleaseHistory.swift` 의 첫 항목 (아래 "버전은 한 곳에서 나온다")
+- **번역이 빠진 문구가 없는지** (`check_localization.py`) — 소스의 한국어 문구, 명언 201편,
+  인물 이름·직업·국적을 모아 세 언어 사전에 있는지 본다. 자리표시자 개수와 빈 값,
+  언어별 키 집합도 함께 검사한다. `--todo` 를 붙이면 빠진 키를 `.strings` 형식으로 뽑아 준다.
+  인물 소개글·업적·비하인드 스토리는 **덮어 가며** 채우므로 실패가 아니라 진행률로 보고한다.
+- **번체 사전이 간체와 어긋나지 않았는지** (`build_traditional.py --check`)
 
 macOS 에서는 여기에 더해:
 

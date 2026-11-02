@@ -17,11 +17,11 @@ struct AIChatSettingsView: View {
 
         ScrollView {
             VStack(spacing: ClayTheme.Spacing.m) {
-                providerCard(aiSettings: aiSettings)
+                providerCard(aiSettings: $aiSettings)
 
                 if aiSettings.provider == .qwen {
                     keyCard
-                    modelCard(aiSettings: aiSettings)
+                    modelCard(aiSettings: $aiSettings)
                 }
 
                 privacyCard

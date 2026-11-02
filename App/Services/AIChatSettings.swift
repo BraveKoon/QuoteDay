@@ -72,15 +72,14 @@ public final class AIChatSettings {
         }
     }
 
-    public init(
-        defaults: UserDefaults = AppGroup.defaults,
-        keyStore: APIKeyStore = KeychainAPIKeyStore(
+    /// `keyStore` 를 생략하면 실제 Keychain 을 쓴다. (기본값 자리에서 내부 멤버를
+    /// 참조할 수 없어 nil 로 받고 여기서 만든다.)
+    public init(defaults: UserDefaults = AppGroup.defaults, keyStore: APIKeyStore? = nil) {
+        self.defaults = defaults
+        self.keyStore = keyStore ?? KeychainAPIKeyStore(
             service: AIChatSettings.Keychain.service,
             account: AIChatSettings.Keychain.account
         )
-    ) {
-        self.defaults = defaults
-        self.keyStore = keyStore
         self.provider = AIChatProvider(rawValue: defaults.string(forKey: Self.providerKey) ?? "")
             ?? .onDevice
         self.region = QwenRegion(rawValue: defaults.string(forKey: Self.regionKey) ?? "")

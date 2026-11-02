@@ -14,6 +14,7 @@ struct SettingsView: View {
     @Environment(NoteStore.self) private var notes
     @Environment(AppRouter.self) private var router
     @Environment(QuoteExplanationStore.self) private var explanations
+    @Environment(AIChatSettings.self) private var aiChatSettings
 
     @State private var pendingNotificationCount = 0
     @State private var isRefreshingRemoteQuote = false
@@ -35,6 +36,8 @@ struct SettingsView: View {
     @State private var showsSignOutConfirmation = false
     /// 설정에서 Apple 로그인을 시도했을 때의 실패 메시지.
     @State private var signInMessage: String?
+    /// AI 대화 설정으로 밀어 올렸는지.
+    @State private var showsAIChatSettings = false
 
     var body: some View {
         @Bindable var settings = settings
@@ -59,6 +62,7 @@ struct SettingsView: View {
                 calendarCard(settings: settings)
                 widgetGuideCard
                 explanationCard
+                chatSettingsCard
                 if AppFeatureFlags.isSupportEnabled {
                     supportCard
                 }
@@ -75,6 +79,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showsReleaseNotes) {
             ReleaseNotesSheet()
+        }
+        .navigationDestination(isPresented: $showsAIChatSettings) {
+            AIChatSettingsView()
         }
         .fileExporter(
             isPresented: $showsExporter,
@@ -875,6 +882,40 @@ struct SettingsView: View {
         .padding(ClayTheme.Spacing.l)
         .frame(maxWidth: .infinity, alignment: .leading)
         .clayCard()
+    }
+
+    /// AI 대화 설정으로 가는 줄. 지금 누가 답하는지·쓸 수 있는지 한눈에.
+    private var chatSettingsCard: some View {
+        let availability = aiChatSettings.availability
+        return Button {
+            showsAIChatSettings = true
+        } label: {
+            VStack(alignment: .leading, spacing: ClayTheme.Spacing.xs) {
+                SectionHeader("AI 대화")
+
+                HStack(spacing: ClayTheme.Spacing.xs) {
+                    Image(systemName: aiChatSettings.provider.symbol)
+                        .foregroundStyle(ClayTheme.accent)
+                    Text(aiChatSettings.provider.title)
+                        .font(ClayFont.callout())
+                        .foregroundStyle(ClayTheme.textPrimary)
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(ClayTheme.textSecondary)
+                }
+
+                Text(AIChatAvailabilityText.intro(availability))
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(ClayTheme.Spacing.l)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .clayCard()
+        }
+        .buttonStyle(.plain)
     }
 
     /// "v1.0부터 11개". 목록이 비어 있으면 (있을 수 없지만) 아무것도 쓰지 않는다.

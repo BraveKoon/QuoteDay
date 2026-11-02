@@ -509,6 +509,26 @@ finishes, that translation is discarded.
 - Settings → My account lets you change the nickname or sign in with Apple later; signing out
   returns to the first screen and **keeps quotes and notes**.
 
+### AI chat — top right of the quotes tab
+- The **"AI chat"** button at the top right of the quotes tab opens a sheet. The quote you are looking
+  at (or today's quote) and its author travel with the question, so "this quote" and "this author" mean
+  something to the model.
+- Ask about **hidden meanings**, puzzling lines, **the author's life and era**, or how it applies to you
+  right now. Suggestion chips start the conversation; answers stream in.
+- Pick the channel in Settings → AI chat:
+  - **On-device (free, default)**: Foundation Models. Nothing leaves the phone, no key, no fees.
+  - **Qwen (your API key)**: DashScope's **OpenAI-compatible** endpoint
+    (`/compatible-mode/v1/chat/completions`), called directly with `URLSession` + SSE, so no SDK is
+    bundled. Region (international/China) and model (qwen-plus/max/flash) are selectable.
+- **The app never ships an API key.** A shipped key is a public key and turns into a channel billed to
+  someone else. A user-supplied key lives only in the **Keychain**
+  (`kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`), is never handed back to the UI (only `hasKey`),
+  and never reaches the logs.
+- **Conversations are not stored.** Questions can be personal, so closing the sheet discards them.
+- The header always says **who is answering** and **whether the question leaves the device**.
+- Only the last 16 turns are sent (`QwenChatTransport.body`) to stay inside the context window. The
+  on-device session keeps its transcript but is reopened when the quote in focus changes.
+
 ### AI explanation — on-device, free
 - On the quote detail screen, the **AI explanation** card's "Show explanation" button streams three
   short sections: **What it means**, **The story behind it**, **Try this today**.

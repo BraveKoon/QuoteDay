@@ -15,6 +15,12 @@ public extension ReleaseHistory {
             summary: "TestFlight 에 새 빌드가 보이지 않던 문제를 고쳤다.",
             sections: [
                 ReleaseSection(
+                    title: "더함",
+                    items: [
+                        "명언 탭 우측 상단에서 AI 와 대화한다. 명언의 숨은 뜻, 이해가 안 되는 구절, 작가의 일생과 시대, 지금 내 상황에 어떻게 적용할지 물어볼 수 있다. 답은 글자 단위로 흘러나오고, 지금 보고 있는 명언과 작가 정보가 함께 전달된다.",
+                    ]
+                ),
+                ReleaseSection(
                     title: "고침",
                     items: [
                         "빌드 번호를 순번(27, 28, 29 …)으로 바꿨다. 예전에는 UTC 시각(202611012329)을 썼는데, 그 숫자는 \"몇 번째 빌드인지\" 알려 주지 않고 이어 붙일 수도 없었다. 이제 project.yml 의 CURRENT_PROJECT_VERSION 이 다음에 쓸 번호이고, 업로드 전에 App Store Connect 에서 이미 올라간 순번을 읽어 겹치면 최댓값 + 1 로 밀어 올린다.",

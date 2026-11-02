@@ -47,6 +47,8 @@ public enum AppLog {
     public static let notes = Logger(subsystem: subsystem, category: "notes")
     public static let challenge = Logger(subsystem: subsystem, category: "challenge")
     public static let hearts = Logger(subsystem: subsystem, category: "hearts")
+    /// AI 대화. **키 값은 절대 남기지 않는다** — 실패 여부만 센다.
+    public static let aiChat = Logger(subsystem: subsystem, category: "aichat")
 }
 
 /// `UserDefaults` 에 저장되는 모든 키. 앱과 위젯이 같은 정의를 본다.

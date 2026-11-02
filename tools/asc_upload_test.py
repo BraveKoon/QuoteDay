@@ -243,6 +243,23 @@ class NextBuildNumberTests(unittest.TestCase):
         self.assertEqual(asc_upload.sequential_builds(client, "app"), [31])
 
 
+class RecentBuildsTests(unittest.TestCase):
+    def test_reads_state_and_flags_timestamp_regression(self) -> None:
+        client = asc_upload.Asc("AuthKey.p8", "KEY", "ISSUER")
+        def fake_call(method, path, body=None):
+            return {"data": [
+                {"attributes": {"version": "29", "uploadedDate": "2026-11-02T15:35:00Z",
+                                "processingState": "VALID", "expired": False}},
+                {"attributes": {"version": "202611012329", "uploadedDate": "2026-11-01T23:29:00Z",
+                                "processingState": "VALID", "expired": False}},
+            ]}
+        client.call = fake_call
+        builds = asc_upload.recent_builds(client, "app")
+        self.assertEqual([b["build"] for b in builds], ["29", "202611012329"])
+        self.assertEqual(builds[0]["state"], "VALID")
+        self.assertEqual(builds[0]["uploaded"], "2026-11-02 15:35")
+
+
 class ClientTests(unittest.TestCase):
     def setUp(self) -> None:
         # 네트워크·키 없이 클라이언트 로직만 본다.

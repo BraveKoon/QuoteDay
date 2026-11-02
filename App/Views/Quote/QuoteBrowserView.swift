@@ -12,6 +12,8 @@ struct QuoteBrowserView: View {
     @State private var searchText = ""
     /// 카드를 만들 명언. 값이 들어오면 시트가 올라온다.
     @State private var cardTarget: QuotePresentation?
+    /// AI 대화 시트.
+    @State private var showsChat = false
 
     private let quoteService = QuoteService.shared
 
@@ -59,6 +61,9 @@ struct QuoteBrowserView: View {
         .clayBackground()
         .sheet(item: $cardTarget) { target in
             ShareCardSheet(presentation: target)
+        }
+        .sheet(isPresented: $showsChat) {
+            QuoteChatSheet(context: QuoteChatContext.today(service: quoteService))
         }
         // 이 화면은 자체 헤더를 쓴다. 밀어 올린 기록 목록은 자기 바를 갖는다.
         .toolbar(.hidden, for: .navigationBar)
@@ -129,16 +134,35 @@ struct QuoteBrowserView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("명언 모음")
-                .font(ClayFont.hero())
-                .foregroundStyle(ClayTheme.textPrimary)
-            Text(L("총 %d개 · 표시 중 %d개", quoteService.quoteCount, results.count))
-                .font(ClayFont.caption())
-                .foregroundStyle(ClayTheme.textSecondary)
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("명언 모음")
+                    .font(ClayFont.hero())
+                    .foregroundStyle(ClayTheme.textPrimary)
+                Text(L("총 %d개 · 표시 중 %d개", quoteService.quoteCount, results.count))
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+            }
+            .accessibilityElement(children: .combine)
+
+            Spacer(minLength: ClayTheme.Spacing.s)
+
+            // AI 대화로 들어가는 문. 명언을 보다가 "이게 무슨 뜻이지" 싶은
+            // 자리에서 바로 물을 수 있어야 한다.
+            Button {
+                showsChat = true
+            } label: {
+                Label("AI 대화", systemImage: "bubble.left.and.text.bubble.right")
+                    .font(ClayFont.caption())
+                    .padding(.horizontal, ClayTheme.Spacing.s)
+                    .padding(.vertical, 8)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(ClayTheme.accent)
+            .clayCard(cornerRadius: ClayTheme.Radius.control)
+            .accessibilityLabel("AI 와 대화하기")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
     }
 
     private var searchField: some View {

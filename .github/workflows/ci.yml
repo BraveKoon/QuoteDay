@@ -68,6 +68,10 @@ jobs:
     # (App Store Connect 는 iOS 26 SDK 이상으로 빌드한 앱만 받는다.)
     # 이 이미지에서만 `#if canImport(FoundationModels)` 가지가 실제로 컴파일된다.
     runs-on: macos-26
+    # 실패한 테스트 이름을 커밋 코멘트로 남기려면 쓰기 권한이 필요하다.
+    # (러너 로그는 API 로 읽기 어려운 경우가 있다 — 그때 이 코멘트가 유일한 단서다.)
+    permissions:
+      contents: write
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -126,7 +130,8 @@ jobs:
       - name: 테스트
         run: |
           set -o pipefail
-          xcodebuild test \
+          LOG="$RUNNER_TEMP/test.log"
+          if xcodebuild test \
             -project QuoteDay.xcodeproj \
             -scheme QuoteDay \
             -destination "id=${{ steps.sim.outputs.udid }}" \
@@ -135,4 +140,34 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             QD_CLOUDKIT_CONTAINER="" \
-            | xcbeautify
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 120 \
+            2>&1 | tee "$LOG" | xcbeautify; then
+            exit 0
+          fi
+
+          # 실패한 테스트를 읽을 수 있는 곳(커밋 코멘트)에 남긴다.
+          FAILED=$(grep -E "(Test Case .* failed|error:|Testing failed)" "$LOG" \
+            | sed -E 's/^[[:space:]]+//' | sort -u | head -25)
+          if [ -z "$FAILED" ]; then
+            FAILED=$(tail -40 "$LOG" | sed -E 's/^[[:space:]]+//' | head -25)
+          fi
+
+          echo "$FAILED" | while IFS= read -r line; do
+            [ -n "$line" ] && echo "::error::$line"
+          done
+
+          {
+            echo "### ❌ 테스트 실패"
+            echo ""
+            echo "run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo ""
+            echo '```'
+            echo "$FAILED"
+            echo '```'
+          } > "$RUNNER_TEMP/comment.md"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/comments" \
+            -f body="$(cat "$RUNNER_TEMP/comment.md")" \
+            || echo "커밋 코멘트를 남기지 못했습니다."
+
+          exit 1

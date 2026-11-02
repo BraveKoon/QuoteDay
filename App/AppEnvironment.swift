@@ -28,6 +28,10 @@ final class AppEnvironment {
     let rankStore: RankStore
     /// 명언 AI 해설. 기기 모델이 없으면 "쓸 수 없음" 상태로 앉아 있다.
     let explanationStore: QuoteExplanationStore
+    /// AI 대화 설정(누가 답할지 · API 키).
+    let aiChatSettings: AIChatSettings
+    /// 대화의 상태와 흐름.
+    let chatEngine: QuoteChatEngine
 
     /// 지금 번역이 필요한 영어 원문. 최상위 화면이 이 값을 보고 번역을 돌린다.
     private(set) var pendingTranslationSource: String?
@@ -72,6 +76,8 @@ final class AppEnvironment {
         self.heartStore = HeartStore(sync: heartSync, defaults: defaults)
         self.rankStore = RankStore(sync: rankSync, defaults: defaults)
         self.explanationStore = QuoteExplanationStore()
+        self.aiChatSettings = AIChatSettings(defaults: defaults)
+        self.chatEngine = QuoteChatEngine()
 
         self.notificationDelegate = NotificationDelegate(router: router)
         UNUserNotificationCenter.current().delegate = notificationDelegate
@@ -275,6 +281,8 @@ extension View {
             .environment(environment.heartStore)
             .environment(environment.rankStore)
             .environment(environment.explanationStore)
+            .environment(environment.aiChatSettings)
+            .environment(environment.chatEngine)
             .modelContainer(environment.container)
     }
 }

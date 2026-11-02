@@ -10,9 +10,9 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
-            version: "1.11.1",
-            date: "2026-11-02",
-            summary: "TestFlight 에 새 빌드가 보이지 않던 문제를 고쳤다.",
+            version: "1.12.0",
+            date: "2026-11-03",
+            summary: "명언 탭에서 AI 와 대화한다. 한 번 묻고 끝나는 카드가 아니라, 되묻고 이어 갈 수 있다.",
             sections: [
                 ReleaseSection(
                     title: "더함",
@@ -20,6 +20,20 @@ public extension ReleaseHistory {
                         "명언 탭 우측 상단에서 AI 와 대화한다. 명언의 숨은 뜻, 이해가 안 되는 구절, 작가의 일생과 시대, 지금 내 상황에 어떻게 적용할지 물어볼 수 있다. 답은 글자 단위로 흘러나오고, 지금 보고 있는 명언과 작가 정보가 함께 전달된다.",
                     ]
                 ),
+                ReleaseSection(
+                    title: "고침",
+                    items: [
+                        "키를 넣지 않고 보내면 빈 말풍선만 남던 문제. 이제 보내기 전에 지금 통로를 쓸 수 있는지 먼저 확인하고, 쓸 수 없으면 이유를 그 자리에서 알려 준다(키 없음 · 지원하지 않는 기기).",
+                        "기기를 바꾸거나 명언을 넘기면 이전 대화가 새 명언에 섞이지 않도록 대화 상태를 정리한다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
+            version: "1.11.1",
+            date: "2026-11-02",
+            summary: "TestFlight 에 새 빌드가 보이지 않던 문제를 고쳤다.",
+            sections: [
                 ReleaseSection(
                     title: "고침",
                     items: [

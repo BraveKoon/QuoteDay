@@ -53,22 +53,25 @@ public final class QuoteChatEngine {
         let question = text.trimmed
         guard !question.isEmpty, !isSending else { return }
 
-        errorMessage = nil
-        messages.append(QuoteChatMessage(role: .user, text: question))
-        messages.append(QuoteChatMessage(role: .assistant, text: "", isStreaming: true))
+        // 보내기 **전에** 지금 통로를 쓸 수 있는지 본다. 못 쓰는데 질문을 넣으면
+        // 빈 말풍선만 남고, 사용자는 무엇이 잘못됐는지 모른다.
+        switch settings.availability {
+        case .ready:
+            break
+        case .needsKey:
+            fail(QuoteChatError.missingKey)
+            return
+        case .unavailable(let reason):
+            fail(QuoteChatError.onDeviceUnavailable(reason))
+            return
+        case .misconfigured:
+            fail(QuoteChatError.badRequest("region"))
+            return
+        }
 
         let transport: QuoteChatTransport
         switch settings.provider {
         case .onDevice:
-            let availability = settings.availability
-            guard availability.canChat else {
-                if case .unavailable(let reason) = availability {
-                    fail(QuoteChatError.onDeviceUnavailable(reason))
-                } else {
-                    fail(QuoteChatError.onDeviceUnavailable(.requiresNewerOS))
-                }
-                return
-            }
             onDeviceTransport.resetIfContextChanged(context?.quote.slug)
             transport = onDeviceTransport
         case .qwen:
@@ -78,6 +81,10 @@ public final class QuoteChatEngine {
             }
             transport = made
         }
+
+        errorMessage = nil
+        messages.append(QuoteChatMessage(role: .user, text: question))
+        messages.append(QuoteChatMessage(role: .assistant, text: "", isStreaming: true))
 
         let system = systemPrompt(context: context, language: language)
         activeProviderTitle = settings.provider.title

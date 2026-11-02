@@ -748,9 +748,20 @@ are different things.
 
 ### Build numbers
 
-Re-uploading the same version with the same build number is rejected. `run_number` restarts at 1
-per workflow, so the default is the **UTC timestamp `YYYYMMDDHHMM`**; a manual run can set it
-explicitly. `concurrency: testflight` keeps two uploads from racing.
+The build number is simply **which build this is** — 27, 28, 29, one higher each time.
+
+- `CURRENT_PROJECT_VERSION` in `project.yml` is **the number to use next**; bump it per release.
+- Before uploading, the workflow asks App Store Connect which sequential numbers are already there
+  and, if that number is taken (uploaded from another machine, or an earlier run succeeded), moves up
+  to `highest + 1`. `tools/asc_upload.py --next-build` does the calculation.
+- If that lookup fails (network, key), it falls back to `CURRENT_PROJECT_VERSION + 1` so
+  infrastructure trouble never blocks a release.
+- A manual run can still pass `build_number` to force a value.
+
+Earlier releases used a UTC timestamp (`202611012329`). It told you nothing about "which build" and
+could not be continued (you would reach the 60-billionth build), so it is now a plain sequence; the old
+timestamp-style numbers are ignored when computing the next one. `concurrency: testflight` keeps two
+uploads from racing.
 
 ### After the upload
 

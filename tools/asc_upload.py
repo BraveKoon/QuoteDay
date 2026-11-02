@@ -254,6 +254,36 @@ def sequential_builds(client: Asc, app_id: str, limit: int = 200) -> list[int]:
     return numbers
 
 
+def recent_builds(client: Asc, app_id: str, limit: int = 15) -> list[dict]:
+    """최근 빌드의 요약. "왜 TestFlight 에 안 보이지?" 를 로그로 답하기 위한 것.
+
+    빌드 번호만 봐서는 알 수 없는 것들이 있다: 처리 상태(processingState),
+    만료 여부(expired), 그리고 **같은 버전 안에서 번호가 뒤로 갔는지**.
+    """
+    payload = client.call(
+        "GET",
+        f"/v1/builds?filter[app]={app_id}&sort=-uploadedDate&limit={limit}"
+        "&fields[builds]=version,uploadedDate,expired,processingState",
+    )
+    result: list[dict] = []
+    for item in payload.get("data") or []:
+        attributes = item.get("attributes") or {}
+        result.append(
+            {
+                "build": str(attributes.get("version", "?")),
+                "uploaded": str(attributes.get("uploadedDate", ""))[:16].replace("T", " "),
+                "state": str(attributes.get("processingState", "?")),
+                "expired": bool(attributes.get("expired", False)),
+                "preReleaseVersion": (
+                    ((item.get("relationships") or {}).get("preReleaseVersion") or {})
+                    .get("data", {})
+                    .get("id", "")
+                ),
+            }
+        )
+    return result
+
+
 def next_build_number(client: Asc, app_id: str, floor: int) -> int:
     """다음 빌드 번호.
 
@@ -428,10 +458,14 @@ def main(argv: list[str] | None = None) -> int:
         "--floor", type=int, default=1,
         help="다음 빌드 번호의 바닥값 (project.yml 의 CURRENT_PROJECT_VERSION)",
     )
+    parser.add_argument(
+        "--list-builds", action="store_true",
+        help="최근 빌드의 번호·처리 상태·만료 여부를 사람이 읽는 줄로 출력한다",
+    )
     args = parser.parse_args(argv)
 
-    if not args.check and not args.upload and not args.next_build:
-        parser.error("--check, --upload, --next-build 중 하나가 필요합니다.")
+    if not (args.check or args.upload or args.next_build or args.list_builds):
+        parser.error("--check, --upload, --next-build, --list-builds 중 하나가 필요합니다.")
     if not args.key_id:
         parser.error("--key-id 가 필요합니다.")
     if not os.path.exists(args.key):
@@ -469,6 +503,28 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         print(build)
+        return OK
+
+    if args.list_builds:
+        builds = recent_builds(client, app_id)
+        if not builds:
+            print("올라간 빌드가 없습니다.")
+            return OK
+        print("| 빌드 번호 | 처리 상태 | 만료 | 올린 시각(UTC) |")
+        print("|---|---|---|---|")
+        for build in builds:
+            print(
+                f"| {build['build']} | {build['state']} | "
+                f"{'예' if build['expired'] else '아니오'} | {build['uploaded']} |"
+            )
+        numbers = [int(b["build"]) for b in builds if b["build"].isdigit()]
+        if numbers and max(numbers) > 10_000:
+            print()
+            print(
+                "주의: 예전의 시각 형식 빌드 번호가 순번보다 큽니다. "
+                "TestFlight 는 같은 버전 안에서 번호가 큰 빌드를 최신으로 보므로, "
+                "순번 빌드가 뒤로 밀립니다. 버전을 올려 새 그룹에서 시작하는 편이 낫습니다."
+            )
         return OK
 
     if args.check:

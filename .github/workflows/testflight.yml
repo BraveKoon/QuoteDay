@@ -495,8 +495,20 @@ jobs:
             {
               echo "### ✅ TestFlight 업로드 완료"
               echo ""
+              echo "빌드 **$BUILD** · 버전 **$VERSION**"
+              echo ""
               echo "App Store Connect 처리에 보통 5~15분 걸립니다. 그동안 TestFlight 목록에"
               echo "빌드가 보이지 않는 것은 정상입니다."
+            } >> "$GITHUB_STEP_SUMMARY"
+            # "왜 TestFlight 에 안 보이지?" 를 실행 화면에서 바로 답한다.
+            # (같은 버전 안에서 빌드 번호가 뒤로 갔거나, 처리 중이거나, 만료된 경우)
+            {
+              echo ""
+              echo "#### 지금까지 올라간 빌드"
+              echo ""
+              python3 tools/asc_upload.py --list-builds \
+                --key "$PWD/AuthKey.p8" --key-id "$KEY_ID" --issuer "$ISSUER_ID" 2>&1 \
+                || echo "(빌드 목록을 읽지 못했습니다)"
             } >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi

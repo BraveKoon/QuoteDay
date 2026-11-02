@@ -760,8 +760,15 @@ The build number is simply **which build this is** — 27, 28, 29, one higher ea
 
 Earlier releases used a UTC timestamp (`202611012329`). It told you nothing about "which build" and
 could not be continued (you would reach the 60-billionth build), so it is now a plain sequence; the old
-timestamp-style numbers are ignored when computing the next one. `concurrency: testflight` keeps two
-uploads from racing.
+timestamp-style numbers are ignored when computing the next one.
+
+**Careful:** within one version, TestFlight treats the **highest build number** as the newest. Uploading
+a sequential build into a version that still holds a timestamp-style build pushes it to the back, where
+it does not look like a new build. So right after switching to sequential numbers, **bump
+`MARKETING_VERSION`** to start a fresh version group. The "builds uploaded so far" table in the run
+summary lists numbers, processing state and expiry, so you never have to guess.
+
+`concurrency: testflight` keeps two uploads from racing.
 
 ### After the upload
 

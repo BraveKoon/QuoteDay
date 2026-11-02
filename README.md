@@ -682,9 +682,19 @@ must be built with the iOS 26 SDK or later ... (409)
 
 ### 빌드 번호
 
-같은 버전에 같은 빌드 번호를 다시 올리면 App Store Connect 가 거부한다. 실행 번호(`run_number`)는
-워크플로마다 1부터 다시 시작하므로 쓰지 않고, 기본값은 **UTC 시각 `YYYYMMDDHHMM`** 이다.
-수동 실행에서는 직접 지정할 수 있다. 두 빌드가 겹치지 않도록 `concurrency: testflight` 로 한 번에 하나만 돈다.
+빌드 번호는 **몇 번째 빌드인지**를 그대로 쓴다 — 27, 28, 29 … 처럼 1씩 는다.
+
+- `project.yml` 의 `CURRENT_PROJECT_VERSION` 이 **다음에 쓸 번호**다. 릴리스마다 여기를 올린다.
+- 업로드 전에 App Store Connect 에서 이미 올라간 순번들을 읽어, 그 번호가 이미 쓰였으면
+  `가장 큰 순번 + 1` 로 밀어 올린다(다른 기기에서 올렸거나 예전 실행이 성공한 경우).
+  계산은 `tools/asc_upload.py --next-build` 가 한다.
+- ASC 조회가 실패하면(네트워크·키 문제) `CURRENT_PROJECT_VERSION + 1` 로 진행한다 —
+  인프라 문제로 릴리스가 통째로 막히지 않게.
+- 수동 실행에서 `build_number` 를 주면 그 값을 그대로 쓴다.
+
+예전에는 UTC 시각(`202611012329`)을 썼는데, 그 숫자는 "몇 번째"인지 알려 주지 않고 이어 붙일 수도
+없어서(600억 번째 빌드가 된다) 순번으로 바꿨다. 그때 올린 시각 형식 번호는 순번 계산에서 무시한다.
+두 빌드가 겹치지 않도록 `concurrency: testflight` 로 한 번에 하나만 돈다.
 
 ### 올라간 뒤
 

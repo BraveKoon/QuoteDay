@@ -234,6 +234,40 @@ def find_app(client: Asc, bundle_id: str) -> str:
     return data[0]["id"]
 
 
+def sequential_builds(client: Asc, app_id: str, limit: int = 200) -> list[int]:
+    """이미 올라간 **순번 형식** 빌드 번호들.
+
+    예전에는 `202611012329` 처럼 UTC 시각을 썼다. 그런 번호는 "몇 번째
+    빌드인지"를 알려 주지 않고, 이어 붙일 수도 없다(600억 번째 빌드가 된다).
+    그래서 순번으로 읽히는 값(1~9999)만 모은다.
+    """
+    payload = client.call(
+        "GET",
+        f"/v1/builds?filter[app]={app_id}&sort=-uploadedDate&limit={limit}"
+        "&fields[builds]=version,uploadedDate",
+    )
+    numbers: list[int] = []
+    for item in payload.get("data") or []:
+        raw = str((item.get("attributes") or {}).get("version", "")).strip()
+        if raw.isdigit() and 0 < int(raw) < 10_000:
+            numbers.append(int(raw))
+    return numbers
+
+
+def next_build_number(client: Asc, app_id: str, floor: int) -> int:
+    """다음 빌드 번호.
+
+    `project.yml` 의 `CURRENT_PROJECT_VERSION` 을 **다음에 쓸 번호**로 본다.
+    App Store Connect 에 이미 그 번호가 있으면(다른 기기에서 올렸거나 예전
+    실행이 성공했거나) 가장 큰 순번 + 1 로 밀어 올린다.
+
+    즉 `next = max(floor, max(순번 빌드) + 1)`.
+    """
+    used = sequential_builds(client, app_id)
+    newest = max(used) if used else 0
+    return max(floor, newest + 1)
+
+
 def create_build_upload(client: Asc, app_id: str, version: str, build: str) -> str:
     body = {
         "data": {
@@ -386,10 +420,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--version", required=False, help="CFBundleShortVersionString")
     parser.add_argument("--build", required=False, help="CFBundleVersion")
     parser.add_argument("--wait", type=int, default=1800, help="처리 대기 한도(초)")
+    parser.add_argument(
+        "--next-build", action="store_true",
+        help="다음 빌드 번호만 계산해 숫자 하나를 출력한다",
+    )
+    parser.add_argument(
+        "--floor", type=int, default=1,
+        help="다음 빌드 번호의 바닥값 (project.yml 의 CURRENT_PROJECT_VERSION)",
+    )
     args = parser.parse_args(argv)
 
-    if not args.check and not args.upload:
-        parser.error("--check 또는 --upload 중 하나가 필요합니다.")
+    if not args.check and not args.upload and not args.next_build:
+        parser.error("--check, --upload, --next-build 중 하나가 필요합니다.")
     if not args.key_id:
         parser.error("--key-id 가 필요합니다.")
     if not os.path.exists(args.key):
@@ -411,6 +453,23 @@ def main(argv: list[str] | None = None) -> int:
     except LookupError as error:
         print(str(error), file=sys.stderr)
         return FAILED
+
+    if args.next_build:
+        # 이 모드의 출력은 **숫자 하나**여야 한다. 워크플로가 그대로 받아 쓴다.
+        # 설명은 stderr 로 보낸다.
+        try:
+            build = next_build_number(client, app_id, args.floor)
+        except Exception as error:  # noqa: BLE001 - 워크플로가 폴백할 수 있게
+            print(f"다음 빌드 번호를 계산하지 못했습니다: {error}", file=sys.stderr)
+            return FAILED
+        used = sequential_builds(client, app_id)
+        newest = max(used) if used else 0
+        print(
+            f"올라간 순번 최댓값 {newest or '없음'} · 바닥값 {args.floor} → {build}",
+            file=sys.stderr,
+        )
+        print(build)
+        return OK
 
     if args.check:
         print("자가 점검 통과")

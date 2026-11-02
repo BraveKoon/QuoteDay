@@ -207,6 +207,42 @@ class UploadTests(unittest.TestCase):
             asc_upload.put_operations(self.ipa, operations)
 
 
+class NextBuildNumberTests(unittest.TestCase):
+    """빌드 번호는 '몇 번째 빌드인지'로 읽혀야 한다."""
+
+    def _client_with_versions(self, versions):
+        client = asc_upload.Asc("AuthKey.p8", "KEY", "ISSUER")
+        def fake_call(method, path, body=None):
+            self.assertEqual(method, "GET")
+            self.assertIn("/v1/builds", path)
+            return {"data": [{"attributes": {"version": v}} for v in versions]}
+        client.call = fake_call
+        return client
+
+    def test_timestamp_builds_are_ignored(self) -> None:
+        # 예전에 올린 시각 형식(202611012329)은 순번이 아니다.
+        client = self._client_with_versions(["202611012329", "202611012312", "26"])
+        self.assertEqual(asc_upload.sequential_builds(client, "app"), [26])
+        self.assertEqual(asc_upload.next_build_number(client, "app", 27), 27)
+
+    def test_floor_is_next_number_when_unused(self) -> None:
+        client = self._client_with_versions(["26", "24"])
+        self.assertEqual(asc_upload.next_build_number(client, "app", 27), 27)
+
+    def test_running_ahead_of_the_repository(self) -> None:
+        # 프로젝트 파일이 27 인데 이미 27·28 이 올라갔다면 29 를 쓴다.
+        client = self._client_with_versions(["27", "28", "26"])
+        self.assertEqual(asc_upload.next_build_number(client, "app", 27), 29)
+
+    def test_no_builds_yet(self) -> None:
+        client = self._client_with_versions([])
+        self.assertEqual(asc_upload.next_build_number(client, "app", 27), 27)
+
+    def test_garbage_versions_are_ignored(self) -> None:
+        client = self._client_with_versions(["", "abc", "12.3", "0", "31"])
+        self.assertEqual(asc_upload.sequential_builds(client, "app"), [31])
+
+
 class ClientTests(unittest.TestCase):
     def setUp(self) -> None:
         # 네트워크·키 없이 클라이언트 로직만 본다.

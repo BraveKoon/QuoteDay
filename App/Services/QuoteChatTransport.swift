@@ -159,7 +159,10 @@ public struct QwenChatTransport: QuoteChatTransport {
     // MARK: 요청 본문
 
     /// OpenAI 호환 요청 본문. 테스트에서 그대로 확인한다.
-    static func body(
+    ///
+    /// `nonisolated` 인 이유: 순수 함수라 메인 스레드가 필요 없고, 테스트가
+    /// 메인 배우 없이 그대로 부를 수 있어야 한다.
+    nonisolated static func body(
         system: String,
         messages: [QuoteChatMessage],
         model: String,
@@ -182,7 +185,7 @@ public struct QwenChatTransport: QuoteChatTransport {
         return try JSONSerialization.data(withJSONObject: body)
     }
 
-    static func error(status: Int, body: String) -> QuoteChatError {
+    nonisolated static func error(status: Int, body: String) -> QuoteChatError {
         switch status {
         case 401, 403: return .unauthorized
         case 429: return .rateLimited

@@ -239,7 +239,7 @@ final class QuoteChatTests: XCTestCase {
 
     @MainActor
     func testProviderDefaultsToOnDevice() {
-        let settings = AIChatSettings(defaults: makeDefaults())
+        let settings = AIChatSettings(defaults: makeDefaults(), keyStore: MemoryKeyStore())
         XCTAssertEqual(settings.provider, .onDevice)
         XCTAssertFalse(settings.provider.requiresKey)
         XCTAssertFalse(settings.provider.leavesDevice)
@@ -247,12 +247,37 @@ final class QuoteChatTests: XCTestCase {
 
     @MainActor
     func testQwenNeedsAKey() {
-        let settings = AIChatSettings(defaults: makeDefaults())
+        let settings = AIChatSettings(defaults: makeDefaults(), keyStore: MemoryKeyStore())
         settings.provider = .qwen
         // 테스트 기기의 Keychain 상태에 기대지 않도록 키를 지우고 확인한다.
         settings.deleteKey()
         XCTAssertEqual(settings.availability, .needsKey)
         XCTAssertFalse(settings.availability.canChat)
+    }
+
+    @MainActor
+    func testKeyRoundTripAndTrimming() {
+        let store = MemoryKeyStore()
+        let settings = AIChatSettings(defaults: makeDefaults(), keyStore: store)
+        settings.provider = .qwen
+        XCTAssertFalse(settings.hasKey)
+
+        // 붙여 넣을 때 딸려 오는 공백·줄바꿈은 지운다.
+        XCTAssertTrue(settings.saveKey("  sk-abc123\n"))
+        XCTAssertTrue(settings.hasKey)
+        XCTAssertEqual(store.stored, "sk-abc123")
+
+        settings.deleteKey()
+        XCTAssertFalse(settings.hasKey)
+        XCTAssertEqual(settings.availability, .needsKey)
+    }
+
+    @MainActor
+    func testEmptyKeyIsNotSaved() {
+        let store = MemoryKeyStore()
+        let settings = AIChatSettings(defaults: makeDefaults(), keyStore: store)
+        XCTAssertFalse(settings.saveKey("   "))
+        XCTAssertNil(store.stored)
     }
 
     func testQwenRegionURLs() {
@@ -294,7 +319,7 @@ final class QuoteChatTests: XCTestCase {
 
     @MainActor
     private func makeSettings(provider: AIChatProvider, key: String?) -> AIChatSettings {
-        let settings = AIChatSettings(defaults: makeDefaults())
+        let settings = AIChatSettings(defaults: makeDefaults(), keyStore: MemoryKeyStore())
         settings.provider = provider
         if let key {
             settings.saveKey(key)
@@ -319,6 +344,23 @@ final class QuoteChatTests: XCTestCase {
             try? await Task.sleep(nanoseconds: 20_000_000)
         }
         XCTFail("조건이 시간 안에 만족되지 않았다.")
+    }
+}
+
+/// 테스트용 키 저장소. 진짜 Keychain 을 만지지 않는다.
+final class MemoryKeyStore: APIKeyStore {
+    private(set) var stored: String?
+
+    func key() -> String? { stored }
+
+    @discardableResult
+    func save(_ key: String) -> Bool {
+        stored = key
+        return true
+    }
+
+    func delete() {
+        stored = nil
     }
 }
 

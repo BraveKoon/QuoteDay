@@ -75,3 +75,45 @@ public enum KeychainStore {
         SecItemDelete(query as CFDictionary)
     }
 }
+
+
+/// API 키를 두는 곳. 테스트에서는 메모리 구현을 끼워 넣는다.
+///
+/// 실제 Keychain 은 시뮬레이터·CI 에서 권한 문제로 실패할 수 있고, 테스트끼리
+/// 상태를 공유한다. 그런 환경 요인과 무관하게 **앱 로직**을 검사하려면
+/// 이 경계가 필요하다.
+public protocol APIKeyStore: AnyObject {
+    func key() -> String?
+    @discardableResult func save(_ key: String) -> Bool
+    func delete()
+}
+
+/// 실제 저장소. 앱이 쓰는 유일한 구현이다.
+public final class KeychainAPIKeyStore: APIKeyStore {
+    private let service: String
+    private let account: String
+
+    public init(service: String, account: String) {
+        self.service = service
+        self.account = account
+    }
+
+    public func key() -> String? {
+        KeychainStore.get(for: account, service: service)?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    @discardableResult
+    public func save(_ key: String) -> Bool {
+        do {
+            try KeychainStore.set(key, for: account, service: service)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    public func delete() {
+        KeychainStore.delete(for: account, service: service)
+    }
+}

@@ -47,6 +47,7 @@ public final class AIChatSettings {
     }
 
     @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let keyStore: APIKeyStore
     /// 온디바이스 모델의 가용성만 물어보는 데 쓴다. 세션을 만들지 않는다.
     @ObservationIgnored private let deviceExplainer = FoundationModelsQuoteExplainer()
 
@@ -71,8 +72,15 @@ public final class AIChatSettings {
         }
     }
 
-    public init(defaults: UserDefaults = AppGroup.defaults) {
+    public init(
+        defaults: UserDefaults = AppGroup.defaults,
+        keyStore: APIKeyStore = KeychainAPIKeyStore(
+            service: AIChatSettings.Keychain.service,
+            account: AIChatSettings.Keychain.account
+        )
+    ) {
         self.defaults = defaults
+        self.keyStore = keyStore
         self.provider = AIChatProvider(rawValue: defaults.string(forKey: Self.providerKey) ?? "")
             ?? .onDevice
         self.region = QwenRegion(rawValue: defaults.string(forKey: Self.regionKey) ?? "")
@@ -87,28 +95,23 @@ public final class AIChatSettings {
     public var hasKey: Bool { !(apiKey ?? "").isEmpty }
 
     /// 실제 키. 네트워크 요청을 만들 때만 쓴다. 화면에 바인딩하지 않는다.
-    var apiKey: String? {
-        KeychainStore.get(for: Keychain.account, service: Keychain.service)?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-    }
+    var apiKey: String? { keyStore.key() }
 
     /// 키를 저장한다. 공백·줄바꿈은 지운다(붙여 넣을 때 흔히 딸려 온다).
     @discardableResult
     public func saveKey(_ raw: String) -> Bool {
         let cleaned = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else { return false }
-        do {
-            try KeychainStore.set(cleaned, for: Keychain.account, service: Keychain.service)
-            access(keyPath: \.hasKey)
-            return true
-        } catch {
+        let saved = keyStore.save(cleaned)
+        if !saved {
             AppLog.aiChat.error("AI 키를 저장하지 못했습니다.")
-            return false
         }
+        access(keyPath: \.hasKey)
+        return saved
     }
 
     public func deleteKey() {
-        KeychainStore.delete(for: Keychain.account, service: Keychain.service)
+        keyStore.delete()
         access(keyPath: \.hasKey)
     }
 

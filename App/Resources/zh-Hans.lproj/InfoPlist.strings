@@ -1,0 +1,6 @@
+/* zh-Hans — QuoteDay 권한 안내 (번체는 이 파일에서 자동으로 만든다) */
+
+"NSPhotoLibraryAddUsageDescription" = "用于将你制作的名言卡片保存到照片 App。不会读取你已有的照片。";
+"NSCalendarsFullAccessUsageDescription" = "用于在应用中一并显示设备日历里的日程。即使不允许，应用内的日程功能也可正常使用。";
+"NSCalendarsWriteOnlyAccessUsageDescription" = "用于将你在 QuoteDay 中创建的日程同时添加到设备日历。";
+"NSCalendarsUsageDescription" = "用于在应用中一并显示设备日历里的日程。";

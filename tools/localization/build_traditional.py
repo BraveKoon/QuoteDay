@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """간체 사전(`zh-Hans`)에서 번체 사전(`zh-Hant`)을 만든다.
 
+대상은 두 파일이다 — 화면 문구(`Localizable.strings`)와, 사진·캘린더 권한 안내처럼
+시스템이 직접 띄우는 문구(`InfoPlist.strings`). 둘 다 간체가 원본이다.
+
 번체를 따로 손으로 쓰지 않는 이유는, 같은 문장을 두 번 관리하면 반드시
 어긋나기 때문이다. 간체 사전이 원본이고 번체는 **변환 결과**다. 문구를
 고칠 때는 간체만 고치고 이 스크립트를 다시 돌린다.
@@ -27,12 +30,13 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-SOURCE = ROOT / "App" / "Resources" / "zh-Hans.lproj" / "Localizable.strings"
-OUTPUT = ROOT / "App" / "Resources" / "zh-Hant.lproj" / "Localizable.strings"
+RESOURCES = ROOT / "App" / "Resources"
+# 간체를 원본으로 삼아 번체를 만드는 `.strings` 파일 이름들.
+TABLES = ["Localizable.strings", "InfoPlist.strings"]
 
 HEADER = """/* zh-Hant — QuoteDay */
 /* zh-Hans 사전에서 자동으로 만든 파일이다. 직접 고치지 말 것. */
-/* 고치는 곳: App/Resources/zh-Hans.lproj/Localizable.strings  */
+/* 고치는 곳: App/Resources/zh-Hans.lproj/{table}  */
 /* 다시 만들기: python tools/localization/build_traditional.py  */
 """
 
@@ -77,11 +81,12 @@ def escape(text: str) -> str:
     return text.replace("\\", "\\\\").replace('"', '\\"')
 
 
-def render(entries: list[tuple[str, str]], convert) -> str:
+def render(table: str, entries: list[tuple[str, str]], convert) -> str:
     """섹션 주석은 원본 그대로 옮기고, 값만 변환한다."""
-    source_lines = SOURCE.read_text(encoding="utf-8").splitlines()
+    source = RESOURCES / "zh-Hans.lproj" / table
+    source_lines = source.read_text(encoding="utf-8").splitlines()
     pairs = dict(entries)
-    out: list[str] = [HEADER]
+    out: list[str] = [HEADER.format(table=table)]
     for line in source_lines:
         stripped = line.strip()
         if not stripped:
@@ -114,28 +119,35 @@ def main() -> int:
     parser.add_argument("--check", action="store_true", help="최신인지만 확인한다")
     args = parser.parse_args()
 
-    if not SOURCE.exists():
-        sys.exit(f"원본이 없습니다: {SOURCE}")
-
-    entries = parse(SOURCE)
-    if not entries:
-        sys.exit("간체 사전에서 문구를 하나도 읽지 못했습니다.")
-
     convert = build_converter()
-    text = render(entries, convert.convert)
+    stale = False
 
-    if args.check:
-        current = OUTPUT.read_text(encoding="utf-8") if OUTPUT.exists() else ""
-        if current != text:
-            print("번체 사전이 간체 사전과 어긋납니다. build_traditional.py 를 실행하세요.")
-            return 1
-        print(f"번체 사전 최신 — {len(entries)}개 문구")
-        return 0
+    for table in TABLES:
+        source = RESOURCES / "zh-Hans.lproj" / table
+        output = RESOURCES / "zh-Hant.lproj" / table
+        if not source.exists():
+            sys.exit(f"원본이 없습니다: {source}")
 
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(text, encoding="utf-8")
-    print(f"생성 완료: {OUTPUT.relative_to(ROOT)} - 문구 {len(entries)}개")
-    return 0
+        entries = parse(source)
+        if not entries:
+            sys.exit(f"간체 사전에서 문구를 하나도 읽지 못했습니다: {table}")
+
+        text = render(table, entries, convert.convert)
+
+        if args.check:
+            current = output.read_text(encoding="utf-8") if output.exists() else ""
+            if current != text:
+                print(f"번체 사전이 간체 사전과 어긋납니다: {table} — build_traditional.py 를 실행하세요.")
+                stale = True
+            else:
+                print(f"번체 사전 최신 — {table} {len(entries)}개 문구")
+            continue
+
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(text, encoding="utf-8")
+        print(f"생성 완료: {output.relative_to(ROOT)} - 문구 {len(entries)}개")
+
+    return 1 if stale else 0
 
 
 if __name__ == "__main__":

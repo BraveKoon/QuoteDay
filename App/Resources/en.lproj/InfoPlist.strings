@@ -1,0 +1,6 @@
+/* en — QuoteDay 권한 안내 (Info.plist 의 한국어 값이 원본) */
+
+"NSPhotoLibraryAddUsageDescription" = "Used to save the quote cards you create to the Photos app. QuoteDay does not read your existing photos.";
+"NSCalendarsFullAccessUsageDescription" = "Used to show events from your device calendar alongside your quotes. The in-app schedule works fine even if you don't allow this.";
+"NSCalendarsWriteOnlyAccessUsageDescription" = "Used to also add events you create in QuoteDay to your device calendar.";
+"NSCalendarsUsageDescription" = "Used to show events from your device calendar alongside your quotes.";

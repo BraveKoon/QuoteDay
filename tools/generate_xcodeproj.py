@@ -90,6 +90,24 @@ LOCALIZATION_FILES = {
 LOCALIZATION_VARIANT_NAME = "Localizable.strings"
 LOCALIZATION_GROUP_DIR = "App/Resources"
 
+# 사진·캘린더 권한 안내처럼 **시스템이 직접 띄우는 문구**. 화면 문구와 달리
+# 앱이 고른 언어가 아니라 기기의 시스템 언어를 따라 번들에서 읽힌다.
+# 이 파일이 없으면 영어·중국어 기기에서도 권한 안내가 한국어로 나온다.
+# 앱 번들만 쓴다(위젯은 권한 문구가 없다).
+INFOPLIST_FILES = {
+    "en": "App/Resources/en.lproj/InfoPlist.strings",
+    "zh-Hans": "App/Resources/zh-Hans.lproj/InfoPlist.strings",
+    # 번체는 간체에서 만든다. (tools/localization/build_traditional.py)
+    "zh-Hant": "App/Resources/zh-Hant.lproj/InfoPlist.strings",
+}
+INFOPLIST_VARIANT_NAME = "InfoPlist.strings"
+
+# (변형 그룹 이름, 언어별 파일, 번들에 넣는 타깃)
+LOCALIZATION_TABLES = [
+    (LOCALIZATION_VARIANT_NAME, LOCALIZATION_FILES, (APP_TARGET, WIDGET_TARGET)),
+    (INFOPLIST_VARIANT_NAME, INFOPLIST_FILES, (APP_TARGET,)),
+]
+
 # 그룹에는 넣되 빌드 페이즈에는 넣지 않는 파일.
 NON_BUILD_FILES = [
     "App/Resources/Info.plist",
@@ -319,34 +337,37 @@ def main() -> int:
     # `en.lproj/Localizable.strings` 처럼 언어 폴더가 붙은 파일은 낱개
     # 파일 참조로 넣으면 번들 최상위로 섞여 들어간다. 변형 그룹으로 묶어야
     # Xcode 가 언어 폴더를 유지한 채 복사한다.
-    for language, path in LOCALIZATION_FILES.items():
-        if not (ROOT / path).exists():
-            raise SystemExit(f"번역 파일을 찾을 수 없습니다: {path}")
+    variant_group_ids: dict[str, str] = {}
+    for variant_name, files, _targets in LOCALIZATION_TABLES:
+        for language, path in files.items():
+            if not (ROOT / path).exists():
+                raise SystemExit(f"번역 파일을 찾을 수 없습니다: {path}")
+            project.add(
+                "PBXFileReference",
+                oid("fileref", path),
+                dict_body([
+                    ("isa", "PBXFileReference"),
+                    ("lastKnownFileType", "text.plist.strings"),
+                    ("name", quote(language)),
+                    ("path", quote(path.split(f"{LOCALIZATION_GROUP_DIR}/", 1)[-1])),
+                    ("sourceTree", quote("<group>")),
+                ]),
+            )
+        variant_group_ids[variant_name] = oid("variantgroup", variant_name)
         project.add(
-            "PBXFileReference",
-            oid("fileref", path),
+            "PBXVariantGroup",
+            variant_group_ids[variant_name],
             dict_body([
-                ("isa", "PBXFileReference"),
-                ("lastKnownFileType", "text.plist.strings"),
-                ("name", quote(language)),
-                ("path", quote(path.split(f"{LOCALIZATION_GROUP_DIR}/", 1)[-1])),
+                ("isa", "PBXVariantGroup"),
+                ("children", list_value([
+                    f"{oid('fileref', path)} /* {language} */"
+                    for language, path in files.items()
+                ])),
+                ("name", quote(variant_name)),
                 ("sourceTree", quote("<group>")),
             ]),
         )
-    localization_group_id = oid("variantgroup", LOCALIZATION_VARIANT_NAME)
-    project.add(
-        "PBXVariantGroup",
-        localization_group_id,
-        dict_body([
-            ("isa", "PBXVariantGroup"),
-            ("children", list_value([
-                f"{oid('fileref', path)} /* {language} */"
-                for language, path in LOCALIZATION_FILES.items()
-            ])),
-            ("name", quote(LOCALIZATION_VARIANT_NAME)),
-            ("sourceTree", quote("<group>")),
-        ]),
-    )
+    localization_group_id = variant_group_ids[LOCALIZATION_VARIANT_NAME]
 
     # --- PBXFileReference (소스/리소스)
     for path in sorted(every_path):
@@ -389,7 +410,10 @@ def main() -> int:
         project,
         every_path,
         extra_children={
-            LOCALIZATION_GROUP_DIR: [f"{localization_group_id} /* {LOCALIZATION_VARIANT_NAME} */"]
+            LOCALIZATION_GROUP_DIR: [
+                f"{variant_group_ids[name]} /* {name} */"
+                for name, _files, _targets in LOCALIZATION_TABLES
+            ]
         },
     )
 
@@ -514,17 +538,17 @@ def main() -> int:
 
         # Resources
         resource_files = []
-        if target in (APP_TARGET, WIDGET_TARGET):
-            localization_build_id = oid("buildfile", target, LOCALIZATION_VARIANT_NAME)
-            resource_files.append(
-                f"{localization_build_id} /* {LOCALIZATION_VARIANT_NAME} in Resources */"
-            )
+        for variant_name, _files, targets in LOCALIZATION_TABLES:
+            if target not in targets:
+                continue
+            localization_build_id = oid("buildfile", target, variant_name)
+            resource_files.append(f"{localization_build_id} /* {variant_name} in Resources */")
             project.add(
                 "PBXBuildFile",
                 localization_build_id,
                 dict_body([
                     ("isa", "PBXBuildFile"),
-                    ("fileRef", f"{localization_group_id} /* {LOCALIZATION_VARIANT_NAME} */"),
+                    ("fileRef", f"{variant_group_ids[variant_name]} /* {variant_name} */"),
                 ]),
             )
         for path in RESOURCE_DIRS[target]:

@@ -18,6 +18,7 @@ public final class AIChatSettings {
     }
 
     private static let providerKey = "aiChat.provider"
+    private static let localChoiceKey = "aiChat.localChoice"
     private static let regionKey = "aiChat.qwenRegion"
     private static let modelKey = "aiChat.qwenModel"
 
@@ -48,6 +49,8 @@ public final class AIChatSettings {
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let keyStore: APIKeyStore
+    /// 기기 내 모델을 받아 두었는지 물어보는 곳. 내려받기 자체는 여기서 하지 않는다.
+    @ObservationIgnored private let localService: LocalQwenService
     /// 온디바이스 모델의 가용성만 물어보는 데 쓴다. 세션을 만들지 않는다.
     @ObservationIgnored private let deviceExplainer = FoundationModelsQuoteExplainer()
 
@@ -65,6 +68,14 @@ public final class AIChatSettings {
         }
     }
 
+    /// 기기 내 Qwen 을 쓸 때 어느 크기를 쓸지.
+    public var localChoice: LocalQwenChoice {
+        didSet {
+            defaults.set(localChoice.rawValue, forKey: Self.localChoiceKey)
+            access(keyPath: \.localChoice)
+        }
+    }
+
     public var model: QwenModel {
         didSet {
             defaults.set(model.rawValue, forKey: Self.modelKey)
@@ -74,8 +85,13 @@ public final class AIChatSettings {
 
     /// `keyStore` 를 생략하면 실제 Keychain 을 쓴다. (기본값 자리에서 내부 멤버를
     /// 참조할 수 없어 nil 로 받고 여기서 만든다.)
-    public init(defaults: UserDefaults = AppGroup.defaults, keyStore: APIKeyStore? = nil) {
+    public init(
+        defaults: UserDefaults = AppGroup.defaults,
+        keyStore: APIKeyStore? = nil,
+        localService: LocalQwenService? = nil
+    ) {
         self.defaults = defaults
+        self.localService = localService ?? .shared
         self.keyStore = keyStore ?? KeychainAPIKeyStore(
             service: AIChatSettings.Keychain.service,
             account: AIChatSettings.Keychain.account
@@ -84,6 +100,8 @@ public final class AIChatSettings {
             ?? .onDevice
         self.region = QwenRegion(rawValue: defaults.string(forKey: Self.regionKey) ?? "")
             ?? .international
+        self.localChoice = LocalQwenChoice(rawValue: defaults.string(forKey: Self.localChoiceKey) ?? "")
+            ?? .automatic
         self.model = QwenModel(rawValue: defaults.string(forKey: Self.modelKey) ?? "")
             ?? .plus
     }
@@ -120,10 +138,28 @@ public final class AIChatSettings {
         case .onDevice:
             let reason = deviceExplainer.availability(for: Localization.language)
             return reason.canExplain ? .ready : .unavailable(reason)
+        case .localQwen:
+            guard localService.canRun else { return .localUnsupportedDevice }
+            let model = localModel
+            guard localService.isDownloaded(model) else { return .needsDownload(model) }
+            return .ready
         case .qwen:
             if !hasKey { return .needsKey }
             return region.chatURL == nil ? .misconfigured : .ready
         }
+    }
+
+    /// 기기 내 Qwen 에 실제로 쓸 모델.
+    ///
+    /// 고른 크기가 아직 없는데 **다른 크기가 이미 있으면** 있는 쪽을 쓴다.
+    /// 이미 받아 둔 것을 두고 또 1GB 를 받게 하는 것은 무례하다.
+    public var localModel: LocalQwenModel {
+        let wanted = localChoice.resolve()
+        if localService.isDownloaded(wanted) { return wanted }
+        if let ready = LocalQwenModel.allCases.first(where: { localService.isDownloaded($0) }) {
+            return ready
+        }
+        return wanted
     }
 }
 
@@ -134,6 +170,10 @@ public enum AIChatAvailability: Equatable, Sendable {
     case needsKey
     /// 온디바이스 모델을 쓸 수 없다.
     case unavailable(QuoteExplainerAvailability)
+    /// 기기 내 Qwen 을 아직 받지 않았다.
+    case needsDownload(LocalQwenModel)
+    /// 시뮬레이터처럼 MLX 를 돌릴 수 없는 환경.
+    case localUnsupportedDevice
     /// 주소가 잘못됐다(있을 수 없지만 방어).
     case misconfigured
 

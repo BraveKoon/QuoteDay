@@ -37,6 +37,12 @@ public enum QuoteChatError: LocalizedError, Equatable {
     case server(Int)
     /// 네트워크가 없다.
     case offline
+    /// 기기 내 모델을 아직 받지 않았다.
+    case localModelMissing(LocalQwenModel)
+    /// 시뮬레이터에서는 MLX(Metal)를 쓸 수 없다.
+    case localNotOnSimulator
+    /// 내려받기·적재가 실패했다.
+    case localModelFailed(String)
 
     public var errorDescription: String? {
         switch self {
@@ -54,6 +60,12 @@ public enum QuoteChatError: LocalizedError, Equatable {
             L("Qwen 서버가 응답하지 않아요. 잠시 뒤 다시 시도해 주세요.")
         case .offline:
             L("인터넷에 연결되어 있지 않아요.")
+        case .localModelMissing(let model):
+            L("기기 내 %@ 모델을 아직 받지 않았어요. 설정에서 내려받아 주세요.", model.title)
+        case .localNotOnSimulator:
+            L("시뮬레이터에서는 기기 내 AI 를 돌릴 수 없어요. 실제 기기에서 확인해 주세요.")
+        case .localModelFailed(let reason):
+            L("모델을 준비하지 못했어요: %@", reason)
         }
     }
 }

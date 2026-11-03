@@ -125,6 +125,8 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             QD_CLOUDKIT_CONTAINER="" \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
             | xcbeautify
 
       - name: 테스트
@@ -142,6 +144,8 @@ jobs:
             QD_CLOUDKIT_CONTAINER="" \
             -test-timeouts-enabled YES \
             -default-test-execution-time-allowance 120 \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
             2>&1 | tee "$LOG" | xcbeautify; then
             exit 0
           fi

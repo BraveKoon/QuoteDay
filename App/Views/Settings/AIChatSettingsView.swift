@@ -7,6 +7,7 @@ import SwiftUI
 /// 한다. 그 두 가지를 숨기면 편해 보이지만 정직하지 않다.
 struct AIChatSettingsView: View {
     @Environment(AIChatSettings.self) private var aiSettings
+    @Environment(LocalQwenService.self) private var localQwen
 
     @State private var keyDraft = ""
     @State private var message: String?
@@ -18,6 +19,10 @@ struct AIChatSettingsView: View {
         ScrollView {
             VStack(spacing: ClayTheme.Spacing.m) {
                 providerCard(aiSettings: $aiSettings)
+
+                if aiSettings.provider == .localQwen {
+                    localCard(aiSettings: $aiSettings)
+                }
 
                 if aiSettings.provider == .qwen {
                     keyCard
@@ -88,6 +93,98 @@ struct AIChatSettingsView: View {
         .padding(ClayTheme.Spacing.l)
         .frame(maxWidth: .infinity, alignment: .leading)
         .clayCard()
+    }
+
+    // MARK: - 기기 내 Qwen (오픈소스 가중치)
+
+    private func localCard(aiSettings: Bindable<AIChatSettings>) -> some View {
+        VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+            SectionHeader("기기 내 모델")
+
+            Picker("크기", selection: aiSettings.localChoice) {
+                ForEach(LocalQwenChoice.allCases) { choice in
+                    Text(choice.title).tag(choice)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            Text(aiSettings.wrappedValue.localChoice.detail)
+                .font(ClayFont.caption())
+                .foregroundStyle(ClayTheme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            ForEach(LocalQwenModel.allCases) { model in
+                localModelRow(model)
+            }
+
+            Text("가중치는 처음 한 번만 내려받아요. 받은 파일은 이 기기의 저장 공간에 남고, 앱을 지우면 함께 지워져요.")
+                .font(ClayFont.caption())
+                .foregroundStyle(ClayTheme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(LocalQwenModel.licenseNotice)
+                .font(.caption2)
+                .foregroundStyle(ClayTheme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(ClayTheme.Spacing.l)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .clayCard()
+    }
+
+    @ViewBuilder
+    private func localModelRow(_ model: LocalQwenModel) -> some View {
+        let isDownloaded = localQwen.isDownloaded(model)
+        let isPreparing = localQwen.preparing == model
+        let recommended = LocalQwenModel.recommendedForThisDevice == model
+
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: ClayTheme.Spacing.xs) {
+                Text(model.title)
+                    .font(ClayFont.callout())
+                    .foregroundStyle(ClayTheme.textPrimary)
+                if recommended {
+                    Text("이 기기 추천")
+                        .font(.caption2)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(ClayTheme.accent.opacity(0.12), in: Capsule())
+                        .foregroundStyle(ClayTheme.accent)
+                }
+                Spacer(minLength: 0)
+                Text(isDownloaded ? LocalQwenModel.format(localQwen.bytesOnDisk(for: model)) : model.formattedSize)
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+            }
+
+            if isPreparing {
+                ProgressView(value: localQwen.progress.isFinite ? max(0, min(1, localQwen.progress)) : 0)
+                    .tint(ClayTheme.accent)
+            } else if isDownloaded {
+                HStack(spacing: ClayTheme.Spacing.xs) {
+                    Label("받아 두었어요", systemImage: "checkmark.seal.fill")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.accent)
+                    Spacer(minLength: 0)
+                    Button("지우기") {
+                        localQwen.delete(model)
+                    }
+                    .font(ClayFont.caption())
+                    .buttonStyle(.plain)
+                    .foregroundStyle(ClayTheme.textSecondary)
+                }
+            } else {
+                Button {
+                    Task { await localQwen.prepare(model) }
+                } label: {
+                    Text(verbatim: "\(L("내려받기")) (\(model.formattedSize))")
+                        .font(ClayFont.caption())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(ClayTheme.accent)
+            }
+        }
+        .padding(.vertical, 6)
     }
 
     // MARK: - 열쇠
@@ -194,7 +291,8 @@ struct AIChatSettingsView: View {
     private var privacyCard: some View {
         VStack(alignment: .leading, spacing: ClayTheme.Spacing.xs) {
             SectionHeader("무엇이 오가나")
-            bullet("온디바이스는 질문도 답도 기기 밖으로 나가지 않아요.")
+            bullet("온디바이스와 기기 내 Qwen3 는 질문도 답도 기기 밖으로 나가지 않아요.")
+            bullet("기기 내 Qwen3 는 오픈소스 가중치(Apache 2.0)를 처음 한 번만 내려받아 기기에서 돌려요.")
             bullet("Qwen 을 고르면 질문과 지금 보고 있는 명언·작가 정보가 알리바바 클라우드로 전송돼요.")
             bullet("대화는 저장하지 않아요. 시트를 닫으면 사라져요.")
             bullet("API 키는 이 기기 Keychain 에만 있고, 위젯·백업과 공유하지 않아요.")

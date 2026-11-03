@@ -14,6 +14,7 @@ struct QuoteChatSheet: View {
 
     @Environment(QuoteChatEngine.self) private var engine
     @Environment(AIChatSettings.self) private var aiSettings
+    @Environment(LocalQwenService.self) private var localQwen
     @Environment(AppSettings.self) private var settings
     @Environment(\.dismiss) private var dismiss
 
@@ -204,9 +205,67 @@ struct QuoteChatSheet: View {
                         .font(ClayFont.callout())
                 }
             }
+        case .needsDownload(let model):
+            downloadCard(model)
+        case .localUnsupportedDevice:
+            VStack(alignment: .leading, spacing: ClayTheme.Spacing.xs) {
+                Text("기기 내 Qwen 은 실제 기기에서만 돌아가요. 시뮬레이터에서는 확인할 수 없어요.")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                NavigationLink {
+                    AIChatSettingsView()
+                } label: {
+                    Text("다른 방법 고르기")
+                        .font(ClayFont.callout())
+                }
+            }
         case .ready, .misconfigured:
             EmptyView()
         }
+    }
+
+    /// 아직 모델을 받지 않았을 때. 여기서 바로 받을 수 있게 한다 —
+    /// 설정으로 보내고 다시 돌아오게 하면 두 번 일하게 된다.
+    private func downloadCard(_ model: LocalQwenModel) -> some View {
+        VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
+            HStack(spacing: ClayTheme.Spacing.xs) {
+                Image(systemName: "arrow.down.circle")
+                    .foregroundStyle(ClayTheme.accent)
+                Text(verbatim: "\(model.title) · \(model.formattedSize)")
+                    .font(ClayFont.callout())
+                    .foregroundStyle(ClayTheme.textPrimary)
+                Spacer(minLength: 0)
+            }
+
+            Text("한 번만 받으면 그다음부터는 인터넷 없이도 대화할 수 있어요. 와이파이에서 받는 편이 좋아요.")
+                .font(ClayFont.caption())
+                .foregroundStyle(ClayTheme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if localQwen.preparing == model {
+                ProgressView(value: localQwen.progress.isFinite ? max(0, min(1, localQwen.progress)) : 0)
+                    .tint(ClayTheme.accent)
+                Text(verbatim: "\(L("받는 중…")) \(Int((max(0, min(1, localQwen.progress))) * 100))%")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textSecondary)
+            } else {
+                Button {
+                    Task { await localQwen.prepare(model) }
+                } label: {
+                    Text("내려받기")
+                        .font(ClayFont.callout())
+                }
+                .clayButton(.primary, fullWidth: true)
+            }
+
+            Text(LocalQwenModel.licenseNotice)
+                .font(.caption2)
+                .foregroundStyle(ClayTheme.textSecondary)
+        }
+        .padding(ClayTheme.Spacing.m)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .clayCard()
     }
 
     // MARK: - 말풍선
@@ -350,6 +409,10 @@ enum AIChatAvailabilityText {
             L("Qwen API 키를 넣으면 대화를 시작할 수 있어요.")
         case .unavailable(let reason):
             reason.explanation ?? L("지금은 AI 대화를 쓸 수 없어요.")
+        case .needsDownload(let model):
+            L("%@ 모델을 한 번만 받으면 기기 안에서 대화할 수 있어요. 약 %@예요.", model.title, model.formattedSize)
+        case .localUnsupportedDevice:
+            L("이 환경에서는 기기 내 AI 를 돌릴 수 없어요. 실제 기기에서 써 주세요.")
         case .misconfigured:
             L("주소 설정이 잘못됐어요. 설정에서 지역을 다시 골라 주세요.")
         }

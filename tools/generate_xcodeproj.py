@@ -100,6 +100,34 @@ NON_BUILD_FILES = [
 
 TOP_LEVEL_GROUPS = ["App", "Shared", "Widget", "Tests"]
 
+# Swift Package Manager 의존성.
+#
+# 기기 안에서 Qwen3(오픈소스 가중치)를 돌리려면 MLX 가 필요하다. 이 저장소는
+# `.xcodeproj` 를 이 스크립트로 만들기 때문에, Xcode 가 대신 넣어 주는 패키지
+# 참조를 여기서 직접 만든다.
+#
+#   mlx-swift-examples  MLXLLM(모델 적재·생성) · MLXLMCommon(대화 세션)
+#   swift-transformers  Hub(Hugging Face 에서 가중치 내려받기)
+#
+# 버전은 고정한다. 올릴 때는 빌드를 한 번 돌려 API 가 그대로인지 확인할 것.
+SWIFT_PACKAGES = [
+    {
+        "name": "mlx-swift-examples",
+        "url": "https://github.com/ml-explore/mlx-swift-examples",
+        "version": "2.29.1",
+        "products": ["MLXLLM", "MLXLMCommon"],
+    },
+    {
+        "name": "swift-transformers",
+        "url": "https://github.com/huggingface/swift-transformers",
+        "version": "1.0.0",
+        "products": ["Hub"],
+    },
+]
+
+# 이 패키지 제품을 쓰는 타겟.
+PACKAGE_TARGET = APP_TARGET
+
 
 def oid(*parts: str) -> str:
     """경로/역할로부터 24자리 대문자 16진수 ID 를 만든다."""
@@ -162,6 +190,8 @@ class Project:
             "PBXVariantGroup",
             "XCBuildConfiguration",
             "XCConfigurationList",
+            "XCRemoteSwiftPackageReference",
+            "XCSwiftPackageProductDependency",
         ]
 
         lines = [
@@ -392,6 +422,40 @@ def main() -> int:
         ]),
     )
 
+    # --- Swift 패키지 참조
+    #
+    # Xcode 가 만들어 주는 것과 같은 모양이다. 제품 의존성은 프레임워크 빌드
+    # 페이즈의 빌드 파일에서 `productRef` 로 가리킨다.
+    package_ids: dict[str, str] = {}
+    product_ids_by_name: dict[str, str] = {}
+    for package in SWIFT_PACKAGES:
+        package_id = oid("swiftpackage", package["url"])
+        package_ids[package["name"]] = package_id
+        project.add(
+            "XCRemoteSwiftPackageReference",
+            package_id,
+            dict_body([
+                ("isa", "XCRemoteSwiftPackageReference"),
+                ("repositoryURL", quote(package["url"])),
+                ("requirement", dict_body([
+                    ("kind", "upToNextMinorVersion"),
+                    ("minimumVersion", quote(package["version"])),
+                ], indent=5)),
+            ]),
+        )
+        for product in package["products"]:
+            product_id = oid("swiftproduct", package["url"], product)
+            product_ids_by_name[product] = product_id
+            project.add(
+                "XCSwiftPackageProductDependency",
+                product_id,
+                dict_body([
+                    ("isa", "XCSwiftPackageProductDependency"),
+                    ("package", f"{package_id} /* XCRemoteSwiftPackageReference \"{package['name']}\" */"),
+                    ("productName", quote(product)),
+                ]),
+            )
+
     # --- 빌드 페이즈
     phase_ids: dict[tuple[str, str], str] = {}
     for target in (APP_TARGET, WIDGET_TARGET, TEST_TARGET):
@@ -421,7 +485,20 @@ def main() -> int:
             ]),
         )
 
-        # Frameworks (자동 링크에 맡기고 비워 둔다)
+        # Frameworks — 패키지 제품만 명시하고 나머지는 자동 링크에 맡긴다.
+        framework_files = []
+        if target == PACKAGE_TARGET:
+            for product, product_id in product_ids_by_name.items():
+                build_id = oid("buildfile", target, "swiftpackage", product)
+                framework_files.append(f"{build_id} /* {product} in Frameworks */")
+                project.add(
+                    "PBXBuildFile",
+                    build_id,
+                    dict_body([
+                        ("isa", "PBXBuildFile"),
+                        ("productRef", f"{product_id} /* {product} */"),
+                    ]),
+                )
         frameworks_id = oid("phase", target, "frameworks")
         phase_ids[(target, "frameworks")] = frameworks_id
         project.add(
@@ -430,7 +507,7 @@ def main() -> int:
             dict_body([
                 ("isa", "PBXFrameworksBuildPhase"),
                 ("buildActionMask", "2147483647"),
-                ("files", list_value([])),
+                ("files", list_value(framework_files)),
                 ("runOnlyForDeploymentPostprocessing", "0"),
             ]),
         )
@@ -699,6 +776,10 @@ def main() -> int:
                 ("dependencies", list_value(dependencies)),
                 ("name", quote(target)),
                 ("productName", quote(target)),
+                ("packageProductDependencies", list_value(
+                    [f"{pid} /* {name} */" for name, pid in sorted(product_ids_by_name.items())]
+                    if target == PACKAGE_TARGET else []
+                )),
                 ("productReference", f"{product_ids[target]} /* {products[target][0]} */"),
                 ("productType", quote(product_types[target])),
             ]),
@@ -727,6 +808,10 @@ def main() -> int:
             # 지원 언어. ko 는 developmentRegion 이고 원문 언어다(파일 없음).
             ("knownRegions", list_value(["ko", "en", "zh-Hans", "zh-Hant", "Base"])),
             ("mainGroup", main_group),
+            ("packageReferences", list_value(
+                [f"{pid} /* XCRemoteSwiftPackageReference \"{name}\" */"
+                 for name, pid in sorted(package_ids.items())]
+            )),
             ("productRefGroup", f"{products_group} /* Products */"),
             ("projectDirPath", quote("")),
             ("projectRoot", quote("")),

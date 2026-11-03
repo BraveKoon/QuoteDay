@@ -5,6 +5,8 @@ import Foundation
 /// 두 갈래를 둔 이유:
 /// - **온디바이스**: 기기 안에서 끝난다. 키도, 요금도, 네트워크도 필요 없다.
 ///   대신 기기·OS 를 가리고 답이 짧다.
+/// - **Qwen3 (기기 내)**: 오픈소스 가중치를 기기에서 직접 돌린다. 질문이 나가지
+///   않고 키도 요금도 없다. 대신 **처음 한 번 내려받아야** 하고 답이 느리다.
 /// - **Qwen(DashScope)**: 훨씬 똑똑하고 길게 답한다. 대신 **사용자 자기 키**가
 ///   필요하고, 질문이 알리바바 클라우드로 나간다.
 ///
@@ -12,6 +14,7 @@ import Foundation
 /// 남의 요금으로 도는 통로가 된다. 그래서 열쇠는 사용자가 직접 넣는다.
 public enum AIChatProvider: String, CaseIterable, Codable, Identifiable, Sendable {
     case onDevice
+    case localQwen
     case qwen
 
     public var id: String { rawValue }
@@ -19,6 +22,7 @@ public enum AIChatProvider: String, CaseIterable, Codable, Identifiable, Sendabl
     public var title: String {
         switch self {
         case .onDevice: L("온디바이스 (무료)")
+        case .localQwen: L("Qwen3 기기 내 (오픈소스)")
         case .qwen: L("Qwen (내 API 키)")
         }
     }
@@ -27,6 +31,8 @@ public enum AIChatProvider: String, CaseIterable, Codable, Identifiable, Sendabl
         switch self {
         case .onDevice:
             L("기기 안에서 답해요. 인터넷도, 키도, 요금도 필요 없어요.")
+        case .localQwen:
+            L("Qwen3 가중치를 내려받아 기기에서 직접 돌려요. 질문이 나가지 않고, 키도 요금도 없어요.")
         case .qwen:
             L("알리바바 클라우드의 Qwen 이 답해요. 질문이 그쪽으로 전송되고, 내 API 키로 요금이 나가요.")
         }
@@ -35,12 +41,16 @@ public enum AIChatProvider: String, CaseIterable, Codable, Identifiable, Sendabl
     public var symbol: String {
         switch self {
         case .onDevice: "iphone.gen3"
+        case .localQwen: "cpu"
         case .qwen: "cloud"
         }
     }
 
     /// 이 통로를 쓰려면 API 키가 필요한지.
     public var requiresKey: Bool { self == .qwen }
+
+    /// 이 통로를 쓰려면 모델을 내려받아야 하는지.
+    public var requiresModelDownload: Bool { self == .localQwen }
 
     /// 질문이 기기 밖으로 나가는지. 화면에 그대로 적는다.
     public var leavesDevice: Bool { self == .qwen }

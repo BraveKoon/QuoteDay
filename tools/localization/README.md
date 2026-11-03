@@ -18,6 +18,21 @@ App/Resources/zh-Hant.lproj/Localizable.strings      ← 손대지 않는 곳
 `zh-Hant` 파일 머리말에도 같은 말이 적혀 있다. 번체 문구를 고치고 싶으면
 간체를 고친다.
 
+## 변환하는 파일
+
+| 간체 (원본) | 번체 (결과) |
+|---|---|
+| `App/Resources/zh-Hans.lproj/Localizable.strings` | `zh-Hant.lproj/Localizable.strings` |
+| `App/Resources/zh-Hans.lproj/InfoPlist.strings` | `zh-Hant.lproj/InfoPlist.strings` |
+| `docs/PRIVACY.zh-Hans.md` | `docs/PRIVACY.zh-Hant.md` |
+
+`InfoPlist.strings` 는 사진·캘린더 권한 안내다. 앱이 고른 언어가 아니라 **시스템 언어**를
+따라 읽히므로, 파일이 없으면 영어·중국어 기기에서도 한국어로 나온다.
+
+문서는 OpenCC 가 못 바꾸는 대만 낱말(`識別符號`→識別碼, `許可權`→權限, `賬號`→帳號 …)을
+`DOCUMENT_FIXES` 로 고친다. **문서에만 적용한다** — 앱 화면 사전은 이미 `日程·日曆·應用` 으로
+통일되어 있어서, 거기까지 바꾸는 것은 보정표가 아니라 앱 전체의 용어 결정이다.
+
 ## 명령
 
 ```bash

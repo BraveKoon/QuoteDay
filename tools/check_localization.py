@@ -13,6 +13,7 @@ Xcode 없이도 돌릴 수 있어서, 번역을 더하거나 화면 문구를 �
 3. 자리표시자(`%@`, `%d` …)의 개수가 언어마다 같은지
 4. 명언·인물·비하인드 스토리 데이터가 언어별로 채워져 있는지
 5. 쓰이지 않는 키가 남아 있는지 (오타로 생긴 유령 키를 잡는다)
+6. 사진·캘린더 권한 안내(`InfoPlist.strings`)가 모든 언어로 있는지
 """
 
 from __future__ import annotations
@@ -320,6 +321,41 @@ def story_slugs() -> list[str]:
     return re.findall(r'quoteSlug:\s*"([^"]+)"', text)
 
 
+def info_plist_keys() -> list[str]:
+    """`Info.plist` 의 권한 안내 키. 시스템이 직접 띄우는 문구라 따로 번역해야 한다."""
+    text = (ROOT / "App" / "Resources" / "Info.plist").read_text(encoding="utf-8")
+    return re.findall(r"<key>(NS\w+UsageDescription)</key>", text)
+
+
+def check_info_plist(errors: list[str]) -> int:
+    """`InfoPlist.strings` 가 권한 안내를 모든 언어로 갖고 있는지.
+
+    화면 문구와 달리 이 문구는 앱이 고른 언어가 아니라 **기기의 시스템 언어**를
+    따라 읽힌다. 파일이 없거나 키가 빠지면 영어·중국어 기기에서도 사진·캘린더
+    권한 안내가 한국어로 나온다 — 그리고 번역이 빠졌다는 표시는 어디에도 없다.
+    """
+    keys = info_plist_keys()
+    if not keys:
+        errors.append("Info.plist 에서 권한 안내 키를 하나도 찾지 못했습니다.")
+        return 0
+    for language in LANGUAGES:
+        path = RESOURCE_ROOT / f"{language}.lproj" / "InfoPlist.strings"
+        if not path.exists():
+            errors.append(f"권한 안내 번역이 없습니다: {path.relative_to(ROOT)}")
+            continue
+        try:
+            table = parse_strings(path)
+        except ValueError as error:
+            errors.append(str(error))
+            continue
+        for key in keys:
+            if not table.get(key, "").strip():
+                errors.append(f"[{language}] InfoPlist.strings 에 {key} 가 없거나 비었습니다.")
+        for extra in sorted(set(table) - set(keys)):
+            errors.append(f"[{language}] InfoPlist.strings 의 {extra} 는 Info.plist 에 없는 키입니다.")
+    return len(keys)
+
+
 def main() -> int:
     errors: list[str] = []
 
@@ -392,6 +428,9 @@ def main() -> int:
             owner = base_language if key in base_keys else language
             errors.append(f"[{owner}] 에만 있는 키: {key!r}")
 
+    # 3-1. 권한 안내 — 시스템이 직접 띄우는 문구.
+    permission_count = check_info_plist(errors)
+
     # 4. 쓰이지 않는 키 — 오타로 생긴 유령 키를 잡는다. (실패는 아니다)
     unused = sorted(base_keys - required - optional - scan_all_text())
     if unused:
@@ -415,6 +454,7 @@ def main() -> int:
         return 1
 
     print(f"번역 검사 통과 — 필수 문구 {len(required)}개 × {len(LANGUAGES)}개 언어")
+    print(f"   권한 안내(InfoPlist): {permission_count}개 × {len(LANGUAGES)}개 언어")
     print("   소개글·업적·배경 설명: " + " · ".join(coverage))
     return 0
 

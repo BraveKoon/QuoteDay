@@ -1,0 +1,9 @@
+/* zh-Hant — QuoteDay */
+/* zh-Hans 사전에서 자동으로 만든 파일이다. 직접 고치지 말 것. */
+/* 고치는 곳: App/Resources/zh-Hans.lproj/InfoPlist.strings  */
+/* 다시 만들기: python tools/localization/build_traditional.py  */
+
+"NSPhotoLibraryAddUsageDescription" = "用於將你製作的名言卡片儲存到照片 App。不會讀取你已有的照片。";
+"NSCalendarsFullAccessUsageDescription" = "用於在應用中一併顯示裝置日曆裡的日程。即使不允許，應用內的日程功能也可正常使用。";
+"NSCalendarsWriteOnlyAccessUsageDescription" = "用於將你在 QuoteDay 中建立的日程同時新增到裝置日曆。";
+"NSCalendarsUsageDescription" = "用於在應用中一併顯示裝置日曆裡的日程。";

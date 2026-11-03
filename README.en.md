@@ -493,6 +493,15 @@ finishes, that translation is discarded.
 - The Traditional Chinese table is never written by hand:
   `python tools/localization/build_traditional.py` converts the Simplified table with OpenCC
   (`s2twp`, Taiwan vocabulary). Only the Simplified table is edited.
+- **The photo and calendar permission prompts live in `InfoPlist.strings`.** The system shows them
+  itself, so they follow the **device's system language**, not the language picked in the app. Without
+  this file, those prompts appear in Korean even on English and Chinese devices.
+  `check_localization.py` verifies that every permission key in `Info.plist` has a value in all
+  three languages.
+- The privacy policy is `docs/PRIVACY.md` (the Korean original), `PRIVACY.en.md`, `PRIVACY.zh-Hans.md`
+  and `PRIVACY.zh-Hant.md`. Traditional is generated from Simplified by the same script. **When the
+  Korean original changes, the three translations must change with it** — a stale translation
+  claims the app does things it no longer does.
 - On the English screen the ZenQuotes **English original** is used as-is. On-device translation
   exists only for the Korean screen.
 

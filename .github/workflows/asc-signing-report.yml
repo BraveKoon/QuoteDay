@@ -1,0 +1,37 @@
+name: ASC 서명 상태 점검
+
+# 수동으로만 돈다. TestFlight 아카이브가 서명 단계에서 막힐 때, Apple 계정에
+# 인증서·프로파일·앱 ID 가 어떤 상태인지 **읽어서** 보여 준다.
+# 아무것도 만들거나 지우지 않는다. (tools/asc_signing_report.py)
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    name: 서명 상태 읽기
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 키 풀기
+        env:
+          APP_STORE_CONNECT_KEY: ${{ secrets.APP_STORE_CONNECT_KEY }}
+        run: python3 tools/prepare_asc_key.py
+
+      - name: 서명 상태 읽기
+        env:
+          RAW_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          RAW_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          KEY_ID=$(printf '%s' "$RAW_KEY_ID" | tr -d '[:space:]')
+          ISSUER_ID=$(printf '%s' "$RAW_ISSUER_ID" | tr -d '[:space:]')
+          python3 tools/asc_signing_report.py \
+            --key "$PWD/AuthKey.p8" --key-id "$KEY_ID" --issuer "$ISSUER_ID"
+
+      - name: 키 지우기
+        if: always()
+        run: rm -f AuthKey.p8

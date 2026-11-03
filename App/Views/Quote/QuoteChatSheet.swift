@@ -5,9 +5,8 @@ import SwiftUI
 /// 묻는 것: 이 문장의 숨은 뜻, 이해가 안 되는 구절, 작가의 일생과 시대,
 /// 지금 내 상황에 어떻게 적용할지.
 ///
-/// 답하는 쪽은 사용자가 고른다 — 기기 안(무료) 또는 Qwen(자기 키).
-/// 어느 쪽이든 **누가 답하는지 화면에 적는다.** 특히 기기 밖으로 나가는
-/// 경우에는 사용자가 그 사실을 알고 물어야 한다.
+/// 답하는 쪽은 사용자가 고른다 — Apple 온디바이스 또는 Qwen3 기기 내(오픈소스).
+/// 둘 다 **기기 안에서** 끝나고, 어느 쪽인지는 화면 위에 적는다.
 struct QuoteChatSheet: View {
     /// 지금 보고 있는 명언. 없으면 오늘의 명언을 쓴다.
     let context: QuoteChatContext?
@@ -94,15 +93,14 @@ struct QuoteChatSheet: View {
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
 
-            if aiSettings.provider.leavesDevice {
-                Label("질문이 기기 밖으로 전송돼요", systemImage: "arrow.up.right.circle")
-                    .font(ClayFont.caption())
-                    .foregroundStyle(ClayTheme.textSecondary)
-            } else {
-                Label("기기 안에서 답해요", systemImage: "lock")
-                    .font(ClayFont.caption())
-                    .foregroundStyle(ClayTheme.textSecondary)
-            }
+            // 지금은 어떤 통로도 기기 밖으로 나가지 않는다. 나중에 서버 통로가
+            // 생기면 provider.leavesDevice 만 바꾸면 이 안내가 따라온다.
+            Label(
+                aiSettings.provider.leavesDevice ? "질문이 기기 밖으로 전송돼요" : "기기 안에서 답해요",
+                systemImage: aiSettings.provider.leavesDevice ? "arrow.up.right.circle" : "lock"
+            )
+            .font(ClayFont.caption())
+            .foregroundStyle(ClayTheme.textSecondary)
 
             Spacer(minLength: 0)
 
@@ -178,20 +176,6 @@ struct QuoteChatSheet: View {
     @ViewBuilder
     private var setupHint: some View {
         switch availability {
-        case .needsKey:
-            VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
-                Text("Qwen 을 쓰려면 내 API 키가 필요해요. 알리바바 클라우드에서 발급받아 설정에 넣어 주세요.")
-                    .font(ClayFont.caption())
-                    .foregroundStyle(ClayTheme.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                NavigationLink {
-                    AIChatSettingsView()
-                } label: {
-                    Text("키 넣으러 가기")
-                        .font(ClayFont.callout())
-                }
-                .clayButton(.primary, fullWidth: true)
-            }
         case .unavailable(let reason):
             VStack(alignment: .leading, spacing: ClayTheme.Spacing.xs) {
                 Text(reason.explanation ?? L("이 기기에서는 온디바이스 AI 를 쓸 수 없어요."))
@@ -201,7 +185,7 @@ struct QuoteChatSheet: View {
                 NavigationLink {
                     AIChatSettingsView()
                 } label: {
-                    Text("Qwen 으로 바꾸기")
+                    Text("다른 방법 고르기")
                         .font(ClayFont.callout())
                 }
             }
@@ -220,7 +204,7 @@ struct QuoteChatSheet: View {
                         .font(ClayFont.callout())
                 }
             }
-        case .ready, .misconfigured:
+        case .ready:
             EmptyView()
         }
     }
@@ -405,16 +389,12 @@ enum AIChatAvailabilityText {
         switch availability {
         case .ready:
             L("명언의 숨은 뜻, 이해가 안 되는 구절, 작가의 일생까지 편하게 물어보세요.")
-        case .needsKey:
-            L("Qwen API 키를 넣으면 대화를 시작할 수 있어요.")
         case .unavailable(let reason):
             reason.explanation ?? L("지금은 AI 대화를 쓸 수 없어요.")
         case .needsDownload(let model):
             L("%@ 모델을 한 번만 받으면 기기 안에서 대화할 수 있어요. 약 %@예요.", model.title, model.formattedSize)
         case .localUnsupportedDevice:
             L("이 환경에서는 기기 내 AI 를 돌릴 수 없어요. 실제 기기에서 써 주세요.")
-        case .misconfigured:
-            L("주소 설정이 잘못됐어요. 설정에서 지역을 다시 골라 주세요.")
         }
     }
 }

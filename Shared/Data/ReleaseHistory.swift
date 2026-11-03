@@ -10,6 +10,21 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.14.0",
+            date: "2026-11-03",
+            summary: "API 키를 넣는 길을 없앴다. 이제 AI 대화는 어떤 경우에도 기기 안에서 끝난다.",
+            sections: [
+                ReleaseSection(
+                    title: "바뀜",
+                    items: [
+                        "클라우드 Qwen(내 API 키) 통로를 걷어냈다. 남은 통로는 둘이다 — Apple 온디바이스와 Qwen3 기기 내(오픈소스). 둘 다 인터넷도, 키도, 요금도 필요 없다.",
+                        "설정 화면이 짧아졌다. 고르는 것은 통로와, Qwen3 를 쓸 때의 크기뿐이다.",
+                        "\"무엇이 오가나\" 안내도 사실만 남겼다: 질문도 답도 기기 밖으로 나가지 않는다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.13.0",
             date: "2026-11-03",
             summary: "오픈소스 Qwen3 를 앱 안으로 들였다. 이제 대화는 클라우드 없이도 된다.",

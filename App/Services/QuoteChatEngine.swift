@@ -37,9 +37,6 @@ public final class QuoteChatEngine {
             return nil // 엔진이 들고 있는 OnDeviceChatTransport 를 쓴다.
         case .localQwen:
             return LocalQwenChatTransport(model: settings.localModel)
-        case .qwen:
-            guard let key = settings.apiKey, !key.isEmpty else { return nil }
-            return QwenChatTransport(key: key, region: settings.region, model: settings.model.rawValue)
         }
     }
 
@@ -60,9 +57,6 @@ public final class QuoteChatEngine {
         switch settings.availability {
         case .ready:
             break
-        case .needsKey:
-            fail(QuoteChatError.missingKey)
-            return
         case .unavailable(let reason):
             fail(QuoteChatError.onDeviceUnavailable(reason))
             return
@@ -71,9 +65,6 @@ public final class QuoteChatEngine {
             return
         case .localUnsupportedDevice:
             fail(QuoteChatError.localNotOnSimulator)
-            return
-        case .misconfigured:
-            fail(QuoteChatError.badRequest("region"))
             return
         }
 
@@ -87,12 +78,6 @@ public final class QuoteChatEngine {
             // 서비스가 알아서 새 세션을 만든다.
             guard let made = makeTransport(settings) else {
                 fail(QuoteChatError.localModelMissing(settings.localModel))
-                return
-            }
-            transport = made
-        case .qwen:
-            guard let made = makeTransport(settings) else {
-                fail(QuoteChatError.missingKey)
                 return
             }
             transport = made
@@ -121,7 +106,7 @@ public final class QuoteChatEngine {
                     self.appendDelta(delta)
                 }
                 if !received, self.messages.last?.text.isEmpty == true {
-                    throw QuoteChatError.server(-1)
+                    throw QuoteChatError.emptyReply
                 }
                 self.finishStreaming()
             } catch is CancellationError {

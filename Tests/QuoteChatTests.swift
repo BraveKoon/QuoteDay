@@ -3,110 +3,24 @@ import XCTest
 
 /// AI 대화의 **순수 로직**을 검사한다.
 ///
-/// 실제 모델(Qwen·온디바이스)은 CI 에서 부를 수 없다. 대신
-/// - SSE 한 줄을 제대로 해석하는지(델타·끝·오류·모르는 줄)
-/// - 요청 본문이 OpenAI 호환 규격인지
+/// 실제 모델은 CI 에서 부를 수 없다(Foundation Models 는 기기, MLX 는 실기기).
+/// 대신
 /// - 화면의 상태 전이(질문 → 답하는 중 → 완성, 실패, 중단)
+/// - 스냅숏/델타 두 방식의 조각을 합치는 규칙
 /// - 프롬프트에 명언·작가·언어가 들어가는지
 /// 를 지킨다. 이것들이 틀어지면 답이 아니라 오류가 온다.
 final class QuoteChatTests: XCTestCase {
 
-    // MARK: - SSE 해석
-
-    func testDeltaLineIsParsed() {
-        let line = #"data: {"choices":[{"delta":{"content":"안녕"}}]}"#
-        XCTAssertEqual(QwenSSE.parse(line: line), .delta("안녕"))
-    }
-
-    func testDoneLineEndsTheStream() {
-        XCTAssertEqual(QwenSSE.parse(line: "data: [DONE]"), .done)
-    }
-
-    func testEmptyDeltaIsIgnored() {
-        // 첫 조각은 role 만 오고 content 가 빈 경우가 흔하다.
-        let line = #"data: {"choices":[{"delta":{"role":"assistant"}}]}"#
-        XCTAssertEqual(QwenSSE.parse(line: line), .ignore)
-    }
-
-    func testErrorPayloadInsideStreamIsSurfaced() {
-        let line = #"data: {"error":{"message":"model not found","code":"InvalidParameter"}}"#
-        XCTAssertEqual(QwenSSE.parse(line: line), .error("model not found"))
-    }
-
-    func testNonDataLinesAreIgnored() {
-        XCTAssertEqual(QwenSSE.parse(line: ""), .ignore)
-        XCTAssertEqual(QwenSSE.parse(line: ": keep-alive"), .ignore)
-        XCTAssertEqual(QwenSSE.parse(line: "event: message"), .ignore)
-        XCTAssertEqual(QwenSSE.parse(line: "data: not json"), .ignore)
-    }
-
-    func testMessageContentFallbackIsAccepted() {
-        // 일부 구현은 delta 대신 message.content 로 준다.
-        let line = #"data: {"choices":[{"message":{"content":"답"}}]}"#
-        XCTAssertEqual(QwenSSE.parse(line: line), .delta("답"))
-    }
-
-    // MARK: - 요청 본문
-
-    func testRequestBodyIsOpenAICompatible() throws {
-        let messages = [
-            QuoteChatMessage(role: .user, text: "이 명언 무슨 뜻이야?"),
-            QuoteChatMessage(role: .assistant, text: "요지는 …"),
-            QuoteChatMessage(role: .user, text: "작가 이야기도 해 줘")
-        ]
-        let data = try QwenChatTransport.body(
-            system: "지시문", messages: messages, model: "qwen-plus"
-        )
-        let object = try XCTUnwrap(
-            JSONSerialization.jsonObject(with: data) as? [String: Any]
-        )
-        XCTAssertEqual(object["model"] as? String, "qwen-plus")
-        XCTAssertEqual(object["stream"] as? Bool, true)
-
-        let sent = try XCTUnwrap(object["messages"] as? [[String: String]])
-        XCTAssertEqual(sent.first?["role"], "system")
-        XCTAssertEqual(sent.first?["content"], "지시문")
-        XCTAssertEqual(sent.dropFirst().map { $0["role"] }, ["user", "assistant", "user"])
-        XCTAssertEqual(sent.last?["content"], "작가 이야기도 해 줘")
-    }
-
-    func testLongHistoryIsTrimmed() throws {
-        // 문맥 한도를 넘기면 요청이 거부된다. 오래된 대화는 잘라 낸다.
-        let messages = (0..<40).map { index in
-            QuoteChatMessage(role: index % 2 == 0 ? .user : .assistant, text: "\(index)")
-        }
-        let data = try QwenChatTransport.body(system: "s", messages: messages, model: "m", maxTurns: 6)
-        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
-        let sent = try XCTUnwrap(object["messages"] as? [[String: String]])
-        XCTAssertEqual(sent.count, 1 + 6, "system + 최근 6개만 남아야 한다.")
-        XCTAssertEqual(sent.last?["content"], "39")
-    }
-
-    func testEmptyMessagesAreNotSent() throws {
-        let messages = [
-            QuoteChatMessage(role: .user, text: "질문"),
-            QuoteChatMessage(role: .assistant, text: "   ")
-        ]
-        let data = try QwenChatTransport.body(system: "s", messages: messages, model: "m")
-        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
-        let sent = try XCTUnwrap(object["messages"] as? [[String: String]])
-        XCTAssertEqual(sent.count, 2, "빈 답변은 보내지 않는다.")
-    }
-
-    func testStatusCodesMapToReadableReasons() {
-        XCTAssertEqual(QwenChatTransport.error(status: 401, body: ""), .unauthorized)
-        XCTAssertEqual(QwenChatTransport.error(status: 403, body: ""), .unauthorized)
-        XCTAssertEqual(QwenChatTransport.error(status: 429, body: ""), .rateLimited)
-        XCTAssertEqual(QwenChatTransport.error(status: 500, body: ""), .server(500))
-        guard case .badRequest = QwenChatTransport.error(status: 400, body: "bad model") else {
-            return XCTFail("400 은 badRequest 여야 한다.")
-        }
-    }
+    // MARK: - 오류
 
     func testEveryErrorHasAMessage() {
         let errors: [QuoteChatError] = [
-            .missingKey, .unauthorized, .rateLimited, .server(500), .offline,
-            .badRequest("x"), .onDeviceUnavailable(.requiresNewerOS)
+            .onDeviceUnavailable(.requiresNewerOS),
+            .localModelMissing(.small),
+            .localNotOnSimulator,
+            .localModelFailed("no space"),
+            .onDeviceFailed("boom"),
+            .emptyReply
         ]
         for error in errors {
             XCTAssertFalse((error.errorDescription ?? "").isEmpty, "\(error) 에 문구가 없다.")
@@ -158,9 +72,9 @@ final class QuoteChatTests: XCTestCase {
     // MARK: - 엔진 상태 전이
 
     @MainActor
-    func testSendStreamsThenFinishes() async {
+    func testSendStreamsThenFinishes() async throws {
         let engine = QuoteChatEngine(makeTransport: { _ in FakeTransport(chunks: ["요지는 ", "짧다."]) })
-        let settings = makeSettings(provider: .qwen, key: "sk-test")
+        let settings = try makeDownloadedSettings()
 
         engine.send("무슨 뜻이야?", context: nil, settings: settings, language: .korean)
         await waitFor(engine, until: { !engine.isSending })
@@ -175,35 +89,41 @@ final class QuoteChatTests: XCTestCase {
     }
 
     @MainActor
-    func testFailureShowsMessageAndDropsEmptyBubble() async {
+    func testFailureShowsMessageAndDropsEmptyBubble() async throws {
         let engine = QuoteChatEngine(makeTransport: { _ in FailingTransport() })
-        let settings = makeSettings(provider: .qwen, key: "sk-test")
+        let settings = try makeDownloadedSettings()
 
         engine.send("질문", context: nil, settings: settings, language: .korean)
         await waitFor(engine, until: { !engine.isSending })
 
-        XCTAssertEqual(engine.errorMessage, QuoteChatError.unauthorized.errorDescription)
+        XCTAssertEqual(
+            engine.errorMessage,
+            QuoteChatError.localModelFailed("저장 공간이 부족합니다").errorDescription
+        )
         XCTAssertEqual(engine.messages.count, 1, "빈 답변 말풍선은 남기지 않는다.")
         XCTAssertEqual(engine.messages[0].role, .user)
     }
 
     @MainActor
-    func testMissingKeyNeverCallsTheNetwork() async {
+    func testMissingModelNeverCallsTheTransport() async {
         let transport = FakeTransport(chunks: ["x"])
         let engine = QuoteChatEngine(makeTransport: { _ in transport })
-        let settings = makeSettings(provider: .qwen, key: nil)
+        let settings = makeSettingsWithoutModel()
 
         engine.send("질문", context: nil, settings: settings, language: .korean)
         await waitFor(engine, until: { !engine.isSending })
 
-        XCTAssertEqual(engine.errorMessage, QuoteChatError.missingKey.errorDescription)
+        XCTAssertEqual(
+            engine.errorMessage,
+            QuoteChatError.localModelMissing(settings.localModel).errorDescription
+        )
         XCTAssertEqual(transport.callCount, 0)
     }
 
     @MainActor
-    func testClearRemovesEverything() async {
+    func testClearRemovesEverything() async throws {
         let engine = QuoteChatEngine(makeTransport: { _ in FakeTransport(chunks: ["답"]) })
-        let settings = makeSettings(provider: .qwen, key: "sk-test")
+        let settings = try makeDownloadedSettings()
         engine.send("질문", context: nil, settings: settings, language: .korean)
         await waitFor(engine, until: { !engine.isSending })
 
@@ -214,10 +134,10 @@ final class QuoteChatTests: XCTestCase {
     }
 
     @MainActor
-    func testEmptyQuestionIsIgnored() async {
+    func testEmptyQuestionIsIgnored() async throws {
         let transport = FakeTransport(chunks: ["답"])
         let engine = QuoteChatEngine(makeTransport: { _ in transport })
-        let settings = makeSettings(provider: .qwen, key: "sk-test")
+        let settings = try makeDownloadedSettings()
 
         engine.send("   ", context: nil, settings: settings, language: .korean)
         XCTAssertTrue(engine.messages.isEmpty)
@@ -225,10 +145,10 @@ final class QuoteChatTests: XCTestCase {
     }
 
     @MainActor
-    func testSnapshotStyleDeltasDoNotDuplicateText() async {
+    func testSnapshotStyleDeltasDoNotDuplicateText() async throws {
         // 온디바이스 모델은 조각마다 "전체 글"을 준다. 이어 붙이면 글이 중복된다.
         let engine = QuoteChatEngine(makeTransport: { _ in FakeTransport(chunks: ["요지", "요지는", "요지는 짧다"]) })
-        let settings = makeSettings(provider: .qwen, key: "sk-test")
+        let settings = try makeDownloadedSettings()
         engine.send("질문", context: nil, settings: settings, language: .korean)
         await waitFor(engine, until: { !engine.isSending })
 
@@ -238,57 +158,35 @@ final class QuoteChatTests: XCTestCase {
     // MARK: - 설정
 
     @MainActor
-    func testProviderDefaultsToOnDevice() {
-        let settings = AIChatSettings(defaults: makeDefaults(), keyStore: MemoryKeyStore())
+    func testLocalModelNeedsDownloadFirst() {
+        let service = makeLocalService()
+        let settings = AIChatSettings(defaults: makeDefaults(), localService: service)
+        settings.provider = .localQwen
+
+        guard case .needsDownload = settings.availability else {
+            return XCTFail("받기 전에는 내려받기 안내가 나와야 한다: \(settings.availability)")
+        }
+    }
+
+    @MainActor
+    func testProviderDefaultIsOnDevice() {
+        let settings = AIChatSettings(defaults: makeDefaults(), localService: makeLocalService())
         XCTAssertEqual(settings.provider, .onDevice)
-        XCTAssertFalse(settings.provider.requiresKey)
+        XCTAssertEqual(settings.localChoice, .automatic)
+        // 어떤 통로도 기기 밖으로 나가지 않는다.
         XCTAssertFalse(settings.provider.leavesDevice)
     }
 
     @MainActor
-    func testQwenNeedsAKey() {
-        let settings = AIChatSettings(defaults: makeDefaults(), keyStore: MemoryKeyStore())
-        settings.provider = .qwen
-        // 테스트 기기의 Keychain 상태에 기대지 않도록 키를 지우고 확인한다.
-        settings.deleteKey()
-        XCTAssertEqual(settings.availability, .needsKey)
-        XCTAssertFalse(settings.availability.canChat)
-    }
+    func testChoiceIsPersisted() {
+        let defaults = makeDefaults()
+        let first = AIChatSettings(defaults: defaults, localService: makeLocalService())
+        first.provider = .localQwen
+        first.localChoice = .large
 
-    @MainActor
-    func testKeyRoundTripAndTrimming() {
-        let store = MemoryKeyStore()
-        let settings = AIChatSettings(defaults: makeDefaults(), keyStore: store)
-        settings.provider = .qwen
-        XCTAssertFalse(settings.hasKey)
-
-        // 붙여 넣을 때 딸려 오는 공백·줄바꿈은 지운다.
-        XCTAssertTrue(settings.saveKey("  sk-abc123\n"))
-        XCTAssertTrue(settings.hasKey)
-        XCTAssertEqual(store.stored, "sk-abc123")
-
-        settings.deleteKey()
-        XCTAssertFalse(settings.hasKey)
-        XCTAssertEqual(settings.availability, .needsKey)
-    }
-
-    @MainActor
-    func testEmptyKeyIsNotSaved() {
-        let store = MemoryKeyStore()
-        let settings = AIChatSettings(defaults: makeDefaults(), keyStore: store)
-        XCTAssertFalse(settings.saveKey("   "))
-        XCTAssertNil(store.stored)
-    }
-
-    func testQwenRegionURLs() {
-        XCTAssertEqual(
-            QwenRegion.international.chatURL?.absoluteString,
-            "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
-        )
-        XCTAssertEqual(
-            QwenRegion.china.chatURL?.absoluteString,
-            "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
-        )
+        let second = AIChatSettings(defaults: defaults, localService: makeLocalService())
+        XCTAssertEqual(second.provider, .localQwen)
+        XCTAssertEqual(second.localChoice, .large)
     }
 
     // MARK: - 도우미
@@ -317,16 +215,35 @@ final class QuoteChatTests: XCTestCase {
         )
     }
 
+    /// Qwen3 를 이미 받아 둔 기기를 흉내 낸 설정. 엔진 상태 전이를 볼 때 쓴다.
     @MainActor
-    private func makeSettings(provider: AIChatProvider, key: String?) -> AIChatSettings {
-        let settings = AIChatSettings(defaults: makeDefaults(), keyStore: MemoryKeyStore())
-        settings.provider = provider
-        if let key {
-            settings.saveKey(key)
-        } else {
-            settings.deleteKey()
-        }
+    private func makeDownloadedSettings() throws -> AIChatSettings {
+        let service = makeLocalService()
+        let settings = AIChatSettings(defaults: makeDefaults(), localService: service)
+        settings.provider = .localQwen
+        settings.localChoice = .small
+
+        let directory = service.directory(for: .small)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try Data("{}".utf8).write(to: directory.appendingPathComponent("config.json"))
+        try Data(repeating: 0, count: 8).write(to: directory.appendingPathComponent("w.safetensors"))
+        service.refresh()
         return settings
+    }
+
+    /// 아직 아무것도 받지 않은 기기.
+    @MainActor
+    private func makeSettingsWithoutModel() -> AIChatSettings {
+        let settings = AIChatSettings(defaults: makeDefaults(), localService: makeLocalService())
+        settings.provider = .localQwen
+        return settings
+    }
+
+    @MainActor
+    private func makeLocalService() -> LocalQwenService {
+        let base = FileManager.default.temporaryDirectory
+            .appendingPathComponent("QuoteChatTests-\(UUID().uuidString)", isDirectory: true)
+        return LocalQwenService(downloadBase: base, canRun: true)
     }
 
     private func makeDefaults() -> UserDefaults {
@@ -344,23 +261,6 @@ final class QuoteChatTests: XCTestCase {
             try? await Task.sleep(nanoseconds: 20_000_000)
         }
         XCTFail("조건이 시간 안에 만족되지 않았다.")
-    }
-}
-
-/// 테스트용 키 저장소. 진짜 Keychain 을 만지지 않는다.
-final class MemoryKeyStore: APIKeyStore {
-    private(set) var stored: String?
-
-    func key() -> String? { stored }
-
-    @discardableResult
-    func save(_ key: String) -> Bool {
-        stored = key
-        return true
-    }
-
-    func delete() {
-        stored = nil
     }
 }
 
@@ -402,7 +302,7 @@ final class FailingTransport: QuoteChatTransport {
         language: AppLanguage
     ) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
-            continuation.finish(throwing: QuoteChatError.unauthorized)
+            continuation.finish(throwing: QuoteChatError.localModelFailed("저장 공간이 부족합니다"))
         }
     }
 }

@@ -28,6 +28,8 @@ final class AppEnvironment {
     let rankStore: RankStore
     /// 명언 AI 해설. 기기 모델이 없으면 "쓸 수 없음" 상태로 앉아 있다.
     let explanationStore: QuoteExplanationStore
+    /// 기기 내 Qwen3(오픈소스 가중치). 내려받기 상태와 적재된 모델을 들고 있다.
+    let localQwen: LocalQwenService
     /// AI 대화 설정(누가 답할지 · API 키).
     let aiChatSettings: AIChatSettings
     /// 대화의 상태와 흐름.
@@ -76,7 +78,8 @@ final class AppEnvironment {
         self.heartStore = HeartStore(sync: heartSync, defaults: defaults)
         self.rankStore = RankStore(sync: rankSync, defaults: defaults)
         self.explanationStore = QuoteExplanationStore()
-        self.aiChatSettings = AIChatSettings(defaults: defaults)
+        self.localQwen = LocalQwenService()
+        self.aiChatSettings = AIChatSettings(defaults: defaults, localService: localQwen)
         self.chatEngine = QuoteChatEngine()
 
         self.notificationDelegate = NotificationDelegate(router: router)
@@ -281,6 +284,7 @@ extension View {
             .environment(environment.heartStore)
             .environment(environment.rankStore)
             .environment(environment.explanationStore)
+            .environment(environment.localQwen)
             .environment(environment.aiChatSettings)
             .environment(environment.chatEngine)
             .modelContainer(environment.container)

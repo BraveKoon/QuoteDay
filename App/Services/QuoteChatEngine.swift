@@ -35,6 +35,8 @@ public final class QuoteChatEngine {
         switch settings.provider {
         case .onDevice:
             return nil // 엔진이 들고 있는 OnDeviceChatTransport 를 쓴다.
+        case .localQwen:
+            return LocalQwenChatTransport(model: settings.localModel)
         case .qwen:
             guard let key = settings.apiKey, !key.isEmpty else { return nil }
             return QwenChatTransport(key: key, region: settings.region, model: settings.model.rawValue)
@@ -64,6 +66,12 @@ public final class QuoteChatEngine {
         case .unavailable(let reason):
             fail(QuoteChatError.onDeviceUnavailable(reason))
             return
+        case .needsDownload(let model):
+            fail(QuoteChatError.localModelMissing(model))
+            return
+        case .localUnsupportedDevice:
+            fail(QuoteChatError.localNotOnSimulator)
+            return
         case .misconfigured:
             fail(QuoteChatError.badRequest("region"))
             return
@@ -74,6 +82,14 @@ public final class QuoteChatEngine {
         case .onDevice:
             onDeviceTransport.resetIfContextChanged(context?.quote.slug)
             transport = onDeviceTransport
+        case .localQwen:
+            // 기기 내 모델은 세션이 문맥을 들고 있다. 지침(명언)이 바뀌면
+            // 서비스가 알아서 새 세션을 만든다.
+            guard let made = makeTransport(settings) else {
+                fail(QuoteChatError.localModelMissing(settings.localModel))
+                return
+            }
+            transport = made
         case .qwen:
             guard let made = makeTransport(settings) else {
                 fail(QuoteChatError.missingKey)
@@ -135,6 +151,7 @@ public final class QuoteChatEngine {
         activeProviderTitle = nil
         messages.removeAll()
         onDeviceTransport.reset()
+        LocalQwenService.shared.resetSession()
     }
 
     public func dismissError() {

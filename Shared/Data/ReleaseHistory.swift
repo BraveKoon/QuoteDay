@@ -10,6 +10,26 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.13.0",
+            date: "2026-11-03",
+            summary: "오픈소스 Qwen3 를 앱 안으로 들였다. 이제 대화는 클라우드 없이도 된다.",
+            sections: [
+                ReleaseSection(
+                    title: "더함",
+                    items: [
+                        "Qwen3 기기 내 (오픈소스). Qwen3 가중치(Apache 2.0)를 기기에서 직접 돌려 명언에 대해 대화한다. 질문도 답도 기기 밖으로 나가지 않고, API 키도 요금도 없다.",
+                        "시뮬레이터에서는 돌지 않는다는 사실을 숨기지 않는다. MLX 는 Metal 이 필요해 시뮬레이터에서 실행되지 않는다. 그릴 수 없으면 그 이유를 그 자리에서 알려 준다.",
+                    ]
+                ),
+                ReleaseSection(
+                    title: "고침",
+                    items: [
+                        "받다 만 모델을 \"받았다\"고 보지 않는다. 폴더만 보고 판단하면 가중치가 없는 상태에서 대화를 시도해 실패한다. config.json 과 가중치 파일이 둘 다 있어야 쓸 수 있는 것으로 본다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.12.0",
             date: "2026-11-03",
             summary: "명언 탭에서 AI 와 대화한다. 한 번 묻고 끝나는 카드가 아니라, 되묻고 이어 갈 수 있다.",

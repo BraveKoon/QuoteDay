@@ -1235,3 +1235,29 @@
 "키 넣으러 가기" = "Add a key";
 "키 저장" = "Save key";
 "키가 저장되어 있어요" = "Key saved";
+
+/* MARK: 기기 내 Qwen (오픈소스) */
+"%@ 모델을 한 번만 받으면 기기 안에서 대화할 수 있어요. 약 %@예요." = "The %@ model downloads once, then you can chat entirely on this device. About %@.";
+"Qwen3 © Alibaba Cloud. Apache License 2.0. 기기 안에서 직접 실행합니다." = "Qwen3 © Alibaba Cloud. Apache License 2.0. Runs directly on your device.";
+"Qwen3 가중치를 내려받아 기기에서 직접 돌려요. 질문이 나가지 않고, 키도 요금도 없어요." = "Downloads the Qwen3 weights and runs them on your device. Nothing leaves the phone, and there is no key or charge.";
+"Qwen3 기기 내 (오픈소스)" = "Qwen3 on-device (open source)";
+"가볍고 빨라요. 오래된 기기에서도 돌아가고, 답은 짧은 편이에요." = "Light and fast. Runs on older phones; answers are shorter.";
+"가볍고 빨라요." = "Light and fast.";
+"가중치는 처음 한 번만 내려받아요. 받은 파일은 이 기기의 저장 공간에 남고, 앱을 지우면 함께 지워져요." = "Weights are downloaded once. They stay in this device's storage and are removed when you delete the app.";
+"기기 내 %@ 모델을 아직 받지 않았어요. 설정에서 내려받아 주세요." = "The on-device %@ model has not been downloaded yet. Download it in Settings.";
+"기기 내 Qwen 은 실제 기기에서만 돌아가요. 시뮬레이터에서는 확인할 수 없어요." = "On-device Qwen only runs on a real device. The simulator can't run it.";
+"기기 메모리에 맞춰 고르고, 없으면 작은 쪽을 받아요." = "Picks by device memory, and downloads the small one if none is ready.";
+"내려받기" = "Download";
+"다른 방법 고르기" = "Choose another way";
+"답이 더 좋아요. 대신 메모리를 더 쓰고 느려요." = "Better answers, but uses more memory and is slower.";
+"답이 더 좋아요." = "Better answers.";
+"모델을 준비하지 못했어요: %@" = "Couldn't prepare the model: %@";
+"받아 두었어요" = "Downloaded";
+"시뮬레이터에서는 기기 내 AI 를 돌릴 수 없어요. 실제 기기에서 확인해 주세요." = "The simulator can't run on-device AI. Try it on a real device.";
+"이 기기 추천" = "Best for this device";
+"이 환경에서는 기기 내 AI 를 돌릴 수 없어요. 실제 기기에서 써 주세요." = "On-device AI can't run in this environment. Use a real device.";
+"자동" = "Auto";
+"크기" = "Size";
+"한 번만 받으면 그다음부터는 인터넷 없이도 대화할 수 있어요. 와이파이에서 받는 편이 좋아요." = "Download once and you can chat without internet afterwards. Wi-Fi is recommended.";
+"받는 중…" = "Downloading…";
+"기기 내 모델" = "On-device model";

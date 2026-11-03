@@ -691,6 +691,12 @@ def check_swiftdata_cloudkit() -> None:
     missing: list[str] = []
     for path in sorted(ROOT.glob("App/**/*.swift")) + sorted(ROOT.glob("Shared/**/*.swift")):
         source = path.read_text(encoding="utf-8")
+        # MLX(기기 내 Qwen)의 `ModelConfiguration` 은 SwiftData 와 이름만 같다.
+        # iCloud 와 아무 상관이 없으므로 이 검사에서 뺀다 — 그대로 두면
+        # "iCloud 엔타이틀먼트가 붙으면 죽는다"는 잘못된 오류가 난다.
+        if "import MLXLMCommon" in source:
+            continue
+
         for match in re.finditer(r"ModelConfiguration\(", source):
             # 괄호 균형을 세어 호출 한 건을 통째로 떼어 낸다.
             start = match.end()

@@ -83,6 +83,15 @@ def main() -> int:
         print(f"  {identifier}: 등록됨 · 기능 {len(names)}개")
         print("     " + (", ".join(names) or "(없음)"))
 
+    devices = listing(client, "/v1/devices?limit=200")
+    section(f"등록된 기기 {len(devices)}개")
+    for device in devices:
+        a = device["attributes"]
+        print(f"  {a.get('platform', '?'):<6} {a.get('status', '?'):<9} {a.get('deviceType', '?'):<12} "
+              f"{a.get('name', '?')}")
+    if not devices:
+        print("  없음 — 개발용 프로파일은 기기가 하나도 없으면 만들어지지 않는다")
+
     profiles = listing(client, "/v1/profiles?limit=200")
     section(f"프로파일 {len(profiles)}개")
     if not profiles:

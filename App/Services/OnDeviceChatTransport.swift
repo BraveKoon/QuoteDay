@@ -99,7 +99,7 @@ public final class OnDeviceChatTransport: QuoteChatTransport {
                     continuation.finish()
                 } catch {
                     continuation.finish(
-                        throwing: QuoteChatError.badRequest(error.localizedDescription)
+                        throwing: QuoteChatError.onDeviceFailed(error.localizedDescription)
                     )
                 }
             }

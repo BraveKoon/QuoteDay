@@ -19,6 +19,7 @@ final class QuoteChatTests: XCTestCase {
             .localModelMissing(.small),
             .localNotOnSimulator,
             .localModelFailed("no space"),
+            .onDeviceFailed("boom"),
             .emptyReply
         ]
         for error in errors {

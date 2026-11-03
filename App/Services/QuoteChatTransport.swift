@@ -35,6 +35,8 @@ public enum QuoteChatError: LocalizedError, Equatable {
     case localNotOnSimulator
     /// 내려받기·적재가 실패했다.
     case localModelFailed(String)
+    /// 온디바이스 모델이 예상 밖의 오류를 냈다.
+    case onDeviceFailed(String)
     /// 답이 한 글자도 오지 않았다.
     case emptyReply
 
@@ -48,6 +50,8 @@ public enum QuoteChatError: LocalizedError, Equatable {
             L("시뮬레이터에서는 기기 내 AI 를 돌릴 수 없어요. 실제 기기에서 확인해 주세요.")
         case .localModelFailed(let reason):
             L("모델을 준비하지 못했어요: %@", reason)
+        case .onDeviceFailed(let reason):
+            L("답을 만들지 못했어요: %@", reason)
         case .emptyReply:
             L("답이 오지 않았어요. 다시 물어봐 주세요.")
         }

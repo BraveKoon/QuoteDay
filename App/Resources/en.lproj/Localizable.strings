@@ -1227,3 +1227,4 @@
 
 /* MARK: AI 대화 오류 */
 "답이 오지 않았어요. 다시 물어봐 주세요." = "No answer came back. Please ask again.";
+"답을 만들지 못했어요: %@" = "Couldn't produce an answer: %@";

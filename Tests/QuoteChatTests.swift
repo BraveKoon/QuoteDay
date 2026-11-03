@@ -215,7 +215,6 @@ final class QuoteChatTests: XCTestCase {
         )
     }
 
-    @MainActor
     /// Qwen3 를 이미 받아 둔 기기를 흉내 낸 설정. 엔진 상태 전이를 볼 때 쓴다.
     @MainActor
     private func makeDownloadedSettings() throws -> AIChatSettings {

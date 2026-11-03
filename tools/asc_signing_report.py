@@ -78,7 +78,7 @@ def main() -> int:
             print(f"  {identifier}: **등록되어 있지 않음**")
             continue
         bundle = exact[0]
-        caps = listing(client, f"/v1/bundleIds/{bundle['id']}/bundleIdCapabilities?limit=200")
+        caps = listing(client, f"/v1/bundleIds/{bundle['id']}/bundleIdCapabilities")
         names = sorted(c["attributes"].get("capabilityType", "?") for c in caps)
         print(f"  {identifier}: 등록됨 · 기능 {len(names)}개")
         print("     " + (", ".join(names) or "(없음)"))

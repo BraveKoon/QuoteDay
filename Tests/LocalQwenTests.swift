@@ -155,15 +155,14 @@ final class LocalQwenTests: XCTestCase {
 
     func testProviderProperties() {
         XCTAssertFalse(AIChatProvider.localQwen.leavesDevice)
-        XCTAssertFalse(AIChatProvider.localQwen.requiresKey)
         XCTAssertTrue(AIChatProvider.localQwen.requiresModelDownload)
 
-        XCTAssertTrue(AIChatProvider.qwen.leavesDevice)
-        XCTAssertTrue(AIChatProvider.qwen.requiresKey)
-        XCTAssertFalse(AIChatProvider.qwen.requiresModelDownload)
+        XCTAssertFalse(AIChatProvider.onDevice.leavesDevice)
+        XCTAssertFalse(AIChatProvider.onDevice.requiresModelDownload)
 
-        // 세 통로 모두 설정 화면에 보여야 한다(기능을 숨기지 않는다).
-        XCTAssertEqual(AIChatProvider.allCases.count, 3)
+        // 클라우드(사용자 API 키) 통로는 걷어냈다. 남은 둘은 모두 기기 안에서 끝난다.
+        XCTAssertEqual(AIChatProvider.allCases.count, 2)
+        XCTAssertTrue(AIChatProvider.allCases.allSatisfy { !$0.leavesDevice })
     }
 
     // MARK: - 도우미
@@ -178,6 +177,6 @@ final class LocalQwenTests: XCTestCase {
     @MainActor
     private func makeSettings(service: LocalQwenService) -> AIChatSettings {
         let defaults = UserDefaults(suiteName: "LocalQwenTests-\(UUID().uuidString)") ?? .standard
-        return AIChatSettings(defaults: defaults, keyStore: MemoryKeyStore(), localService: service)
+        return AIChatSettings(defaults: defaults, localService: service)
     }
 }

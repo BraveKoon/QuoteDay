@@ -2,20 +2,20 @@ import Foundation
 
 /// AI 대화를 누구에게 물어볼지.
 ///
-/// 두 갈래를 둔 이유:
-/// - **온디바이스**: 기기 안에서 끝난다. 키도, 요금도, 네트워크도 필요 없다.
-///   대신 기기·OS 를 가리고 답이 짧다.
-/// - **Qwen3 (기기 내)**: 오픈소스 가중치를 기기에서 직접 돌린다. 질문이 나가지
-///   않고 키도 요금도 없다. 대신 **처음 한 번 내려받아야** 하고 답이 느리다.
-/// - **Qwen(DashScope)**: 훨씬 똑똑하고 길게 답한다. 대신 **사용자 자기 키**가
-///   필요하고, 질문이 알리바바 클라우드로 나간다.
+/// 통로를 둘로 줄였다. 예전에는 사용자가 발급한 **API 키로 클라우드 Qwen** 을
+/// 부르는 길도 있었지만 걷어냈다. 이유는 세 가지다.
+/// - **키를 넣게 하는 일 자체가 부담**이다. 발급·결제·보관을 사용자가 떠안는다.
+/// - **질문이 기기 밖으로 나간다.** 명언 감상에 곁들인 사적인 이야기가 서버로
+///   가는 통로를 앱이 열어 두는 값이, 얻는 것보다 크다고 판단했다.
+/// - Qwen 은 이미 **기기 안에서** 돌린다(오픈소스 가중치). 같은 모델을 클라우드로
+///   부르는 두 번째 길은 유지비만 늘렸다.
 ///
-/// 앱에 키를 넣어 배포하지 않는다. 배포된 앱의 키는 결국 모두에게 공개되고,
-/// 남의 요금으로 도는 통로가 된다. 그래서 열쇠는 사용자가 직접 넣는다.
+/// 그래서 지금은 둘 다 **기기 안에서** 끝난다. 인터넷·키·요금이 필요 없다.
 public enum AIChatProvider: String, CaseIterable, Codable, Identifiable, Sendable {
+    /// Apple Foundation Models. OS 가 준비한 모델이라 내려받기가 필요 없다.
     case onDevice
+    /// Qwen3 오픈소스 가중치를 기기에서 직접 돌린다. 처음 한 번 내려받는다.
     case localQwen
-    case qwen
 
     public var id: String { rawValue }
 
@@ -23,7 +23,6 @@ public enum AIChatProvider: String, CaseIterable, Codable, Identifiable, Sendabl
         switch self {
         case .onDevice: L("온디바이스 (무료)")
         case .localQwen: L("Qwen3 기기 내 (오픈소스)")
-        case .qwen: L("Qwen (내 API 키)")
         }
     }
 
@@ -33,8 +32,6 @@ public enum AIChatProvider: String, CaseIterable, Codable, Identifiable, Sendabl
             L("기기 안에서 답해요. 인터넷도, 키도, 요금도 필요 없어요.")
         case .localQwen:
             L("Qwen3 가중치를 내려받아 기기에서 직접 돌려요. 질문이 나가지 않고, 키도 요금도 없어요.")
-        case .qwen:
-            L("알리바바 클라우드의 Qwen 이 답해요. 질문이 그쪽으로 전송되고, 내 API 키로 요금이 나가요.")
         }
     }
 
@@ -42,43 +39,17 @@ public enum AIChatProvider: String, CaseIterable, Codable, Identifiable, Sendabl
         switch self {
         case .onDevice: "iphone.gen3"
         case .localQwen: "cpu"
-        case .qwen: "cloud"
         }
     }
-
-    /// 이 통로를 쓰려면 API 키가 필요한지.
-    public var requiresKey: Bool { self == .qwen }
 
     /// 이 통로를 쓰려면 모델을 내려받아야 하는지.
     public var requiresModelDownload: Bool { self == .localQwen }
 
-    /// 질문이 기기 밖으로 나가는지. 화면에 그대로 적는다.
-    public var leavesDevice: Bool { self == .qwen }
-}
-
-/// Qwen 이 있는 지역. 계정을 만든 곳과 가까운 쪽을 쓴다.
-public enum QwenRegion: String, CaseIterable, Codable, Identifiable, Sendable {
-    case international
-    case china
-
-    public var id: String { rawValue }
-
-    public var title: String {
-        switch self {
-        case .international: L("국제 (싱가포르)")
-        case .china: L("중국 (베이징)")
-        }
-    }
-
-    /// OpenAI 호환 엔드포인트. 앱은 `/chat/completions` 만 부른다.
-    public var baseURL: String {
-        switch self {
-        case .international: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
-        case .china: "https://dashscope.aliyuncs.com/compatible-mode/v1"
-        }
-    }
-
-    public var chatURL: URL? { URL(string: baseURL + "/chat/completions") }
+    /// 질문이 기기 밖으로 나가는지.
+    ///
+    /// 지금은 **어떤 통로도 나가지 않는다.** 화면에 적을 문구를 한곳에서 정하려고
+    /// 남겨 둔 값이다. 나중에 서버 통로를 다시 넣는다면 여기만 바꾸면 안내가 따라온다.
+    public var leavesDevice: Bool { false }
 }
 
 /// 대화에 실어 보내는 명언 맥락.

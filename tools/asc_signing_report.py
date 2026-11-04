@@ -115,13 +115,13 @@ def main() -> int:
         for item in payload.get("included", [])
         if item.get("type") == "preReleaseVersions"
     }
-    section("최근 빌드 (최신순, 시각은 UTC)")
+    section("최근 빌드 (최신순, 시각은 ASC 가 준 현지 표기 — 끝의 -08:00 이 UTC 와의 차이)")
     for item in payload.get("data", []):
         a = item["attributes"]
         version_id = (((item.get("relationships") or {}).get("preReleaseVersion") or {})
                       .get("data") or {}).get("id", "")
         print(f"  {versions.get(version_id, '?'):<8} 빌드 {str(a.get('version', '?')):<4} "
-              f"{str(a.get('uploadedDate', ''))[:16].replace('T', ' ')}  "
+              f"{str(a.get('uploadedDate', ''))[:25].replace('T', ' ')}  "
               f"{a.get('processingState', '?')}{'  (만료)' if a.get('expired') else ''}")
 
     return 0

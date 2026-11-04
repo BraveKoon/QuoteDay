@@ -232,9 +232,11 @@ public final class LocalQwenService {
 
                     if session == nil || sessionSystem != system {
                         var parameters = GenerateParameters()
-                        // 창작보다 설명이 목적이라 낮게 잡는다. 높이면 없는 일화를 만든다.
-                        parameters.temperature = 0.5
-                        parameters.topP = 0.9
+                        // Qwen3 가 생각 끄기 모드에서 권하는 값(0.7 / 0.8)이다. 너무 낮추면
+                        // 작은 모델이 같은 문장을 되풀이하며 빠져나오지 못한다. 설명이
+                        // 목적이라 더 올리지는 않는다 — 높이면 없는 일화를 만든다.
+                        parameters.temperature = 0.7
+                        parameters.topP = 0.8
                         // 짧은 모델이 길게 늘어놓으면 앞의 내용이 흐려진다.
                         parameters.maxTokens = 700
                         session = ChatSession(container, instructions: system, generateParameters: parameters)
@@ -243,10 +245,15 @@ public final class LocalQwenService {
 
                     guard let session else { throw QuoteChatError.localModelMissing(model) }
 
+                    // 모델이 `<think>` 구간을 써도 화면에는 답만 간다.
+                    var filter = QwenThinkingFilter()
                     for try await chunk in session.streamResponse(to: prompt) {
                         if Task.isCancelled { break }
-                        if !chunk.isEmpty { continuation.yield(chunk) }
+                        let visible = filter.feed(chunk)
+                        if !visible.isEmpty { continuation.yield(visible) }
                     }
+                    let rest = filter.finish()
+                    if !rest.isEmpty { continuation.yield(rest) }
                     continuation.finish()
                 } catch is CancellationError {
                     // 중간에 끊으면 세션의 문맥이 어중간해진다. 다음 질문은 새로 시작한다.

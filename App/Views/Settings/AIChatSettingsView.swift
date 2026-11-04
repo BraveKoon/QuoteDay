@@ -91,7 +91,7 @@ struct AIChatSettingsView: View {
             SectionHeader("기기 내 모델")
 
             Picker("크기", selection: aiSettings.localChoice) {
-                ForEach(LocalQwenChoice.allCases) { choice in
+                ForEach(LocalQwenChoice.availableOnThisDevice) { choice in
                     Text(choice.title).tag(choice)
                 }
             }
@@ -102,7 +102,7 @@ struct AIChatSettingsView: View {
                 .foregroundStyle(ClayTheme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            ForEach(LocalQwenModel.allCases) { model in
+            ForEach(LocalQwenModel.availableOnThisDevice) { model in
                 localModelRow(model)
             }
 

@@ -163,9 +163,17 @@
 			isa = PBXBuildFile;
 			fileRef = 0BB2796F07DA2C7345006812 /* ChallengeGenerator.swift */;
 		};
+		3822B77397B6CFFEF49BB3EC = {
+			isa = PBXBuildFile;
+			fileRef = 4F86767EE19ED907E20EEB44 /* QwenThinkingFilter.swift */;
+		};
 		398346BFAF595058D9FF6740 = {
 			isa = PBXBuildFile;
 			fileRef = F84B6CC59C7198A711B2FBC2 /* Localizable.strings */;
+		};
+		3A50CF291C274029A5AA5723 = {
+			isa = PBXBuildFile;
+			fileRef = 893DEE4AEEA3A611AAF99050 /* QuoteChatQuotePicker.swift */;
 		};
 		3B4F33BFA3D0EB1D44B7D95E = {
 			isa = PBXBuildFile;
@@ -788,6 +796,10 @@
 			isa = PBXBuildFile;
 			fileRef = ED45F7F873BBF0B9A13035DC /* Assets.xcassets */;
 		};
+		EF8A8200C9387BC2169CDE49 = {
+			isa = PBXBuildFile;
+			fileRef = 5B44B0F12371408060EC82AA /* QwenThinkingFilterTests.swift */;
+		};
 		F0198F0B08D2E24E555D431D = {
 			isa = PBXBuildFile;
 			fileRef = 977166F8078E4665587F2B0B /* QuoteService.swift */;
@@ -1228,6 +1240,12 @@
 			path = PlusLockedCard.swift;
 			sourceTree = "<group>";
 		};
+		4F86767EE19ED907E20EEB44 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QwenThinkingFilter.swift;
+			sourceTree = "<group>";
+		};
 		5025F8A7E5D81A0448248F7C = {
 			isa = PBXFileReference;
 			lastKnownFileType = text.plist.entitlements;
@@ -1280,6 +1298,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.swift;
 			path = DisputedAttribution.swift;
+			sourceTree = "<group>";
+		};
+		5B44B0F12371408060EC82AA = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QwenThinkingFilterTests.swift;
 			sourceTree = "<group>";
 		};
 		5B61FD0D6DA5693CC14AEC4E = {
@@ -1472,6 +1496,12 @@
 			isa = PBXFileReference;
 			lastKnownFileType = text.plist.xml;
 			path = PrivacyInfo.xcprivacy;
+			sourceTree = "<group>";
+		};
+		893DEE4AEEA3A611AAF99050 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = QuoteChatQuotePicker.swift;
 			sourceTree = "<group>";
 		};
 		8BB93BFC51F079D8EC86CA9D = {
@@ -2012,6 +2042,7 @@
 			children = (
 				86384655A61BDA1B3BA39930 /* AuthorDetailView.swift */,
 				0D23819310177CB1F080C484 /* QuoteBrowserView.swift */,
+				893DEE4AEEA3A611AAF99050 /* QuoteChatQuotePicker.swift */,
 				6B45F673A6BEEEA174792A02 /* QuoteChatSheet.swift */,
 				2ADAAC0D312F05E8DD5464E4 /* QuoteDetailView.swift */,
 				42DE88CBDA05C5CADB850BB2 /* QuoteExplanationCard.swift */,
@@ -2186,6 +2217,7 @@
 				BEFB7F7B8B6BF6A9C17C9A3F /* QuoteChatTests.swift */,
 				330BE87998E53C7D80CFB185 /* QuoteEngineTests.swift */,
 				2F5D8C75F082FFDAF15EC8F4 /* QuoteExplanationTests.swift */,
+				5B44B0F12371408060EC82AA /* QwenThinkingFilterTests.swift */,
 				92762851B7349EBBE5469D0C /* RankingTests.swift */,
 				F3A3F8E52A1F69398F2D4444 /* RecurrenceTests.swift */,
 				ABFFE82CF37B371960B9FD49 /* ReleaseHistoryTests.swift */,
@@ -2293,6 +2325,7 @@
 				C324696F6DE4ACFA06F8F5DF /* QuoteExplanationCache.swift */,
 				4A8144F559A142859B93A48B /* QuoteExplanationStore.swift */,
 				2BB954BFC1F8AE17DC738C8D /* QuoteTranslationTask.swift */,
+				4F86767EE19ED907E20EEB44 /* QwenThinkingFilter.swift */,
 				B663D4D8413004C8C4FE767E /* RankStore.swift */,
 				713DE0C004E84D4AFF654912 /* ScheduleStore.swift */,
 				95E2388A4446F00F9A84BE0E /* StreakStore.swift */,
@@ -2524,6 +2557,8 @@
 				2EE01D6D8C21DE887D096AA5 /* LocalQwenModel.swift in Sources */,
 				30DC1167F132F2A4C3EC3DD3 /* AuthorDetailView.swift in Sources */,
 				33EF386FCA0634210F790544 /* Formatters.swift in Sources */,
+				3822B77397B6CFFEF49BB3EC /* QwenThinkingFilter.swift in Sources */,
+				3A50CF291C274029A5AA5723 /* QuoteChatQuotePicker.swift in Sources */,
 				3B6CBB5E521603BCC47AF2C7 /* RankingSheet.swift in Sources */,
 				3B92E8E1B1A15327B90354DD /* ForeignNameLibrary.swift in Sources */,
 				3E6A55054D28D9F84F8933A7 /* Quote.swift in Sources */,
@@ -2661,6 +2696,7 @@
 				E90E1911D37099FEB85CD56F /* QuoteEngineTests.swift in Sources */,
 				EA127D7DA9AF5DD3A378C517 /* RecurrenceTests.swift in Sources */,
 				ED6C441865728C4A92D08B9D /* RankingTests.swift in Sources */,
+				EF8A8200C9387BC2169CDE49 /* QwenThinkingFilterTests.swift in Sources */,
 				FE97EB8251F358EEC0393B72 /* RemoteQuoteTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2767,9 +2803,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 35;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.14.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -2785,7 +2821,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -2793,7 +2829,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.14.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				QD_CLOUDKIT_CONTAINER = iCloud.com.quoteday.app;
@@ -2809,7 +2845,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Resources/QuoteDay.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/Resources/Info.plist;
@@ -2817,7 +2853,7 @@
 				"$(inherited)",
 				"@executable_path/Frameworks",
 			);
-				MARKETING_VERSION = 1.14.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				QD_CLOUDKIT_CONTAINER = iCloud.com.quoteday.app;
@@ -2865,7 +2901,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -2875,7 +2911,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.14.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2914,9 +2950,9 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 35;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.14.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDayTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -2932,7 +2968,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = Widget/QuoteDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 35;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -2942,7 +2978,7 @@
 				"@executable_path/Frameworks",
 				"@executable_path/../../Frameworks",
 			);
-				MARKETING_VERSION = 1.14.0;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.quoteday.QuoteDay.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

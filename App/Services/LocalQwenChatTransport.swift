@@ -31,6 +31,8 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
         guard !prompt.isEmpty else {
             return AsyncThrowingStream { $0.finish() }
         }
-        return service.stream(model: model, system: system, prompt: prompt)
+        // 말풍선에는 사용자가 쓴 그대로 남고, 모델에게만 언어 지시와 `/no_think` 가 붙는다.
+        let sent = QuoteChatPrompt.localPrompt(question: prompt, language: language)
+        return service.stream(model: model, system: system, prompt: sent)
     }
 }

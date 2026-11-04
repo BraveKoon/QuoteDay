@@ -18,6 +18,46 @@ final class LocalQwenTests: XCTestCase {
         XCTAssertEqual(LocalQwenModel.recommended(physicalMemory: 12 * gb), .large)
     }
 
+    /// 4B 는 메모리 한도에 가깝다. 자동 선택이 절대 고르면 안 된다.
+    func testAutomaticNeverPicksTheFourBillionModel() {
+        let gb = UInt64(1024 * 1024 * 1024)
+        for memory in [2, 4, 6, 8, 12, 16, 32] as [UInt64] {
+            XCTAssertNotEqual(LocalQwenModel.recommended(physicalMemory: memory * gb), .xlarge)
+            XCTAssertNotEqual(LocalQwenChoice.automatic.resolve(physicalMemory: memory * gb), .xlarge)
+        }
+    }
+
+    func testFourBillionIsOnlyOfferedOnEightGigabyteDevices() {
+        let gb = UInt64(1024 * 1024 * 1024)
+        // 8GB 기기는 물리 메모리를 7.4GiB 쯤으로 보고한다.
+        let eightGigabyteDevice = UInt64(7.4 * Double(gb))
+        let sixGigabyteDevice = UInt64(5.3 * Double(gb))
+
+        XCTAssertTrue(LocalQwenModel.xlarge.isSupported(physicalMemory: eightGigabyteDevice))
+        XCTAssertFalse(LocalQwenModel.xlarge.isSupported(physicalMemory: sixGigabyteDevice))
+        XCTAssertTrue(LocalQwenModel.available(physicalMemory: eightGigabyteDevice).contains(.xlarge))
+        XCTAssertFalse(LocalQwenModel.available(physicalMemory: sixGigabyteDevice).contains(.xlarge))
+        XCTAssertTrue(LocalQwenChoice.available(physicalMemory: eightGigabyteDevice).contains(.xlarge))
+        XCTAssertFalse(LocalQwenChoice.available(physicalMemory: sixGigabyteDevice).contains(.xlarge))
+        // 작은 두 모델은 어느 기기에서나 보인다.
+        XCTAssertTrue(LocalQwenModel.available(physicalMemory: 2 * gb).contains(.small))
+        XCTAssertTrue(LocalQwenModel.available(physicalMemory: 2 * gb).contains(.large))
+    }
+
+    /// 다른 기기에서 옮겨 온 설정 등으로 메모리가 모자란 기기에 4B 가 저장돼 있어도
+    /// 앱이 죽는 쪽보다 작은 모델이 낫다.
+    func testFourBillionChoiceFallsBackWhenMemoryIsShort() {
+        let gb = UInt64(1024 * 1024 * 1024)
+        XCTAssertEqual(LocalQwenChoice.xlarge.resolve(physicalMemory: 4 * gb), .small)
+        XCTAssertEqual(LocalQwenChoice.xlarge.resolve(physicalMemory: 6 * gb), .large)
+        XCTAssertEqual(LocalQwenChoice.xlarge.resolve(physicalMemory: 8 * gb), .xlarge)
+    }
+
+    func testFourBillionRepositoryIsAnMLXBuild() {
+        XCTAssertEqual(LocalQwenModel.xlarge.repository, "mlx-community/Qwen3-4B-4bit")
+        XCTAssertGreaterThan(LocalQwenModel.xlarge.approximateBytes, LocalQwenModel.large.approximateBytes)
+    }
+
     func testChoiceResolves() {
         let gb = UInt64(1024 * 1024 * 1024)
         XCTAssertEqual(LocalQwenChoice.automatic.resolve(physicalMemory: 4 * gb), .small)

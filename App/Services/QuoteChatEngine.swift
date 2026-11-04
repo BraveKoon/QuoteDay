@@ -103,7 +103,7 @@ public final class QuoteChatEngine {
                 )
                 for try await delta in stream {
                     received = true
-                    self.appendDelta(delta)
+                    self.appendDelta(delta, isSnapshot: transport.yieldsSnapshots)
                 }
                 if !received, self.messages.last?.text.isEmpty == true {
                     throw QuoteChatError.emptyReply
@@ -151,19 +151,26 @@ public final class QuoteChatEngine {
             + QuoteChatPrompt.contextBlock(context, language: language)
     }
 
-    private func appendDelta(_ delta: String) {
+    /// 조각을 답 말풍선에 합친다.
+    ///
+    /// 온디바이스 모델은 조각마다 **전체 글**을 준다(스냅숏) — 더 긴 쪽이 이긴다.
+    /// Qwen 은 **이어붙일 조각**을 준다(델타) — 무조건 붙인다. 통로가 어느 쪽인지
+    /// 밝히므로 추측하지 않는다. 델타를 "지금까지의 글 앞부분과 같다"는 이유로
+    /// 버리면 `이`·`그` 처럼 글머리와 같은 조각이 사라진다.
+    private func appendDelta(_ delta: String, isSnapshot: Bool) {
         guard let index = messages.lastIndex(where: { $0.role == .assistant }) else { return }
-        // 온디바이스 모델은 조각마다 **전체 글**을 준다(스냅숏). Qwen 은 **이어붙일
-        // 조각**을 준다(델타). 둘을 같은 화면으로 그리려면 "더 긴 쪽을 채택"하면 된다.
-        let incoming = delta
-        let current = messages[index].text
-        if incoming.hasPrefix(current) && incoming.count > current.count {
-            messages[index].text = incoming
-        } else if current.hasPrefix(incoming) {
-            return // 같은 내용의 짧은 스냅숏
-        } else {
-            messages[index].text = current + incoming
+        guard isSnapshot else {
+            messages[index].text += delta
+            return
         }
+        let current = messages[index].text
+        if delta.count > current.count, delta.hasPrefix(current) {
+            messages[index].text = delta
+        } else if !current.hasPrefix(delta) {
+            // 앞부분이 이어지지 않는 스냅숏은 새 글로 본다.
+            messages[index].text = delta
+        }
+        // 같거나 더 짧은 스냅숏은 무시한다.
     }
 
     private func finishStreaming() {

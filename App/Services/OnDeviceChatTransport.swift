@@ -41,6 +41,9 @@ public final class OnDeviceChatTransport: QuoteChatTransport {
         contextSlug = slug
     }
 
+    /// Foundation Models 는 조각마다 지금까지의 전체 글을 준다.
+    public var yieldsSnapshots: Bool { true }
+
     public func stream(
         system: String,
         messages: [QuoteChatMessage],

@@ -70,6 +70,19 @@ public struct QuoteChatContext: Hashable, Sendable {
         self.story = story
     }
 
+    /// 사용자가 고른 명언. 작가·배경 이야기는 앱 데이터에서 찾아 붙인다.
+    public static func make(
+        for quote: Quote,
+        service: QuoteService = .shared
+    ) -> QuoteChatContext {
+        let presentation = service.presentation(for: quote)
+        return QuoteChatContext(
+            quote: presentation.quote,
+            author: presentation.author,
+            story: BehindStoryLibrary.story(for: presentation.quote.slug)
+        )
+    }
+
     /// 오늘의 명언.
     public static func today(
         service: QuoteService = .shared,
@@ -92,15 +105,42 @@ public struct QuoteChatContext: Hashable, Sendable {
 public enum QuoteChatPrompt {
 
     /// 캐시·표시용 판 번호. 프롬프트를 고치면 올린다.
-    public static let version = 1
+    public static let version = 2
 
     public static func languageName(_ language: AppLanguage) -> String {
         QuoteExplainerPrompt.languageName(language)
     }
 
+    /// Qwen3 의 "생각 끄기" 스위치. 사용자 말 끝에 붙이면 `<think>` 구간을 건너뛴다.
+    public static let noThinkSwitch = "/no_think"
+
+    /// 질문마다 붙이는 언어 지시.
+    ///
+    /// 시스템 지침에도 언어가 적혀 있지만, 작은 모델은 **긴 지침의 앞쪽 규칙을
+    /// 잊는다.** 가장 가까운 말 — 방금 한 질문의 끝 — 에 한 번 더 적어 둔다.
+    /// 앱 언어는 사용자가 고른 값이므로, 질문 문장의 언어를 모델이 추측하게 두지 않는다.
+    public static func languageReminder(_ language: AppLanguage) -> String {
+        switch language {
+        case .korean: "한국어로만 답하세요. (Answer in Korean only.)"
+        case .english: "Answer in English only."
+        case .simplifiedChinese: "请只用简体中文回答。(Answer in Simplified Chinese only.)"
+        case .traditionalChinese: "請只用繁體中文回答。(Answer in Traditional Chinese only.)"
+        }
+    }
+
+    /// 기기 내 Qwen 에 보낼 한 번의 질문. 화면에 보이는 말풍선은 사용자가 쓴 그대로이고,
+    /// 이 꼬리는 모델에게만 간다.
+    public static func localPrompt(question: String, language: AppLanguage) -> String {
+        "\(question)\n\n\(languageReminder(language)) \(noThinkSwitch)"
+    }
+
     /// 모델의 역할. "무엇을 하는 사람인지"와 "무엇을 하지 말아야 하는지"를 정한다.
     public static func instructions(language: AppLanguage) -> String {
         """
+        Reply language: \(languageName(language)). Answer ONLY in this language, even if the
+        quote, the author notes, or the user's message are in another language.
+        Never show your reasoning or thinking process. Give only the final answer.
+
         너는 QuoteDay 앱 안의 명언 안내자다. 사용자가 명언의 **숨은 뜻**, 이해가 안 되는
         구절, **작가의 일생과 시대**, 지금 자기 상황에 어떻게 적용할지를 묻는다.
 

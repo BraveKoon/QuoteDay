@@ -18,7 +18,15 @@ struct QuoteChatSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft = ""
+    /// 사용자가 이 시트 안에서 직접 고른 명언. 없으면 `context`(지금 보던 명언)를 쓴다.
+    @State private var picked: QuoteChatContext?
+    @State private var showsPicker = false
     @FocusState private var isInputFocused: Bool
+
+    /// 지금 묻고 있는 명언. 고른 것 → 보던 것 → 오늘의 명언 순이다.
+    private var activeContext: QuoteChatContext {
+        picked ?? context ?? QuoteChatContext.today()
+    }
 
     private var language: AppLanguage { settings.language }
     private var availability: AIChatAvailability { aiSettings.availability }
@@ -28,6 +36,13 @@ struct QuoteChatSheet: View {
             VStack(spacing: 0) {
                 providerBar
                 Divider().overlay(ClayTheme.separator)
+
+                // 대화가 시작되면 위의 큰 카드는 스크롤로 사라진다. 어떤 명언에 대해
+                // 묻고 있는지, 그리고 바꿀 수 있다는 것이 늘 보이도록 한 줄을 남긴다.
+                if !engine.messages.isEmpty {
+                    quoteBar
+                    Divider().overlay(ClayTheme.separator)
+                }
 
                 ScrollViewReader { proxy in
                     ScrollView {
@@ -72,7 +87,50 @@ struct QuoteChatSheet: View {
                     .disabled(engine.messages.isEmpty)
                 }
             }
+            .sheet(isPresented: $showsPicker) {
+                QuoteChatQuotePicker(currentSlug: activeContext.quote.slug) { quote in
+                    choose(quote)
+                }
+            }
         }
+    }
+
+    /// 다른 명언을 골랐다. 이미 오간 대화는 **앞 명언에 대한 것**이라 비운다 —
+    /// 남겨 두면 "이 명언" 이 무엇을 가리키는지 사용자도 모델도 헷갈린다.
+    private func choose(_ quote: Quote) {
+        guard quote.slug != activeContext.quote.slug else { return }
+        if !engine.messages.isEmpty { engine.clear() }
+        picked = QuoteChatContext.make(for: quote)
+    }
+
+    // MARK: - 위쪽: 어떤 명언인지
+
+    private var quoteBar: some View {
+        Button {
+            showsPicker = true
+        } label: {
+            HStack(spacing: ClayTheme.Spacing.xs) {
+                Image(systemName: "quote.opening")
+                    .font(.caption)
+                    .foregroundStyle(ClayTheme.accent)
+                Text(verbatim: "\(activeContext.quote.text) — \(activeContext.author.displayName)")
+                    .font(ClayFont.caption())
+                    .foregroundStyle(ClayTheme.textPrimary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2)
+                    .foregroundStyle(ClayTheme.textSecondary)
+            }
+            .padding(.horizontal, ClayTheme.Spacing.m)
+            .padding(.vertical, ClayTheme.Spacing.xs + 2)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        // 답하는 중에 명언을 바꾸면 흐르던 답이 엉뚱한 명언에 붙는다.
+        .disabled(engine.isSending)
+        .accessibilityLabel("명언 바꾸기")
     }
 
     private func scrollToBottom(_ proxy: ScrollViewProxy) {
@@ -121,23 +179,33 @@ struct QuoteChatSheet: View {
 
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: ClayTheme.Spacing.s) {
-            if let context {
+            Button {
+                showsPicker = true
+            } label: {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("지금 보고 있는 명언")
+                    Text(picked == nil ? L("지금 보고 있는 명언") : L("선택한 명언"))
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
-                    Text("\u{201C}\(context.quote.text)\u{201D}")
+                    Text("\u{201C}\(activeContext.quote.text)\u{201D}")
                         .font(ClayFont.callout())
                         .foregroundStyle(ClayTheme.textPrimary)
+                        .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("— \(context.author.displayName)")
+                    Text("— \(activeContext.author.displayName)")
                         .font(ClayFont.caption())
                         .foregroundStyle(ClayTheme.textSecondary)
+
+                    // 눌러서 바꿀 수 있다는 것을 말로 적는다. 카드만 보고는 알 수 없다.
+                    Label("다른 명언 고르기", systemImage: "arrow.triangle.2.circlepath")
+                        .font(ClayFont.caption())
+                        .foregroundStyle(ClayTheme.accent)
+                        .padding(.top, 4)
                 }
                 .padding(ClayTheme.Spacing.m)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .clayCard()
             }
+            .buttonStyle(.plain)
 
             Text(AIChatAvailabilityText.intro(availability))
                 .font(ClayFont.body())
@@ -145,7 +213,7 @@ struct QuoteChatSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             if availability.canChat {
-                ForEach(QuoteChatPrompt.suggestions(hasContext: context != nil), id: \.self) { suggestion in
+                ForEach(QuoteChatPrompt.suggestions(hasContext: true), id: \.self) { suggestion in
                     Button {
                         send(suggestion)
                     } label: {
@@ -376,7 +444,7 @@ struct QuoteChatSheet: View {
         isInputFocused = false
         engine.send(
             question,
-            context: context ?? QuoteChatContext.today(),
+            context: activeContext,
             settings: aiSettings,
             language: language
         )

@@ -16,6 +16,13 @@ public enum LocalQwenModel: String, CaseIterable, Codable, Identifiable, Sendabl
     case small
     /// Qwen3-1.7B 4bit. 답이 낫지만 메모리를 더 쓰고 느리다.
     case large
+    /// Qwen3-4B 4bit. 가장 낫지만 가중치만 2.3GB 다. **물리 메모리 8GB 기기에서만** 쓴다.
+    ///
+    /// 이 앱에는 `increased-memory-limit` 권한이 없다. iOS 가 앱 하나에 허용하는
+    /// 메모리는 물리 메모리보다 훨씬 작아서, 8GB 기기에서도 가중치 + KV 캐시 +
+    /// MLX 작업 공간이 한도에 가깝다. 그래서 자동 선택에는 절대 넣지 않고,
+    /// 사용자가 직접 고르게 한다.
+    case xlarge
 
     public var id: String { rawValue }
 
@@ -24,6 +31,7 @@ public enum LocalQwenModel: String, CaseIterable, Codable, Identifiable, Sendabl
         switch self {
         case .small: "mlx-community/Qwen3-0.6B-4bit"
         case .large: "mlx-community/Qwen3-1.7B-4bit"
+        case .xlarge: "mlx-community/Qwen3-4B-4bit"
         }
     }
 
@@ -32,6 +40,7 @@ public enum LocalQwenModel: String, CaseIterable, Codable, Identifiable, Sendabl
         switch self {
         case .small: "Qwen3 0.6B"
         case .large: "Qwen3 1.7B"
+        case .xlarge: "Qwen3 4B"
         }
     }
 
@@ -41,6 +50,8 @@ public enum LocalQwenModel: String, CaseIterable, Codable, Identifiable, Sendabl
             L("가볍고 빨라요. 오래된 기기에서도 돌아가고, 답은 짧은 편이에요.")
         case .large:
             L("답이 더 좋아요. 대신 메모리를 더 쓰고 느려요.")
+        case .xlarge:
+            L("가장 똑똑해요. 용량이 크고 느리며, 램 8GB 이상 기기에서만 쓸 수 있어요.")
         }
     }
 
@@ -50,6 +61,7 @@ public enum LocalQwenModel: String, CaseIterable, Codable, Identifiable, Sendabl
         switch self {
         case .small: 350 * 1024 * 1024
         case .large: 1_100 * 1024 * 1024
+        case .xlarge: 2_300 * 1024 * 1024
         }
     }
 
@@ -61,10 +73,31 @@ public enum LocalQwenModel: String, CaseIterable, Codable, Identifiable, Sendabl
         switch self {
         case .small: 4 * 1024 * 1024 * 1024
         case .large: 6 * 1024 * 1024 * 1024
+        // 8GB 기기는 물리 메모리를 7.4GiB 쯤으로 보고한다. 7GiB 를 문턱으로 두면
+        // 8GB 기기는 들어오고 6GB 기기(5.3GiB 쯤)는 들어오지 못한다.
+        case .xlarge: 7 * 1024 * 1024 * 1024
         }
     }
 
-    /// 이 기기에 맞는 모델. 1.7B 는 6GB 이상일 때만 권한다.
+    /// 이 기기에서 쓸 수 있는 모델인지. 4B 는 메모리가 모자라면 아예 고르지 못하게 한다.
+    public func isSupported(physicalMemory: UInt64) -> Bool {
+        switch self {
+        case .small, .large: true
+        case .xlarge: physicalMemory >= requiredMemory
+        }
+    }
+
+    /// 이 기기에서 쓸 수 있는 모델들. 설정 화면이 이것만 보여 준다.
+    public static func available(physicalMemory: UInt64) -> [LocalQwenModel] {
+        allCases.filter { $0.isSupported(physicalMemory: physicalMemory) }
+    }
+
+    public static var availableOnThisDevice: [LocalQwenModel] {
+        available(physicalMemory: ProcessInfo.processInfo.physicalMemory)
+    }
+
+    /// 이 기기에 맞는 모델. 1.7B 는 6GB 이상일 때만 권한다. **4B 는 권하지 않는다**
+    /// — 메모리 한도에 가까워서, 직접 고른 사람만 쓴다.
     ///
     /// 물리 메모리를 인자로 받는 이유: 테스트에서 여러 기기를 흉내 낼 수 있어야 한다.
     public static func recommended(physicalMemory: UInt64) -> LocalQwenModel {
@@ -99,6 +132,7 @@ public enum LocalQwenChoice: String, CaseIterable, Codable, Identifiable, Sendab
     case automatic
     case small
     case large
+    case xlarge
 
     public var id: String { rawValue }
 
@@ -107,6 +141,7 @@ public enum LocalQwenChoice: String, CaseIterable, Codable, Identifiable, Sendab
         case .automatic: L("자동")
         case .small: "0.6B"
         case .large: "1.7B"
+        case .xlarge: "4B"
         }
     }
 
@@ -115,7 +150,22 @@ public enum LocalQwenChoice: String, CaseIterable, Codable, Identifiable, Sendab
         case .automatic: L("기기 메모리에 맞춰 고르고, 없으면 작은 쪽을 받아요.")
         case .small: L("가볍고 빨라요.")
         case .large: L("답이 더 좋아요.")
+        case .xlarge: L("가장 똑똑해요. 램 8GB 이상 기기에서만 쓸 수 있어요.")
         }
+    }
+
+    /// 이 기기에서 고를 수 있는 크기들.
+    public static func available(physicalMemory: UInt64) -> [LocalQwenChoice] {
+        allCases.filter { choice in
+            switch choice {
+            case .xlarge: LocalQwenModel.xlarge.isSupported(physicalMemory: physicalMemory)
+            default: true
+            }
+        }
+    }
+
+    public static var availableOnThisDevice: [LocalQwenChoice] {
+        available(physicalMemory: ProcessInfo.processInfo.physicalMemory)
     }
 
     /// 실제로 쓸 모델. 자동이면 기기 메모리로 정한다.
@@ -124,6 +174,12 @@ public enum LocalQwenChoice: String, CaseIterable, Codable, Identifiable, Sendab
         case .automatic: LocalQwenModel.recommended(physicalMemory: physicalMemory)
         case .small: .small
         case .large: .large
+        case .xlarge:
+            // 예전에 4B 를 고른 기기라도, 지금 메모리가 모자라면(예: 설정이 다른 기기에서
+            // 옮겨 온 경우) 앱이 죽는 쪽보다 한 단계 작은 모델이 낫다.
+            LocalQwenModel.xlarge.isSupported(physicalMemory: physicalMemory)
+                ? .xlarge
+                : LocalQwenModel.recommended(physicalMemory: physicalMemory)
         }
     }
 }

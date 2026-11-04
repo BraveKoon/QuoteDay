@@ -60,6 +60,41 @@ final class QuoteChatTests: XCTestCase {
         }
     }
 
+    /// 시스템 지침의 맨 앞 줄이 언어 규칙이어야 한다. 작은 모델은 긴 지침의 뒤쪽 규칙을 잊는다.
+    func testInstructionsLeadWithTheLanguageRule() {
+        for language in AppLanguage.allCases {
+            let text = QuoteChatPrompt.instructions(language: language)
+            XCTAssertTrue(
+                text.hasPrefix("Reply language: \(QuoteChatPrompt.languageName(language))"),
+                "\(language) 의 지침이 언어 규칙으로 시작하지 않는다."
+            )
+        }
+    }
+
+    /// 사용자가 "내가 무슨 언어인지 모른다" 고 했다. 질문마다 앱 언어를 끝에 한 번 더 적는다.
+    func testEveryLocalQuestionCarriesTheAppLanguageAndNoThink() {
+        var seen = Set<String>()
+        for language in AppLanguage.allCases {
+            let prompt = QuoteChatPrompt.localPrompt(question: "무슨 뜻이야?", language: language)
+            XCTAssertTrue(prompt.hasPrefix("무슨 뜻이야?"), "사용자의 질문이 그대로 앞에 와야 한다.")
+            XCTAssertTrue(prompt.hasSuffix(QuoteChatPrompt.noThinkSwitch), "생각 끄기가 맨 끝이어야 먹는다.")
+            XCTAssertTrue(prompt.contains(QuoteChatPrompt.languageReminder(language)))
+            seen.insert(QuoteChatPrompt.languageReminder(language))
+        }
+        XCTAssertEqual(seen.count, AppLanguage.allCases.count, "언어마다 지시가 달라야 한다.")
+    }
+
+    func testPromptVersionWasBumpedForTheNewInstructions() {
+        XCTAssertGreaterThanOrEqual(QuoteChatPrompt.version, 2)
+    }
+
+    func testContextForAChosenQuoteCarriesItsAuthor() throws {
+        let quote = try XCTUnwrap(QuoteService.shared.allQuotes.first)
+        let context = QuoteChatContext.make(for: quote)
+        XCTAssertEqual(context.quote.slug, quote.slug)
+        XCTAssertFalse(context.author.displayName.isEmpty)
+    }
+
     func testSuggestionsFollowContext() {
         XCTAssertTrue(QuoteChatPrompt.suggestions(hasContext: true).count >= 3)
         XCTAssertTrue(QuoteChatPrompt.suggestions(hasContext: false).count >= 3)
@@ -147,12 +182,28 @@ final class QuoteChatTests: XCTestCase {
     @MainActor
     func testSnapshotStyleDeltasDoNotDuplicateText() async throws {
         // 온디바이스 모델은 조각마다 "전체 글"을 준다. 이어 붙이면 글이 중복된다.
-        let engine = QuoteChatEngine(makeTransport: { _ in FakeTransport(chunks: ["요지", "요지는", "요지는 짧다"]) })
+        let engine = QuoteChatEngine(makeTransport: { _ in
+            FakeTransport(chunks: ["요지", "요지는", "요지는 짧다"], yieldsSnapshots: true)
+        })
         let settings = try makeDownloadedSettings()
         engine.send("질문", context: nil, settings: settings, language: .korean)
         await waitFor(engine, until: { !engine.isSending })
 
         XCTAssertEqual(engine.messages.last?.text, "요지는 짧다")
+    }
+
+    /// 델타를 주는 통로(Qwen)에서 글머리와 같은 조각이 사라지던 결함.
+    /// 예전 규칙은 "조각이 지금까지의 글 앞부분과 같으면 버린다" 여서 `이` 가 통째로 빠졌다.
+    @MainActor
+    func testDeltaThatRepeatsTheStartOfTheAnswerIsKept() async throws {
+        let engine = QuoteChatEngine(makeTransport: { _ in
+            FakeTransport(chunks: ["이", "것은 ", "이", "유가 있다"])
+        })
+        let settings = try makeDownloadedSettings()
+        engine.send("질문", context: nil, settings: settings, language: .korean)
+        await waitFor(engine, until: { !engine.isSending })
+
+        XCTAssertEqual(engine.messages.last?.text, "이것은 이유가 있다")
     }
 
     // MARK: - 설정
@@ -269,10 +320,12 @@ final class QuoteChatTests: XCTestCase {
 @MainActor
 final class FakeTransport: QuoteChatTransport {
     let chunks: [String]
+    let yieldsSnapshots: Bool
     private(set) var callCount = 0
 
-    init(chunks: [String]) {
+    init(chunks: [String], yieldsSnapshots: Bool = false) {
         self.chunks = chunks
+        self.yieldsSnapshots = yieldsSnapshots
     }
 
     func stream(

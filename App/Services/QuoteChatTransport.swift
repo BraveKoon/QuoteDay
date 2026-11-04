@@ -65,10 +65,22 @@ public enum QuoteChatError: LocalizedError, Equatable {
 /// 쓰는지 몰라도 된다.
 @MainActor
 public protocol QuoteChatTransport {
+    /// 조각마다 지금까지의 **전체 글**을 주면 true, **이어붙일 조각**만 주면 false.
+    ///
+    /// 엔진이 조각을 합치는 방법이 이것에 달려 있다. 예전에는 조각이 지금까지의 글
+    /// 앞부분과 같으면 "스냅숏이겠거니" 하고 버렸는데, 델타를 주는 통로에서는
+    /// 글 첫 글자와 같은 조각(`이`, `그`)이 **통째로 사라졌다.** 추측하지 않고 통로가 밝힌다.
+    var yieldsSnapshots: Bool { get }
+
     /// 조각의 흐름. 오류도 이 흐름을 통해 온다.
     func stream(
         system: String,
         messages: [QuoteChatMessage],
         language: AppLanguage
     ) -> AsyncThrowingStream<String, Error>
+}
+
+public extension QuoteChatTransport {
+    /// 대부분의 통로는 델타를 준다. 스냅숏을 주는 쪽만 true 로 바꾼다.
+    var yieldsSnapshots: Bool { false }
 }

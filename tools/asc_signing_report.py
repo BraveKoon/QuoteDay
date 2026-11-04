@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from asc_upload import Asc, CredentialError  # noqa: E402
+from asc_upload import Asc, CredentialError, find_app  # noqa: E402
 
 BUNDLE_IDS = ("com.quoteday.QuoteDay", "com.quoteday.QuoteDay.Widget")
 
@@ -100,6 +100,29 @@ def main() -> int:
         a = profile["attributes"]
         print(f"  {a.get('profileState', '?'):<8} {a.get('profileType', '?'):<22} "
               f"만료 {str(a.get('expirationDate', '?'))[:10]}  {a.get('name', '?')}")
+
+    # 최근 빌드. "TestFlight 에 올라갔나?" 에 답한다. 번호만으로는 어느 경로(GitHub
+    # Actions / Xcode Cloud)에서 왔는지 알 수 없으니 올라온 시각을 함께 본다.
+    app_id = find_app(client, "com.quoteday.QuoteDay")
+    payload = client.call(
+        "GET",
+        f"/v1/builds?filter[app]={app_id}&sort=-uploadedDate&limit=12&include=preReleaseVersion"
+        "&fields[builds]=version,uploadedDate,expired,processingState,preReleaseVersion"
+        "&fields[preReleaseVersions]=version",
+    )
+    versions = {
+        item["id"]: item["attributes"].get("version", "?")
+        for item in payload.get("included", [])
+        if item.get("type") == "preReleaseVersions"
+    }
+    section("최근 빌드 (최신순, 시각은 UTC)")
+    for item in payload.get("data", []):
+        a = item["attributes"]
+        version_id = (((item.get("relationships") or {}).get("preReleaseVersion") or {})
+                      .get("data") or {}).get("id", "")
+        print(f"  {versions.get(version_id, '?'):<8} 빌드 {str(a.get('version', '?')):<4} "
+              f"{str(a.get('uploadedDate', ''))[:16].replace('T', ' ')}  "
+              f"{a.get('processingState', '?')}{'  (만료)' if a.get('expired') else ''}")
 
     return 0
 

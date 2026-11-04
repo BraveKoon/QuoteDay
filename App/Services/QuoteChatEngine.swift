@@ -99,7 +99,8 @@ public final class QuoteChatEngine {
                 let stream = transport.stream(
                     system: system,
                     messages: Array(history),
-                    language: language
+                    language: language,
+                    context: context
                 )
                 for try await delta in stream {
                     received = true

@@ -23,7 +23,8 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
     public func stream(
         system: String,
         messages: [QuoteChatMessage],
-        language: AppLanguage
+        language: AppLanguage,
+        context: QuoteChatContext?
     ) -> AsyncThrowingStream<String, Error> {
         // 기기 내 모델은 **자기 세션이 대화를 기억한다.** 그래서 매번 전체 대화를
         // 다시 넣지 않고 마지막 질문만 보낸다 — 넣으면 같은 말이 두 번 들어간다.
@@ -31,8 +32,8 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
         guard !prompt.isEmpty else {
             return AsyncThrowingStream { $0.finish() }
         }
-        // 말풍선에는 사용자가 쓴 그대로 남고, 모델에게만 언어 지시와 `/no_think` 가 붙는다.
-        let sent = QuoteChatPrompt.localPrompt(question: prompt, language: language)
+        // 말풍선에는 사용자가 쓴 그대로 남고, 모델에게만 명언·언어 지시·`/no_think` 가 붙는다.
+        let sent = QuoteChatPrompt.localPrompt(question: prompt, language: language, context: context)
         return service.stream(model: model, system: system, prompt: sent)
     }
 }

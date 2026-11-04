@@ -85,7 +85,31 @@ final class QuoteChatTests: XCTestCase {
     }
 
     func testPromptVersionWasBumpedForTheNewInstructions() {
-        XCTAssertGreaterThanOrEqual(QuoteChatPrompt.version, 2)
+        XCTAssertGreaterThanOrEqual(QuoteChatPrompt.version, 3)
+    }
+
+    /// 실기기에서 "이 명언의 숨은 뜻이 뭐야?" 에 "어떤 명언인지 알려 주세요" 라고 되물었다.
+    /// 명언이 시스템 지침에만 있어서 작은 모델이 질문과 연결하지 못했다. 질문 옆에 붙어야 한다.
+    func testLocalQuestionCarriesTheQuoteNextToIt() {
+        let context = QuoteChatContext(quote: sampleQuote, author: sampleAuthor)
+        let prompt = QuoteChatPrompt.localPrompt(question: "이 명언의 숨은 뜻이 뭐야?", language: .korean, context: context)
+
+        XCTAssertTrue(prompt.contains("절대로 포기하지 마라."), "명언 본문이 질문과 함께 가야 한다.")
+        XCTAssertTrue(prompt.contains("윈스턴 처칠"))
+        XCTAssertTrue(prompt.contains("질문: 이 명언의 숨은 뜻이 뭐야?"))
+        XCTAssertTrue(prompt.hasSuffix(QuoteChatPrompt.noThinkSwitch))
+
+        let quoteAt = try? XCTUnwrap(prompt.range(of: "절대로 포기하지 마라.")?.lowerBound)
+        let questionAt = try? XCTUnwrap(prompt.range(of: "질문:")?.lowerBound)
+        if let quoteAt, let questionAt {
+            XCTAssertLessThan(quoteAt, questionAt, "명언이 질문보다 앞에 와야 \"이 명언\" 이 무엇인지 읽힌다.")
+        }
+    }
+
+    func testCompactQuoteLineIsShort() {
+        let line = QuoteChatPrompt.compactQuoteLine(QuoteChatContext(quote: sampleQuote, author: sampleAuthor))
+        XCTAssertTrue(line.contains("윈스턴 처칠"))
+        XCTAssertLessThan(line.count, 200, "질문 옆에 붙이는 한 줄이 길어지면 작은 모델의 문맥을 갉아먹는다.")
     }
 
     func testContextForAChosenQuoteCarriesItsAuthor() throws {
@@ -331,7 +355,8 @@ final class FakeTransport: QuoteChatTransport {
     func stream(
         system: String,
         messages: [QuoteChatMessage],
-        language: AppLanguage
+        language: AppLanguage,
+        context: QuoteChatContext?
     ) -> AsyncThrowingStream<String, Error> {
         callCount += 1
         let chunks = self.chunks
@@ -352,7 +377,8 @@ final class FailingTransport: QuoteChatTransport {
     func stream(
         system: String,
         messages: [QuoteChatMessage],
-        language: AppLanguage
+        language: AppLanguage,
+        context: QuoteChatContext?
     ) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             continuation.finish(throwing: QuoteChatError.localModelFailed("저장 공간이 부족합니다"))

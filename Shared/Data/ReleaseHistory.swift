@@ -10,6 +10,19 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.15.1",
+            date: "2026-11-04",
+            summary: nil,
+            sections: [
+                ReleaseSection(
+                    title: "고침",
+                    items: [
+                        "AI 가 내가 고른 명언을 모르던 문제. \"이 명언의 숨은 뜻이 뭐야?\" 라고 물으면 \"어떤 명언인지 알려 주세요\" 라고 되물었다. 명언과 작가 정보가 긴 시스템 지침 속에만 있었고, 작은 모델은 긴 지침 속의 내용을 질문과 연결하지 못한다. 이제 매 질문 바로 옆에 명언 한 줄(본문·작가·직업·생몰)을 붙여 보낸다. 말풍선에는 입력한 그대로 보인다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.15.0",
             date: "2026-11-04",
             summary: nil,

@@ -73,10 +73,15 @@ public protocol QuoteChatTransport {
     var yieldsSnapshots: Bool { get }
 
     /// 조각의 흐름. 오류도 이 흐름을 통해 온다.
+    ///
+    /// `context` 는 지금 묻고 있는 명언이다. 시스템 지침(`system`)에도 들어 있지만,
+    /// 작은 모델은 **긴 지침 속의 내용을 질문과 연결하지 못한다** — "이 명언의 숨은 뜻이
+    /// 뭐야?" 에 "어떤 명언인지 알려 달라"고 답했다. 질문 바로 옆에 붙일 수 있게 따로 준다.
     func stream(
         system: String,
         messages: [QuoteChatMessage],
-        language: AppLanguage
+        language: AppLanguage,
+        context: QuoteChatContext?
     ) -> AsyncThrowingStream<String, Error>
 }
 

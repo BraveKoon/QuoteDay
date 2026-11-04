@@ -105,7 +105,7 @@ public struct QuoteChatContext: Hashable, Sendable {
 public enum QuoteChatPrompt {
 
     /// 캐시·표시용 판 번호. 프롬프트를 고치면 올린다.
-    public static let version = 2
+    public static let version = 3
 
     public static func languageName(_ language: AppLanguage) -> String {
         QuoteExplainerPrompt.languageName(language)
@@ -130,8 +130,42 @@ public enum QuoteChatPrompt {
 
     /// 기기 내 Qwen 에 보낼 한 번의 질문. 화면에 보이는 말풍선은 사용자가 쓴 그대로이고,
     /// 이 꼬리는 모델에게만 간다.
-    public static func localPrompt(question: String, language: AppLanguage) -> String {
-        "\(question)\n\n\(languageReminder(language)) \(noThinkSwitch)"
+    ///
+    /// 명언을 **질문 바로 옆에** 붙인다. 시스템 지침에도 같은 명언이 들어 있지만 작은
+    /// 모델은 긴 지침 속의 내용을 질문과 연결하지 못해서, "이 명언의 숨은 뜻이 뭐야?" 에
+    /// "어떤 명언인지 알려 주세요" 라고 되물었다. 매 질문에 한 줄(약 80토큰)을 더하는
+    /// 값이 그보다 싸다. 작가 소개·배경 이야기처럼 긴 것은 지침에만 둔다.
+    public static func localPrompt(
+        question: String,
+        language: AppLanguage,
+        context: QuoteChatContext? = nil
+    ) -> String {
+        let tail = "\(languageReminder(language)) \(noThinkSwitch)"
+        guard let context else { return "\(question)\n\n\(tail)" }
+        return """
+        [대화 중인 명언] \(compactQuoteLine(context))
+        (질문의 "이 명언"은 위 문장을 가리킨다.)
+
+        질문: \(question)
+
+        \(tail)
+        """
+    }
+
+    /// 명언 한 줄 요약. 본문과 작가(직업·국적·생몰)만 — 질문 옆에 붙일 만큼 짧게.
+    public static func compactQuoteLine(_ context: QuoteChatContext) -> String {
+        var details: [String] = []
+        let occupation = context.author.occupation.trimmed
+        if !occupation.isEmpty { details.append(occupation) }
+        let nationality = context.author.nationality.trimmed
+        if !nationality.isEmpty { details.append(nationality) }
+        if let birth = context.author.birthYear {
+            let death = context.author.deathYear.map { String($0) } ?? L("현재")
+            details.append("\(birth)–\(death)")
+        }
+        let name = context.author.displayName
+        let who = details.isEmpty ? name : "\(name) (\(details.joined(separator: ", ")))"
+        return "\u{201C}\(context.quote.text)\u{201D} — \(who)"
     }
 
     /// 모델의 역할. "무엇을 하는 사람인지"와 "무엇을 하지 말아야 하는지"를 정한다.

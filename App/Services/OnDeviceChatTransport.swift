@@ -47,7 +47,8 @@ public final class OnDeviceChatTransport: QuoteChatTransport {
     public func stream(
         system: String,
         messages: [QuoteChatMessage],
-        language: AppLanguage
+        language: AppLanguage,
+        context: QuoteChatContext?
     ) -> AsyncThrowingStream<String, Error> {
         #if canImport(FoundationModels)
         if #available(iOS 26.0, *) {

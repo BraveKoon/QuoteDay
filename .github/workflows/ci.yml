@@ -129,15 +129,6 @@ jobs:
             -skipMacroValidation \
             | xcbeautify
 
-      # 임시: 러너가 해석한 Package.resolved 를 로그로 뽑는다. 커밋할 파일을 얻으면 지운다.
-      - name: 의존성 고정 파일 출력 (임시)
-        if: always()
-        run: |
-          F=QuoteDay.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
-          echo "===PACKAGE-RESOLVED-BEGIN==="
-          cat "$F"
-          echo "===PACKAGE-RESOLVED-END==="
-
       - name: 테스트
         run: |
           set -o pipefail

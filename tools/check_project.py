@@ -15,6 +15,7 @@ macOS 에서 실제로 컴파일하기 전에 걸러 낼 수 있는 문제를 �
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
 import sys
 from pathlib import Path
@@ -721,6 +722,49 @@ def check_swiftdata_cloudkit() -> None:
         )
 
 
+# ---------------------------------------------------------------- 패키지 고정
+
+
+def check_package_resolved() -> None:
+    """`Package.resolved` 가 있고, 선언한 패키지가 전부 들어 있는지.
+
+    Xcode Cloud 는 의존성 **자동 해석을 끄고** 빌드한다. 이 파일이 없으면
+    `a resolved file is required when automatic dependency resolution is
+    disabled` 로 아카이브가 시작도 못 한다. GitHub Actions 는 자동 해석을 켜 두고
+    돌아서 이 결함을 드러내지 못한다 — MLX 를 넣은 뒤로 Xcode Cloud 만 조용히 깨져 있었다.
+
+    패키지를 `generate_xcodeproj.py` 의 `SWIFT_PACKAGES` 에 더하면 이 파일도 같이
+    고쳐야 한다. 고치는 방법은 아래 오류 문구에 적는다.
+    """
+    path = ROOT / "QuoteDay.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+    hint = (
+        "러너가 해석한 파일을 가져와 커밋하세요 — CI 의 빌드 단계 뒤에 "
+        "`cat QuoteDay.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved` "
+        "를 잠시 넣어 로그로 뽑으면 됩니다. 손으로 쓰면 커밋 해시가 틀립니다."
+    )
+    if not path.exists():
+        fail(f"Package.resolved 가 없습니다. Xcode Cloud 아카이브가 실패합니다. {hint}")
+        return
+    try:
+        pins = json.loads(path.read_text(encoding="utf-8")).get("pins", [])
+    except json.JSONDecodeError as error:
+        fail(f"Package.resolved 가 JSON 이 아닙니다: {error}")
+        return
+
+    def normalize(url: str) -> str:
+        return url.lower().removesuffix(".git").rstrip("/")
+
+    pinned = {normalize(pin.get("location", "")) for pin in pins}
+    generator = (ROOT / "tools/generate_xcodeproj.py").read_text(encoding="utf-8")
+    for url in re.findall(r'"url":\s*"([^"]+)"', generator):
+        if normalize(url) not in pinned:
+            fail(f"Package.resolved 에 {url} 가 없습니다. 패키지를 더한 뒤 갱신하지 않았습니다. {hint}")
+    for pin in pins:
+        if not pin.get("state", {}).get("revision"):
+            fail(f"Package.resolved 의 {pin.get('identity', '?')} 에 revision 이 없습니다.")
+    print(f"  패키지 고정 {len(pins)}개 점검")
+
+
 # ---------------------------------------------------------------- 버전
 
 
@@ -826,6 +870,7 @@ def main() -> int:
     check_quote_data()
     check_mood_data()
     check_swiftdata_cloudkit()
+    check_package_resolved()
     check_version()
 
     print("-" * 46)

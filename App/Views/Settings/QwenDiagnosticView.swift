@@ -61,7 +61,7 @@ struct QwenDiagnosticView: View {
             Text(verbatim: "\(model.title) · 앱 언어 \(language.rawValue) · 프롬프트 판 \(QuoteChatPrompt.version)")
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
-            Text(verbatim: "끝나면 \"결과 복사\"를 눌러 그대로 보내 주세요. 질문마다 새 대화로 시작합니다.")
+            Text(verbatim: "끝나면 \"결과 복사\"를 눌러 그대로 보내 주세요. 실제 대화처럼 한 대화로 이어서 묻습니다.")
                 .font(ClayFont.caption())
                 .foregroundStyle(ClayTheme.textSecondary)
         }
@@ -136,11 +136,16 @@ struct QwenDiagnosticView: View {
         let model = self.model
         let language = self.language
         task = Task { @MainActor in
+            // **한 대화로 이어서** 묻는다. 질문마다 새 대화로 묻던 1.15.4 의 점검은
+            // 실기기에서 벌어진 일(첫 답 `야` 를 뒤의 모든 답이 베낌)을 잡을 수 없었다.
+            // 사용자는 이어서 묻는다. 점검도 그래야 한다.
+            localQwen.resetSession()
+            var history: [QuoteChatMessage] = []
+            var previousReply = ""
             for prompt in QwenDiagnostic.prompts(language: language) {
                 if Task.isCancelled { break }
                 runningPrompt = prompt
-                // 질문마다 새 대화. 앞 답이 뒤 답에 영향을 주지 않게 한다.
-                localQwen.resetSession()
+                history.append(QuoteChatMessage(role: .user, text: prompt))
 
                 let context = QuoteChatContext.today()
                 let transport = LocalQwenChatTransport(service: localQwen, model: model)
@@ -150,7 +155,7 @@ struct QwenDiagnosticView: View {
                 do {
                     let stream = transport.stream(
                         system: QuoteChatPrompt.system(context: context, language: language),
-                        messages: [QuoteChatMessage(role: .user, text: prompt)],
+                        messages: history,
                         language: language,
                         context: context
                     )
@@ -159,8 +164,14 @@ struct QwenDiagnosticView: View {
                     failure = (error as? LocalizedError)?.errorDescription ?? String(describing: error)
                 }
 
-                let problems = failure.map { ["오류: \($0)"] }
-                    ?? QwenDiagnostic.evaluate(reply: reply, language: language)
+                var problems = failure.map { ["오류: \($0)"] }
+                    ?? QwenDiagnostic.evaluate(reply: reply, language: language, question: prompt)
+                if failure == nil, !previousReply.isEmpty,
+                   ReplyLanguageGuard.normalized(reply) == ReplyLanguageGuard.normalized(previousReply) {
+                    problems.append("앞 답을 되풀이함")
+                }
+                history.append(QuoteChatMessage(role: .assistant, text: reply))
+                previousReply = reply
                 results.append(QwenDiagnostic.Result(
                     prompt: prompt,
                     reply: reply,

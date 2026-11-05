@@ -153,19 +153,27 @@ public enum QuoteChatPrompt {
         question: String,
         language: AppLanguage,
         context: QuoteChatContext? = nil,
-        strict: Bool = false
+        strict: Bool = false,
+        recap: [QuoteChatMessage] = []
     ) -> String {
         let reminder = strict ? strictLanguageReminder(language) : languageReminder(language)
         let tail = "\(reminder) \(noThinkSwitch)"
-        guard let context else { return "\(question)\n\n\(tail)" }
-        return """
-        [대화 중인 명언] \(compactQuoteLine(context))
-        (질문의 "이 명언"은 위 문장을 가리킨다.)
-
-        질문: \(question)
-
-        \(tail)
-        """
+        var parts: [String] = []
+        if let context {
+            parts.append("""
+            [대화 중인 명언] \(compactQuoteLine(context))
+            (질문의 "이 명언"은 위 문장을 가리킨다.)
+            """)
+        }
+        if !recap.isEmpty {
+            // 앞선 대화는 **참고용**이라고 적는다. 그대로 되풀이하라는 뜻으로 읽지 않게.
+            let lines = recap.map { ($0.role == .user ? "사용자: " : "안내자: ") + $0.text }
+            parts.append("[앞선 대화 — 참고만 하고 되풀이하지 않는다]\n" + lines.joined(separator: "\n"))
+        }
+        guard !parts.isEmpty else { return "\(question)\n\n\(tail)" }
+        parts.append("질문: \(question)")
+        parts.append(tail)
+        return parts.joined(separator: "\n\n")
     }
 
     /// 명언 한 줄 요약. 본문과 작가(직업·국적·생몰)만 — 질문 옆에 붙일 만큼 짧게.

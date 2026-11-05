@@ -85,4 +85,41 @@ final class ReplyLanguageGuardTests: XCTestCase {
     func testEmptyReplyIsNotRejected() {
         XCTAssertEqual(run([], expected: .korean), "")
     }
+
+    // MARK: - 되받기 (1.15.4 실기기: `야` 에 `야`)
+
+    func testEchoOfShortQuestionIsRejected() {
+        var guardian = ReplyLanguageGuard(expected: .korean, question: "야")
+        XCTAssertEqual(guardian.feed("야"), .hold)
+        XCTAssertEqual(guardian.finish(), .reject)
+        XCTAssertEqual(guardian.rejection, .echo)
+    }
+
+    func testEchoIgnoresPunctuationAndSpacing() {
+        var guardian = ReplyLanguageGuard(expected: .korean, question: "숨은 뜻 알려줘")
+        _ = guardian.feed("숨은뜻 알려줘!")
+        XCTAssertEqual(guardian.finish(), .reject)
+        XCTAssertEqual(guardian.rejection, .echo)
+    }
+
+    func testEchoOfLongQuestionIsRejectedBeforeShowing() {
+        let question = "지금 내 상황에 어떻게 적용할 수 있을까?"
+        var guardian = ReplyLanguageGuard(expected: .korean, question: question)
+        // 글자 수가 판정 기준(12)을 넘는 질문도, 그대로 되받으면 내보내기 전에 버린다.
+        XCTAssertEqual(guardian.feed(question), .reject)
+        XCTAssertEqual(guardian.rejection, .echo)
+    }
+
+    func testRealAnswerToShortQuestionPasses() {
+        var guardian = ReplyLanguageGuard(expected: .korean, question: "야")
+        XCTAssertEqual(guardian.feed("네, 말씀하세요."), .hold)
+        XCTAssertEqual(guardian.finish(), .release("네, 말씀하세요."))
+        XCTAssertNil(guardian.rejection)
+    }
+
+    func testWrongLanguageReasonIsRecorded() {
+        var guardian = ReplyLanguageGuard(expected: .korean, question: "넌 누구야")
+        XCTAssertEqual(guardian.feed("I'm a language model developed by"), .reject)
+        XCTAssertEqual(guardian.rejection, .wrongLanguage)
+    }
 }

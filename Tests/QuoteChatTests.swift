@@ -422,4 +422,46 @@ final class QuoteChatLanguagePromptTests: XCTestCase {
         let system = QuoteChatPrompt.system(context: nil, language: .korean)
         XCTAssertTrue(system.contains(QuoteChatPrompt.conversationExamples(language: .korean)))
     }
+
+    // MARK: - 앞선 대화 (1.15.4 실기기: 첫 답 `야` 를 뒤의 모든 답이 베낌)
+
+    private func user(_ text: String) -> QuoteChatMessage { QuoteChatMessage(role: .user, text: text) }
+    private func bot(_ text: String) -> QuoteChatMessage { QuoteChatMessage(role: .assistant, text: text) }
+
+    func testRecapDropsEchoedAndTinyReplies() {
+        let messages = [user("야"), bot("야"), user("반말하냐"), bot("응"), user("안녕")]
+        XCTAssertTrue(LocalQwenChatTransport.recap(of: messages).isEmpty,
+                      "무너진 답이 기록에 들어가면 모델이 그것을 베낀다")
+    }
+
+    func testRecapKeepsTheLastTwoGoodExchangesWithoutTheCurrentQuestion() {
+        let messages = [
+            user("안녕"), bot("안녕하세요! 무엇이 궁금하세요?"),
+            user("넌 누구야"), bot("저는 명언 안내자예요."),
+            user("작가는 누구야"), bot("랄프 월도 에머슨이에요."),
+            user("숨은 뜻 알려줘")
+        ]
+        let recap = LocalQwenChatTransport.recap(of: messages)
+        XCTAssertEqual(recap.map(\.text), ["넌 누구야", "저는 명언 안내자예요.", "작가는 누구야", "랄프 월도 에머슨이에요."])
+    }
+
+    func testRecapTruncatesLongReplies() {
+        let long = String(repeating: "가", count: 500)
+        let recap = LocalQwenChatTransport.recap(of: [user("설명해 줘"), bot(long), user("더")])
+        XCTAssertEqual(recap.last?.text.count, 120)
+    }
+
+    func testRecapIsWrittenNextToTheQuestionAsReferenceOnly() {
+        let recap = [user("넌 누구야"), bot("저는 명언 안내자예요.")]
+        let prompt = QuoteChatPrompt.localPrompt(question: "숨은 뜻 알려줘", language: .korean, recap: recap)
+        XCTAssertTrue(prompt.contains("되풀이하지 않는다"))
+        XCTAssertTrue(prompt.contains("안내자: 저는 명언 안내자예요."))
+        XCTAssertTrue(prompt.contains("질문: 숨은 뜻 알려줘"))
+        XCTAssertTrue(prompt.hasSuffix(QuoteChatPrompt.noThinkSwitch))
+    }
+
+    func testPromptWithoutContextOrRecapStaysShort() {
+        let prompt = QuoteChatPrompt.localPrompt(question: "야", language: .korean)
+        XCTAssertEqual(prompt, "야\n\n\(QuoteChatPrompt.languageReminder(.korean)) \(QuoteChatPrompt.noThinkSwitch)")
+    }
 }

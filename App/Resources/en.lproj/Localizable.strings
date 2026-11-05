@@ -1244,7 +1244,7 @@
 /* 모델 점검 (TestFlight 전용) */
 "(빈 답)" = "(empty reply)";
 "결과 복사" = "Copy results";
-"끝나면 \"결과 복사\"를 눌러 그대로 보내 주세요. 질문마다 새 대화로 시작합니다." = "When it finishes, tap \"Copy results\" and send it as is. Each question starts a new conversation.";
+"끝나면 \"결과 복사\"를 눌러 그대로 보내 주세요. 실제 대화처럼 한 대화로 이어서 묻습니다." = "When it finishes, tap \"Copy results\" and send it as is. The questions are asked in one continuous conversation, like a real chat.";
 "모델 점검" = "Model check";
 "모델 점검 (TestFlight 전용)" = "Model check (TestFlight only)";
 "복사했어요" = "Copied";

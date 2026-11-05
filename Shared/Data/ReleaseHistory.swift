@@ -10,6 +10,19 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.15.3",
+            date: "2026-11-05",
+            summary: nil,
+            sections: [
+                ReleaseSection(
+                    title: "고침",
+                    items: [
+                        "언어를 바꿔도 아래쪽 탭 이름이 그대로이던 문제. 설정에서 English 로 바꿔도 탭바는 홈 · 캘린더 · 명언 ··· 한국어 그대로였고, 탭을 한 번 눌러야 바뀌었다. 탭 이름을 전역 언어에서 꺼내 그려서 화면이 언어가 바뀐 것을 알지 못했다. 이제 탭바가 앱 언어를 직접 읽어서 바꾸는 즉시 따라간다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.15.2",
             date: "2026-11-05",
             summary: nil,

@@ -12,15 +12,26 @@ final class AppRouter {
 
         var id: String { rawValue }
 
-        /// 탭 이름. 설정에서 언어를 바꾸면 이 값도 함께 바뀐다.
-        /// (`Text(String)` 은 번역되지 않으므로 `L` 로 직접 찾는다.)
-        var title: String {
+        /// 탭 이름. 지금 앱 언어로 찾는다.
+        ///
+        /// **다시 그려야 하는 뷰는 이것을 쓰지 말고 `title(in:)` 에 `settings.language` 를
+        /// 넘긴다.** 이 값은 전역 `Localization.language` 를 읽을 뿐이라 SwiftUI 가 그
+        /// 변화를 알지 못한다.
+        var title: String { title(in: Localization.language) }
+
+        /// 주어진 언어의 탭 이름.
+        ///
+        /// 언어를 **인자로** 받는 이유: 탭바가 `L("홈")` 처럼 전역 상태를 읽는 문자열을
+        /// 그리면, 언어를 바꿔도 뷰가 자기 의존성을 모르니 다시 그려지지 않는다. 설정에서
+        /// English 로 바꿔도 탭바는 한국어 그대로고, 탭을 눌러 선택이 바뀌어야 비로소
+        /// 바뀌었다. 호출하는 뷰가 `settings.language` 를 넘기면 그 값을 관찰하게 된다.
+        func title(in language: AppLanguage) -> String {
             switch self {
-            case .home: L("홈")
-            case .calendar: L("캘린더")
-            case .quotes: L("명언")
-            case .challenge: L("챌린지")
-            case .settings: L("설정")
+            case .home: L("홈", language: language)
+            case .calendar: L("캘린더", language: language)
+            case .quotes: L("명언", language: language)
+            case .challenge: L("챌린지", language: language)
+            case .settings: L("설정", language: language)
             }
         }
 

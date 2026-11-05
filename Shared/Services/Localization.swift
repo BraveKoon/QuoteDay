@@ -127,6 +127,15 @@ public func L(_ key: String) -> String {
     Localization.string(key)
 }
 
+/// **언어를 지정해서** 꺼낸다.
+///
+/// 뷰가 `settings.language` 를 넘기면 그 값을 관찰하게 되어, 언어를 바꿀 때 다시 그려진다.
+/// 전역 언어를 읽는 `L(_:)` 는 SwiftUI 가 그 변화를 알지 못한다. 키가 `L(` 로 시작하는
+/// 호출이라 `check_localization.py` 도 이 문구를 필수 번역으로 인식한다.
+public func L(_ key: String, language: AppLanguage) -> String {
+    Localization.string(key, language: language)
+}
+
 /// 자리표시자가 있는 문구. 예: `L("%d분 후", minutes)`
 public func L(_ key: String, _ arguments: CVarArg...) -> String {
     Localization.format(key, language: nil, arguments: arguments)

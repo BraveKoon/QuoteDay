@@ -105,7 +105,7 @@ public struct QuoteChatContext: Hashable, Sendable {
 public enum QuoteChatPrompt {
 
     /// 캐시·표시용 판 번호. 프롬프트를 고치면 올린다.
-    public static let version = 3
+    public static let version = 4
 
     public static func languageName(_ language: AppLanguage) -> String {
         QuoteExplainerPrompt.languageName(language)
@@ -119,12 +119,26 @@ public enum QuoteChatPrompt {
     /// 시스템 지침에도 언어가 적혀 있지만, 작은 모델은 **긴 지침의 앞쪽 규칙을
     /// 잊는다.** 가장 가까운 말 — 방금 한 질문의 끝 — 에 한 번 더 적어 둔다.
     /// 앱 언어는 사용자가 고른 값이므로, 질문 문장의 언어를 모델이 추측하게 두지 않는다.
+    ///
+    /// **그 언어로만 쓴다.** 처음에는 `(Answer in Korean only.)` 를 괄호로 덧붙였는데,
+    /// 실기기에서 한국어 화면의 모델이 영어로 답하는 일이 잦았다. 질문 끝의 영어 문장이
+    /// 영어 답을 부추겼을 가능성이 있어 뺐다. (확인한 것은 아니다 — 기기 점검으로 비교한다.)
     public static func languageReminder(_ language: AppLanguage) -> String {
         switch language {
-        case .korean: "한국어로만 답하세요. (Answer in Korean only.)"
+        case .korean: "한국어로만 답하세요."
         case .english: "Answer in English only."
-        case .simplifiedChinese: "请只用简体中文回答。(Answer in Simplified Chinese only.)"
-        case .traditionalChinese: "請只用繁體中文回答。(Answer in Traditional Chinese only.)"
+        case .simplifiedChinese: "请只用简体中文回答。"
+        case .traditionalChinese: "請只用繁體中文回答。"
+        }
+    }
+
+    /// 첫 답이 앱 언어가 아니라서 **다시 시킬 때** 쓰는 더 강한 지시.
+    public static func strictLanguageReminder(_ language: AppLanguage) -> String {
+        switch language {
+        case .korean: "반드시 한국어 문장으로만 답하세요. 영어로 쓰지 마세요."
+        case .english: "You must answer in English sentences only. Do not use any other language."
+        case .simplifiedChinese: "必须只用简体中文句子回答，不要使用其他语言。"
+        case .traditionalChinese: "必須只用繁體中文句子回答，不要使用其他語言。"
         }
     }
 
@@ -138,9 +152,11 @@ public enum QuoteChatPrompt {
     public static func localPrompt(
         question: String,
         language: AppLanguage,
-        context: QuoteChatContext? = nil
+        context: QuoteChatContext? = nil,
+        strict: Bool = false
     ) -> String {
-        let tail = "\(languageReminder(language)) \(noThinkSwitch)"
+        let reminder = strict ? strictLanguageReminder(language) : languageReminder(language)
+        let tail = "\(reminder) \(noThinkSwitch)"
         guard let context else { return "\(question)\n\n\(tail)" }
         return """
         [대화 중인 명언] \(compactQuoteLine(context))
@@ -168,6 +184,63 @@ public enum QuoteChatPrompt {
         return "\u{201C}\(context.quote.text)\u{201D} — \(who)"
     }
 
+    /// 모델에게 줄 시스템 프롬프트 전체(지침 + 맥락). 엔진과 기기 점검 화면이 **같은 것을** 쓴다 —
+    /// 점검이 실제 대화와 다른 프롬프트로 돌면 점검 결과가 아무것도 말해 주지 못한다.
+    public static func system(context: QuoteChatContext?, language: AppLanguage) -> String {
+        instructions(language: language) + "\n\n" + contextBlock(context, language: language)
+    }
+
+    /// 말투와 형식을 보여 주는 **예시 대화**.
+    ///
+    /// 작은 모델은 규칙 목록보다 예시를 잘 따른다. 실기기에서 일상 말(`넌 누구야`, `야`)에
+    /// 외운 영어 답으로 도망갔는데, 규칙 7개로는 그 경우를 다루지 못했다. 명언 내용을
+    /// 묻는 예시는 일부러 넣지 않았다 — 예시의 내용이 새 답으로 새어 나온다.
+    /// 예시는 **앱 언어로** 쓴다. 한국어 예시를 보여 주면 영어 화면에서도 한국어로 답한다.
+    static func conversationExamples(language: AppLanguage) -> String {
+        switch language {
+        case .korean:
+            return """
+            대화 예시 (말투와 길이만 참고한다):
+            사용자: 안녕
+            안내자: 안녕하세요! 지금 보고 있는 명언의 뜻이나 작가 이야기가 궁금하면 편하게 물어보세요.
+            사용자: 넌 누구야
+            안내자: 저는 QuoteDay 의 명언 안내자예요. 명언의 숨은 뜻과 작가의 삶을 함께 살펴볼 수 있어요.
+            사용자: 야
+            안내자: 네, 말씀하세요. 이 명언에 대해 궁금한 점을 물어봐 주세요.
+            """
+        case .english:
+            return """
+            Example conversation (copy only the tone and length):
+            User: hi
+            Guide: Hello! Ask me anything about the quote you're looking at or its author.
+            User: who are you
+            Guide: I'm the quote guide inside QuoteDay. I can help you explore a quote's hidden meaning and its author's life.
+            User: hey
+            Guide: Yes? Tell me what you'd like to know about this quote.
+            """
+        case .simplifiedChinese:
+            return """
+            对话示例（只参考语气和长度）：
+            用户：你好
+            向导：你好！想了解这句名言的含义或作者的故事，尽管问我。
+            用户：你是谁
+            向导：我是 QuoteDay 里的名言向导，可以和你一起看名言背后的含义和作者的人生。
+            用户：喂
+            向导：我在。请告诉我你想了解这句名言的什么。
+            """
+        case .traditionalChinese:
+            return """
+            對話範例（只參考語氣和長度）：
+            使用者：你好
+            嚮導：你好！想了解這句名言的含義或作者的故事，儘管問我。
+            使用者：你是誰
+            嚮導：我是 QuoteDay 裡的名言嚮導，可以和你一起看名言背後的含義和作者的人生。
+            使用者：喂
+            嚮導：我在。請告訴我你想了解這句名言的什麼。
+            """
+        }
+    }
+
     /// 모델의 역할. "무엇을 하는 사람인지"와 "무엇을 하지 말아야 하는지"를 정한다.
     public static func instructions(language: AppLanguage) -> String {
         """
@@ -187,6 +260,9 @@ public enum QuoteChatPrompt {
         5. 사용자의 감정을 함부로 단정하지 않는다. 설교조("~해야 합니다")를 쓰지 않는다.
         6. 앱에 없는 명언을 물으면, 아는 범위에서 답하되 앱에 수록된 문장이 아니라고 알린다.
         7. 목록 기호·제목·인사말을 남발하지 않는다. 대화하듯 담담하게 쓴다.
+        8. 인사나 "넌 누구야" 같은 일상 말에는 아래 예시처럼 짧게 답하고, 명언 이야기로 이끈다.
+
+        \(conversationExamples(language: language))
         """
     }
 

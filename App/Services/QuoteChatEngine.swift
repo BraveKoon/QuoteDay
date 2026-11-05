@@ -147,9 +147,7 @@ public final class QuoteChatEngine {
     // MARK: - 내부
 
     private func systemPrompt(context: QuoteChatContext?, language: AppLanguage) -> String {
-        QuoteChatPrompt.instructions(language: language)
-            + "\n\n"
-            + QuoteChatPrompt.contextBlock(context, language: language)
+        QuoteChatPrompt.system(context: context, language: language)
     }
 
     /// 조각을 답 말풍선에 합친다.

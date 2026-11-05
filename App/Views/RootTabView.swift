@@ -63,6 +63,7 @@ private struct QuoteIdentifier: Identifiable, Hashable {
 
 struct ClayTabBar: View {
     @Binding var selection: AppRouter.Tab
+    @Environment(AppSettings.self) private var settings
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Namespace private var indicator
 
@@ -82,7 +83,7 @@ struct ClayTabBar: View {
                     tabLabel(tab)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(tab.title)
+                .accessibilityLabel(tab.title(in: settings.language))
                 .accessibilityAddTraits(tab == selection ? [.isSelected, .isButton] : .isButton)
             }
         }
@@ -98,7 +99,9 @@ struct ClayTabBar: View {
         VStack(spacing: 3) {
             Image(systemName: tab.symbol)
                 .font(.system(size: 17, weight: .semibold))
-            Text(tab.title)
+            // `settings.language` 를 읽어야 언어를 바꿀 때 이 뷰가 다시 그려진다.
+            // (`Text(String)` 이라 SwiftUI 가 자동으로 번역해 주지도 않는다.)
+            Text(tab.title(in: settings.language))
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)

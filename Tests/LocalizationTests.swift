@@ -60,6 +60,26 @@ final class LocalizationTests: XCTestCase {
         }
     }
 
+    /// 설정에서 언어를 바꿔도 탭바가 한국어 그대로이던 결함.
+    ///
+    /// 탭 이름이 전역 상태를 읽는 `L("홈")` 이라 뷰가 자기 의존성을 몰랐다. 이제 언어를
+    /// **인자로** 받는다. 핵심은 전역 언어와 **무관하게** 요청한 언어로 답한다는 것이다 —
+    /// 전역이 한국어인 채로 영어를 물어도 영어가 와야, 뷰가 `settings.language` 를 넘기는
+    /// 것만으로 올바르게 그려진다.
+    func testTabTitlesFollowTheRequestedLanguageNotTheGlobalOne() {
+        Localization.activate(.korean)
+        for tab in AppRouter.Tab.allCases {
+            let korean = tab.title(in: .korean)
+            for language in [AppLanguage.english, .simplifiedChinese, .traditionalChinese] {
+                let translated = tab.title(in: language)
+                XCTAssertFalse(translated.isEmpty)
+                XCTAssertNotEqual(translated, korean, "\(tab) 이 \(language) 에서 한국어 그대로다.")
+            }
+        }
+        XCTAssertEqual(AppRouter.Tab.home.title(in: .english), "Home")
+        XCTAssertEqual(AppRouter.Tab.settings.title(in: .english), "Settings")
+    }
+
     func testKoreanFallsBackToTheSourceText() {
         Localization.activate(.korean)
         XCTAssertEqual(L("설정"), "설정")

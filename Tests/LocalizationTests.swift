@@ -35,6 +35,31 @@ final class LocalizationTests: XCTestCase {
         XCTAssertNotNil(Localization.bundle(for: .traditionalChinese), "zh-Hant.lproj / Localizable.strings 가 번들에 없습니다.")
     }
 
+    /// 언어를 바꾸면 앱이 죽던 결함. 설정의 "변경 이력" 줄이 쓰는 문구다.
+    ///
+    /// 한국어 키는 `v%@부터 %d개`(문자열, 정수)인데 영어 문구가 `%d releases since v%@`
+    /// (정수, 문자열)로 인자 순서가 뒤집혀 있었다. `String(format:)` 이 문자열 포인터를
+    /// 정수로, 정수를 객체 포인터로 읽어 **메모리 접근 오류로 죽었다.** 문구가 틀린 줄
+    /// 알려 주는 오류가 아니라 프로세스가 사라지는 종류라, 실제 포맷 경로를 지나가는
+    /// 것으로 막는다. (옛 문구였다면 이 테스트는 실패가 아니라 비정상 종료한다.)
+    func testFormatWithReorderedPlaceholdersDoesNotCrashInAnyLanguage() {
+        let key = "v%@부터 %d개"
+        let expected: [AppLanguage: String] = [
+            .korean: "v1.9.0부터 3개",
+            .english: "3 releases since v1.9.0",
+            .simplifiedChinese: "从 v1.9.0 起共 3 个",
+            .traditionalChinese: "從 v1.9.0 起共 3 個"
+        ]
+        for language in AppLanguage.allCases {
+            Localization.activate(language)
+            XCTAssertEqual(
+                Localization.format(key, language: language, arguments: ["1.9.0", 3]),
+                expected[language],
+                "\(language) 의 변경 이력 문구가 어긋났다."
+            )
+        }
+    }
+
     func testKoreanFallsBackToTheSourceText() {
         Localization.activate(.korean)
         XCTAssertEqual(L("설정"), "설정")

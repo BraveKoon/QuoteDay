@@ -65,6 +65,33 @@ SKIP_MARKERS = (
 
 PLACEHOLDER = re.compile(r"%(?:\d+\$)?(?:@|lld|ld|d|u|f|\.\d+f|\.\d+lf)")
 
+# 변환 지정자 전체. 종류(객체·정수·실수)까지 비교하려고 PLACEHOLDER 보다 넓게 잡는다.
+SPECIFIER = re.compile(
+    r"%(?:(\d+)\$)?[-+ 0#]*\d*(?:\.\d+)?(?:hh|h|ll|l|q|z|t|j|L)?([@dDiuUxXoOfFeEgGaAcCsSpn%])"
+)
+_KINDS = {
+    **dict.fromkeys("@", "객체"),
+    **dict.fromkeys("dDiuUxXoOcC", "정수"),
+    **dict.fromkeys("fFeEgGaA", "실수"),
+    **dict.fromkeys("sSpn", "포인터"),
+}
+
+
+def argument_kinds(text: str) -> list[str]:
+    """인자가 **어떤 종류로 몇 번째에** 읽히는지. (`%%` 는 인자가 아니다)
+
+    `%1$@ %2$d` 처럼 위치가 적혀 있으면 번호 순서로 읽힌다는 뜻이므로 그 순서로 센다.
+    """
+    found = [(m.group(1), m.group(2)) for m in SPECIFIER.finditer(text) if m.group(2) != "%"]
+    if any(position for position, _ in found):
+        found.sort(key=lambda item: int(item[0] or 0))
+    return [_KINDS.get(char, "?") for _, char in found]
+
+
+def stray_percent(text: str) -> bool:
+    """자리표시자도 `%%` 도 아닌 `%` 가 남아 있는가. 포맷되면 다음 글자를 변환 지정자로 읽는다."""
+    return "%" in SPECIFIER.sub("", text.replace("%%", ""))
+
 
 def unescape_swift(body: str) -> str:
     """Swift 리터럴 본문을 실제 문자로 바꾼다. (`\\(` 보간은 호출부에서 걸러진다)"""
@@ -415,6 +442,19 @@ def main() -> int:
             actual = len(PLACEHOLDER.findall(table[key]))
             if expected and expected != actual:
                 errors.append(f"[{language}] 자리표시자 개수가 다릅니다: {key!r} ({expected} ≠ {actual})")
+            # 개수가 같아도 **종류나 순서가 다르면** `String(format:)` 이 문자열 포인터를 정수로,
+            # 정수를 객체 포인터로 읽어 앱이 죽는다. 영어 문구가 인자 순서를 뒤집어 쓴 채
+            # 이 검사를 통과했고, 언어를 바꾸는 순간 설정 화면에서 앱이 죽었다.
+            if expected:
+                wanted_kinds = argument_kinds(key)
+                actual_kinds = argument_kinds(table[key])
+                if wanted_kinds != actual_kinds:
+                    errors.append(
+                        f"[{language}] 자리표시자의 종류·순서가 다릅니다(앱이 죽습니다): {key!r} "
+                        f"{wanted_kinds} ≠ {actual_kinds} — 순서가 다르면 %1$@ %2$d 처럼 위치를 적으세요."
+                    )
+                if stray_percent(table[key]):
+                    errors.append(f"[{language}] 자리표시자가 아닌 % 가 있습니다(%% 로 쓰세요): {table[key]!r}")
         empty = sorted(key for key in required & set(table) if not table[key].strip())
         if empty:
             errors.append(f"[{language}] 값이 비어 있는 문구 {len(empty)}개: {empty[:3]}")

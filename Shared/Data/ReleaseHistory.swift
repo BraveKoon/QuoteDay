@@ -10,6 +10,19 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.15.2",
+            date: "2026-11-05",
+            summary: nil,
+            sections: [
+                ReleaseSection(
+                    title: "고침",
+                    items: [
+                        "언어를 English 로 바꾸면 앱이 꺼지던 문제. 설정의 \"변경 이력\" 줄 문구가 영어에서 인자 순서가 뒤집혀 있었다. 앱이 v1.9.0 과 3 을 차례로 넘기는데 영어 문구가 정수를 먼저 읽어서, 문자열을 숫자로 읽다가 메모리 오류로 죽었다. 언어를 바꾸는 바로 그 화면이라 바꾸는 순간 꺼졌다. 한국어와 중국어는 순서가 맞아서 괜찮았다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.15.1",
             date: "2026-11-04",
             summary: nil,

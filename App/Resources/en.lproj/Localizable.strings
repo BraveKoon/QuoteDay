@@ -1028,7 +1028,7 @@
 "마지막 확인 %@" = "Last checked %@";
 "앞으로 %d일치를 미리 예약합니다. 앱을 열 때마다 자동으로 갱신돼요." = "We schedule %d days ahead and refresh every time you open the app.";
 "%d명" = "%d people";
-"v%@부터 %d개" = "%d releases since v%@";
+"v%@부터 %d개" = "%2$d releases since v%1$@";
 "문제당 %d점" = "%d pts per question";
 "보기 %d개" = "%d choices";
 "빈칸 %d개" = "%d blanks";

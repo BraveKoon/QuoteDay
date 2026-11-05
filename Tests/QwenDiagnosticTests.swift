@@ -42,4 +42,15 @@ final class QwenDiagnosticTests: XCTestCase {
     func testEchoedReplyFails() {
         XCTAssertTrue(QwenDiagnostic.evaluate(reply: "야", language: .korean, question: "야").contains("질문을 되받음"))
     }
+
+    func testFirstTwoPromptsAreSmallTalkAndTheRestGoToTheModel() {
+        for language in AppLanguage.allCases {
+            let prompts = QwenDiagnostic.prompts(language: language)
+            XCTAssertNotNil(QuoteChatSmallTalk.classify(prompts[0]), "\(language) \(prompts[0])")
+            XCTAssertNotNil(QuoteChatSmallTalk.classify(prompts[1]), "\(language) \(prompts[1])")
+            for prompt in prompts.dropFirst(2) {
+                XCTAssertNil(QuoteChatSmallTalk.classify(prompt), "\(language) \(prompt) 는 모델이 답해야 한다")
+            }
+        }
+    }
 }

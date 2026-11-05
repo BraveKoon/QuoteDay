@@ -176,7 +176,8 @@ struct QwenDiagnosticView: View {
                     prompt: prompt,
                     reply: reply,
                     seconds: Date().timeIntervalSince(started),
-                    problems: problems
+                    problems: problems,
+                    answeredByApp: QuoteChatSmallTalk.classify(prompt) != nil
                 ))
             }
             runningPrompt = nil

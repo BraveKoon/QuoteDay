@@ -20,20 +20,25 @@ enum QwenDiagnostic {
     /// 점검에 쓰는 질문. 일상 말·무의미한 입력·실제 질문을 섞는다 — 실기기에서 무너진 곳이
     /// 일상 말이었다(`넌 누구야`, `야` 에 똑같은 영어 문장).
     static func prompts(language: AppLanguage) -> [String] {
+        // 앞 둘은 앱이 정해진 답을 내는 일상 말이다(가로채기가 작동하는지 본다).
+        // 나머지는 모델이 실제로 답하는 질문이고, 4번은 3번을 이어 받는다.
         switch language {
         case .korean:
-            return ["안녕", "넌 누구야", "야", "ㅋㅋㅋ", "홀롤ㅗ",
-                    "이 명언의 숨은 뜻이 뭐야?", "작가의 일생을 알려 줘", "지금 내 상황에 어떻게 적용할까?"]
+            return ["안녕", "넌 누구야", "이 명언의 숨은 뜻이 뭐야?", "더 쉽게 설명해 줘",
+                    "작가의 일생을 알려 줘", "작가는 어느 나라 사람이야?",
+                    "지금 내 상황에 어떻게 적용할까?", "비슷한 뜻의 다른 명언이 있을까?"]
         case .english:
-            return ["hi", "who are you", "hey", "lol", "asdf",
-                    "What is the hidden meaning of this quote?", "Tell me about the author's life",
-                    "How can I apply this to my situation?"]
+            return ["hi", "who are you", "What is the hidden meaning of this quote?", "Explain it more simply",
+                    "Tell me about the author's life", "Where was the author from?",
+                    "How can I apply this to my situation?", "Is there another quote with a similar meaning?"]
         case .simplifiedChinese:
-            return ["你好", "你是谁", "喂", "哈哈", "啊啊啊",
-                    "这句名言隐藏的意思是什么？", "介绍一下作者的一生", "我现在的情况该怎么运用？"]
+            return ["你好", "你是谁", "这句名言隐藏的意思是什么？", "再说得简单一点",
+                    "介绍一下作者的一生", "作者是哪国人？",
+                    "我现在的情况该怎么运用？", "有意思相近的其他名言吗？"]
         case .traditionalChinese:
-            return ["你好", "你是誰", "喂", "哈哈", "啊啊啊",
-                    "這句名言隱藏的意思是什麼？", "介紹一下作者的一生", "我現在的情況該怎麼運用？"]
+            return ["你好", "你是誰", "這句名言隱藏的意思是什麼？", "再說得簡單一點",
+                    "介紹一下作者的一生", "作者是哪國人？",
+                    "我現在的情況該怎麼運用？", "有意思相近的其他名言嗎？"]
         }
     }
 
@@ -82,6 +87,8 @@ enum QwenDiagnostic {
         let reply: String
         let seconds: Double
         let problems: [String]
+        /// 일상 말이라 모델을 부르지 않고 앱이 정한 답을 냈다.
+        var answeredByApp = false
 
         var passed: Bool { problems.isEmpty }
     }
@@ -101,7 +108,8 @@ enum QwenDiagnostic {
         ]
         for (index, result) in results.enumerated() {
             let mark = result.passed ? "통과" : "문제: " + result.problems.joined(separator: ", ")
-            lines.append("\(index + 1). [\(mark)] (\(String(format: "%.1f", result.seconds))초)")
+            let source = result.answeredByApp ? " · 앱이 답함" : ""
+            lines.append("\(index + 1). [\(mark)] (\(String(format: "%.1f", result.seconds))초\(source))")
             lines.append("  질문: \(result.prompt)")
             lines.append("  답: \(result.reply.trimmed)")
             lines.append("")

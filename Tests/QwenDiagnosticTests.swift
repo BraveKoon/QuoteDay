@@ -38,4 +38,8 @@ final class QwenDiagnosticTests: XCTestCase {
         XCTAssertTrue(QwenDiagnostic.hasRepetition(loop))
         XCTAssertFalse(QwenDiagnostic.hasRepetition("짧은 답은 반복이 아니다."))
     }
+
+    func testEchoedReplyFails() {
+        XCTAssertTrue(QwenDiagnostic.evaluate(reply: "야", language: .korean, question: "야").contains("질문을 되받음"))
+    }
 }

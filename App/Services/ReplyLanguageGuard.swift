@@ -26,12 +26,24 @@ public struct ReplyLanguageGuard: Sendable {
     /// (`OK` 같은 한 마디를 틀렸다고 버리지 않는다.)
     static let shortReplyThreshold = 4
 
+    /// 왜 버렸는지. 화면에 띄울 안내가 달라진다.
+    public enum Rejection: Equatable, Sendable {
+        /// 앱 언어가 아니다.
+        case wrongLanguage
+        /// 질문을 그대로 되받았다. (1.15.4 실기기: `야` 에 `야`, 그 뒤로 모든 답이 `야`)
+        case echo
+    }
+
     private let expected: AppLanguage
+    /// 사용자가 방금 한 말. 답이 이것과 같으면 답이 아니다.
+    private let question: String
     private var buffer = ""
     private var decided = false
+    public private(set) var rejection: Rejection?
 
-    public init(expected: AppLanguage) {
+    public init(expected: AppLanguage, question: String = "") {
         self.expected = expected
+        self.question = Self.normalized(question)
     }
 
     public mutating func feed(_ chunk: String) -> Verdict {
@@ -41,7 +53,7 @@ public struct ReplyLanguageGuard: Sendable {
         decided = true
         let text = buffer
         buffer = ""
-        return Self.matches(text, expected: expected) ? .release(text) : .reject
+        return judge(text)
     }
 
     /// 흐름이 끝났다. 판정하지 못한 짧은 답이 남아 있으면 마지막으로 본다.
@@ -50,8 +62,39 @@ public struct ReplyLanguageGuard: Sendable {
         decided = true
         let text = buffer
         buffer = ""
+        if isEcho(text) {
+            rejection = .echo
+            return .reject
+        }
         guard Self.letters(in: text) >= Self.shortReplyThreshold else { return .release(text) }
-        return Self.matches(text, expected: expected) ? .release(text) : .reject
+        return judge(text)
+    }
+
+    private mutating func judge(_ text: String) -> Verdict {
+        if isEcho(text) {
+            rejection = .echo
+            return .reject
+        }
+        if !Self.matches(text, expected: expected) {
+            rejection = .wrongLanguage
+            return .reject
+        }
+        return .release(text)
+    }
+
+    /// 답이 질문을 그대로 되받았는지. 띄어쓰기·문장 부호·대소문자는 보지 않는다.
+    private func isEcho(_ text: String) -> Bool {
+        !question.isEmpty && Self.normalized(text) == question
+    }
+
+    /// 글자와 숫자만 남기고 소문자로.
+    static func normalized(_ text: String) -> String {
+        var kept = String.UnicodeScalarView()
+        for scalar in text.lowercased().unicodeScalars
+        where scalar.properties.isAlphabetic || scalar.properties.numericType != nil {
+            kept.append(scalar)
+        }
+        return String(kept)
     }
 
     // MARK: - 판정

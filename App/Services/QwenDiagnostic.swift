@@ -38,11 +38,15 @@ enum QwenDiagnostic {
     }
 
     /// 답 하나의 문제점. 비어 있으면 통과.
-    static func evaluate(reply: String, language: AppLanguage) -> [String] {
+    static func evaluate(reply: String, language: AppLanguage, question: String = "") -> [String] {
         let text = reply.trimmed
         if text.isEmpty { return ["빈 답"] }
 
         var problems: [String] = []
+        if !question.isEmpty,
+           ReplyLanguageGuard.normalized(text) == ReplyLanguageGuard.normalized(question) {
+            problems.append("질문을 되받음")
+        }
         if text.contains("<think") || text.contains("</think") {
             problems.append("생각 구간이 새어 나옴")
         }

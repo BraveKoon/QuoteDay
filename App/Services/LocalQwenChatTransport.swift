@@ -26,9 +26,14 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
         language: AppLanguage,
         context: QuoteChatContext?
     ) -> AsyncThrowingStream<String, Error> {
-        // 기기 내 모델은 **자기 세션이 대화를 기억한다.** 그래서 매번 전체 대화를
-        // 다시 넣지 않고 마지막 질문만 보낸다 — 넣으면 같은 말이 두 번 들어간다.
+        // **매 질문을 새 세션으로 시작한다.** 처음에는 세션이 대화를 기억하게 두었는데,
+        // 1.15.4 실기기에서 모델이 `야` 에 `야` 라고 한 번 답하자 그 뒤의 모든 질문
+        // (`안녕`, `숨은 뜻 알려줘`)에 `야` 만 내놓았다. 작은 모델은 자기 앞 답을 그대로
+        // 베낀다 — 한 번 무너진 답이 기록에 남으면 대화 전체가 무너진다.
+        // 그래서 앞선 대화는 **골라서 짧게** 질문 옆에 적어 준다(`localPrompt` 의 recap).
+        // 지침을 매번 다시 읽히는 값(1.7B 에서 1~2초)이 대화가 통째로 망가지는 것보다 싸다.
         let question = messages.last(where: { $0.role == .user })?.text.trimmed ?? ""
+        let recap = Self.recap(of: messages)
         guard !question.isEmpty else {
             return AsyncThrowingStream { $0.finish() }
         }
@@ -38,21 +43,25 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
                 do {
                     // 말풍선에는 사용자가 쓴 그대로 남고, 모델에게만 명언·언어 지시·`/no_think` 가 붙는다.
                     // 첫 답이 앱 언어가 아니면 **더 강한 지시로 한 번** 다시 시킨다.
+                    var lastRejection: ReplyLanguageGuard.Rejection = .wrongLanguage
                     for strict in [false, true] {
+                        self.service.resetSession()
                         let prompt = QuoteChatPrompt.localPrompt(
-                            question: question, language: language, context: context, strict: strict
+                            question: question, language: language, context: context,
+                            strict: strict, recap: recap
                         )
-                        if try await self.attempt(
-                            system: system, prompt: prompt, language: language, into: continuation
-                        ) {
+                        let rejection = try await self.attempt(
+                            system: system, prompt: prompt, question: question,
+                            language: language, into: continuation
+                        )
+                        guard let rejection else {
                             continuation.finish()
                             return
                         }
-                        // 틀린 언어의 답이 대화 기록에 남으면 이어지는 답도 그것을 따라 한다.
-                        // 세션을 비워 그 답이 문맥에 들어가지 않게 한다.
-                        self.service.resetSession()
+                        lastRejection = rejection
                     }
-                    continuation.finish(throwing: QuoteChatError.wrongLanguage)
+                    continuation.finish(throwing: lastRejection == .echo
+                        ? QuoteChatError.emptyReply : QuoteChatError.wrongLanguage)
                 } catch is CancellationError {
                     continuation.finish()
                 } catch {
@@ -63,15 +72,16 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
         }
     }
 
-    /// 한 번 시도한다. 앱 언어로 답했으면 true, 틀린 언어로 시작해서 버렸으면 false.
+    /// 한 번 시도한다. 받아들였으면 nil, 버렸으면 그 이유.
     /// 버린 답은 **화면에 한 글자도 나가지 않았다**(가드가 앞부분을 쥐고 있었다).
     private func attempt(
         system: String,
         prompt: String,
+        question: String,
         language: AppLanguage,
         into continuation: AsyncThrowingStream<String, Error>.Continuation
-    ) async throws -> Bool {
-        var replyGuard = ReplyLanguageGuard(expected: language)
+    ) async throws -> ReplyLanguageGuard.Rejection? {
+        var replyGuard = ReplyLanguageGuard(expected: language, question: question)
         for try await chunk in service.stream(model: model, system: system, prompt: prompt) {
             switch replyGuard.feed(chunk) {
             case .hold:
@@ -79,17 +89,48 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
             case .release(let text):
                 continuation.yield(text)
             case .reject:
-                return false
+                return replyGuard.rejection ?? .wrongLanguage
             }
         }
         switch replyGuard.finish() {
         case .hold:
-            return true
+            return nil
         case .release(let text):
             if !text.isEmpty { continuation.yield(text) }
-            return true
+            return nil
         case .reject:
-            return false
+            return replyGuard.rejection ?? .wrongLanguage
+        }
+    }
+
+    /// 질문 옆에 적어 줄 앞선 대화. **최근 두 번의 주고받기만**, 한 마디당 120자까지.
+    ///
+    /// 무너진 답은 빼고 적는다 — 질문을 되받은 답, 아주 짧은 답이 기록에 들어가면 모델이
+    /// 그것을 베낀다. 지금 하는 질문(마지막 사용자 말)과 비어 있는 답 자리는 넣지 않는다.
+    nonisolated static func recap(of messages: [QuoteChatMessage], turns: Int = 2, limit: Int = 120) -> [QuoteChatMessage] {
+        var history = messages
+        if let last = history.last, last.role == .user { history.removeLast() }
+
+        var pairs: [(QuoteChatMessage, QuoteChatMessage)] = []
+        var index = 0
+        while index + 1 < history.count {
+            let user = history[index], reply = history[index + 1]
+            if user.role == .user, reply.role == .assistant {
+                pairs.append((user, reply))
+                index += 2
+            } else {
+                index += 1
+            }
+        }
+
+        let usable = pairs.filter { user, reply in
+            let answer = ReplyLanguageGuard.normalized(reply.text)
+            return ReplyLanguageGuard.letters(in: reply.text) >= ReplyLanguageGuard.shortReplyThreshold
+                && answer != ReplyLanguageGuard.normalized(user.text)
+        }
+        return usable.suffix(turns).flatMap { user, reply in
+            [QuoteChatMessage(role: .user, text: String(user.text.trimmed.prefix(limit))),
+             QuoteChatMessage(role: .assistant, text: String(reply.text.trimmed.prefix(limit)))]
         }
     }
 }

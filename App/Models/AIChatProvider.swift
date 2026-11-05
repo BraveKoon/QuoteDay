@@ -105,7 +105,7 @@ public struct QuoteChatContext: Hashable, Sendable {
 public enum QuoteChatPrompt {
 
     /// 캐시·표시용 판 번호. 프롬프트를 고치면 올린다.
-    public static let version = 4
+    public static let version = 5
 
     public static func languageName(_ language: AppLanguage) -> String {
         QuoteExplainerPrompt.languageName(language)
@@ -154,7 +154,7 @@ public enum QuoteChatPrompt {
         language: AppLanguage,
         context: QuoteChatContext? = nil,
         strict: Bool = false,
-        recap: [QuoteChatMessage] = []
+        recap: [String] = []
     ) -> String {
         let reminder = strict ? strictLanguageReminder(language) : languageReminder(language)
         let tail = "\(reminder) \(noThinkSwitch)"
@@ -166,9 +166,9 @@ public enum QuoteChatPrompt {
             """)
         }
         if !recap.isEmpty {
-            // 앞선 대화는 **참고용**이라고 적는다. 그대로 되풀이하라는 뜻으로 읽지 않게.
-            let lines = recap.map { ($0.role == .user ? "사용자: " : "안내자: ") + $0.text }
-            parts.append("[앞선 대화 — 참고만 하고 되풀이하지 않는다]\n" + lines.joined(separator: "\n"))
+            // 앞서 사용자가 물은 것만 적는다. 모델의 앞 답은 넣지 않는다(`recap` 의 설명).
+            let lines = recap.map { "- " + $0 }
+            parts.append("[사용자가 앞서 물은 것]\n" + lines.joined(separator: "\n"))
         }
         guard !parts.isEmpty else { return "\(question)\n\n\(tail)" }
         parts.append("질문: \(question)")
@@ -198,57 +198,6 @@ public enum QuoteChatPrompt {
         instructions(language: language) + "\n\n" + contextBlock(context, language: language)
     }
 
-    /// 말투와 형식을 보여 주는 **예시 대화**.
-    ///
-    /// 작은 모델은 규칙 목록보다 예시를 잘 따른다. 실기기에서 일상 말(`넌 누구야`, `야`)에
-    /// 외운 영어 답으로 도망갔는데, 규칙 7개로는 그 경우를 다루지 못했다. 명언 내용을
-    /// 묻는 예시는 일부러 넣지 않았다 — 예시의 내용이 새 답으로 새어 나온다.
-    /// 예시는 **앱 언어로** 쓴다. 한국어 예시를 보여 주면 영어 화면에서도 한국어로 답한다.
-    static func conversationExamples(language: AppLanguage) -> String {
-        switch language {
-        case .korean:
-            return """
-            대화 예시 (말투와 길이만 참고한다):
-            사용자: 안녕
-            안내자: 안녕하세요! 지금 보고 있는 명언의 뜻이나 작가 이야기가 궁금하면 편하게 물어보세요.
-            사용자: 넌 누구야
-            안내자: 저는 QuoteDay 의 명언 안내자예요. 명언의 숨은 뜻과 작가의 삶을 함께 살펴볼 수 있어요.
-            사용자: 야
-            안내자: 네, 말씀하세요. 이 명언에 대해 궁금한 점을 물어봐 주세요.
-            """
-        case .english:
-            return """
-            Example conversation (copy only the tone and length):
-            User: hi
-            Guide: Hello! Ask me anything about the quote you're looking at or its author.
-            User: who are you
-            Guide: I'm the quote guide inside QuoteDay. I can help you explore a quote's hidden meaning and its author's life.
-            User: hey
-            Guide: Yes? Tell me what you'd like to know about this quote.
-            """
-        case .simplifiedChinese:
-            return """
-            对话示例（只参考语气和长度）：
-            用户：你好
-            向导：你好！想了解这句名言的含义或作者的故事，尽管问我。
-            用户：你是谁
-            向导：我是 QuoteDay 里的名言向导，可以和你一起看名言背后的含义和作者的人生。
-            用户：喂
-            向导：我在。请告诉我你想了解这句名言的什么。
-            """
-        case .traditionalChinese:
-            return """
-            對話範例（只參考語氣和長度）：
-            使用者：你好
-            嚮導：你好！想了解這句名言的含義或作者的故事，儘管問我。
-            使用者：你是誰
-            嚮導：我是 QuoteDay 裡的名言嚮導，可以和你一起看名言背後的含義和作者的人生。
-            使用者：喂
-            嚮導：我在。請告訴我你想了解這句名言的什麼。
-            """
-        }
-    }
-
     /// 모델의 역할. "무엇을 하는 사람인지"와 "무엇을 하지 말아야 하는지"를 정한다.
     public static func instructions(language: AppLanguage) -> String {
         """
@@ -268,9 +217,6 @@ public enum QuoteChatPrompt {
         5. 사용자의 감정을 함부로 단정하지 않는다. 설교조("~해야 합니다")를 쓰지 않는다.
         6. 앱에 없는 명언을 물으면, 아는 범위에서 답하되 앱에 수록된 문장이 아니라고 알린다.
         7. 목록 기호·제목·인사말을 남발하지 않는다. 대화하듯 담담하게 쓴다.
-        8. 인사나 "넌 누구야" 같은 일상 말에는 아래 예시처럼 짧게 답하고, 명언 이야기로 이끈다.
-
-        \(conversationExamples(language: language))
         """
     }
 

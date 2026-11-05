@@ -32,24 +32,32 @@ public struct ReplyLanguageGuard: Sendable {
         case wrongLanguage
         /// 질문을 그대로 되받았다. (1.15.4 실기기: `야` 에 `야`, 그 뒤로 모든 답이 `야`)
         case echo
+        /// 이 대화의 앞 답과 똑같다. (1.15.5 점검: 서로 다른 질문 셋에 같은 문장)
+        case repeated
     }
 
     private let expected: AppLanguage
     /// 사용자가 방금 한 말. 답이 이것과 같으면 답이 아니다.
     private let question: String
+    /// 이 대화에서 이미 한 답들(정규화). 같은 답을 또 내면 답이 아니다.
+    private let earlierReplies: Set<String>
     private var buffer = ""
     private var decided = false
     public private(set) var rejection: Rejection?
 
-    public init(expected: AppLanguage, question: String = "") {
+    public init(expected: AppLanguage, question: String = "", earlierReplies: [String] = []) {
         self.expected = expected
         self.question = Self.normalized(question)
+        self.earlierReplies = Set(earlierReplies.map(Self.normalized).filter { !$0.isEmpty })
     }
 
     public mutating func feed(_ chunk: String) -> Verdict {
         if decided { return .release(chunk) }
         buffer += chunk
         guard Self.letters(in: buffer) >= Self.letterThreshold else { return .hold }
+        // 앞 답과 똑같이 시작하면 끝까지 쥐고 본다. 같은 답인지는 끝나야 안다.
+        let key = Self.normalized(buffer)
+        if earlierReplies.contains(where: { $0.hasPrefix(key) }) { return .hold }
         decided = true
         let text = buffer
         buffer = ""
@@ -66,6 +74,10 @@ public struct ReplyLanguageGuard: Sendable {
             rejection = .echo
             return .reject
         }
+        if earlierReplies.contains(Self.normalized(text)) {
+            rejection = .repeated
+            return .reject
+        }
         guard Self.letters(in: text) >= Self.shortReplyThreshold else { return .release(text) }
         return judge(text)
     }
@@ -73,6 +85,10 @@ public struct ReplyLanguageGuard: Sendable {
     private mutating func judge(_ text: String) -> Verdict {
         if isEcho(text) {
             rejection = .echo
+            return .reject
+        }
+        if earlierReplies.contains(Self.normalized(text)) {
+            rejection = .repeated
             return .reject
         }
         if !Self.matches(text, expected: expected) {

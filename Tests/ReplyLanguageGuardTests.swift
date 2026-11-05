@@ -122,4 +122,24 @@ final class ReplyLanguageGuardTests: XCTestCase {
         XCTAssertEqual(guardian.feed("I'm a language model developed by"), .reject)
         XCTAssertEqual(guardian.rejection, .wrongLanguage)
     }
+
+    // MARK: - 앞 답 되풀이 (1.15.5 점검: 서로 다른 질문 셋에 같은 문장)
+
+    func testRepeatingAnEarlierReplyIsRejected() {
+        let earlier = "야는 랠프 월도 에머슨의 친구야."
+        var guardian = ReplyLanguageGuard(expected: .korean, question: "작가의 일생을 알려 줘",
+                                          earlierReplies: [earlier])
+        XCTAssertEqual(guardian.feed("야는 랠프 월도 에머슨의"), .hold, "앞 답과 같게 시작하면 끝까지 쥔다")
+        XCTAssertEqual(guardian.feed(" 친구야."), .hold)
+        XCTAssertEqual(guardian.finish(), .reject)
+        XCTAssertEqual(guardian.rejection, .repeated)
+    }
+
+    func testReplyThatOnlyStartsLikeAnEarlierOneIsReleasedAtTheEnd() {
+        var guardian = ReplyLanguageGuard(expected: .korean, question: "더 알려 줘",
+                                          earlierReplies: ["에머슨은 미국의 사상가예요."])
+        XCTAssertEqual(guardian.feed("에머슨은 미국의 사상가예요."), .hold)
+        XCTAssertEqual(guardian.feed(" 그는 자연을 사랑했어요."), .release("에머슨은 미국의 사상가예요. 그는 자연을 사랑했어요."))
+        XCTAssertNil(guardian.rejection)
+    }
 }

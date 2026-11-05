@@ -41,6 +41,8 @@ public enum QuoteChatError: LocalizedError, Equatable {
     case emptyReply
     /// 두 번 시켜도 앱 언어가 아닌 말로 답했다. 그 답은 화면에 내보내지 않았다.
     case wrongLanguage
+    /// 두 번 시켜도 질문을 되받거나 앞 답을 되풀이했다. 그 답은 화면에 내보내지 않았다.
+    case unusableReply
 
     public var errorDescription: String? {
         switch self {
@@ -58,6 +60,8 @@ public enum QuoteChatError: LocalizedError, Equatable {
             L("답이 오지 않았어요. 다시 물어봐 주세요.")
         case .wrongLanguage:
             L("답을 선택한 언어로 만들지 못했어요. 조금 다르게 다시 물어봐 주세요.")
+        case .unusableReply:
+            L("제대로 된 답을 만들지 못했어요. 조금 더 자세히 물어봐 주세요.")
         }
     }
 }

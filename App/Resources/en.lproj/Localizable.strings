@@ -1237,3 +1237,16 @@
 "명언 바꾸기" = "Change quote";
 "명언·인물 검색" = "Search quotes or authors";
 "선택한 명언" = "Selected quote";
+
+/* AI 대화 — 언어 가드 */
+"답을 선택한 언어로 만들지 못했어요. 조금 다르게 다시 물어봐 주세요." = "I couldn't answer in the selected language. Please try asking a little differently.";
+
+/* 모델 점검 (TestFlight 전용) */
+"(빈 답)" = "(empty reply)";
+"결과 복사" = "Copy results";
+"끝나면 \"결과 복사\"를 눌러 그대로 보내 주세요. 질문마다 새 대화로 시작합니다." = "When it finishes, tap \"Copy results\" and send it as is. Each question starts a new conversation.";
+"모델 점검" = "Model check";
+"모델 점검 (TestFlight 전용)" = "Model check (TestFlight only)";
+"복사했어요" = "Copied";
+"중지" = "Stop";
+"점검 시작" = "Start check";

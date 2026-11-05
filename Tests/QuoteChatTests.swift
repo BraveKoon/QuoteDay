@@ -20,7 +20,8 @@ final class QuoteChatTests: XCTestCase {
             .localNotOnSimulator,
             .localModelFailed("no space"),
             .onDeviceFailed("boom"),
-            .emptyReply
+            .emptyReply,
+            .wrongLanguage
         ]
         for error in errors {
             XCTAssertFalse((error.errorDescription ?? "").isEmpty, "\(error) 에 문구가 없다.")
@@ -383,5 +384,42 @@ final class FailingTransport: QuoteChatTransport {
         AsyncThrowingStream { continuation in
             continuation.finish(throwing: QuoteChatError.localModelFailed("저장 공간이 부족합니다"))
         }
+    }
+}
+
+/// 틀린 언어를 되풀이하지 않게 하는 프롬프트 조각.
+final class QuoteChatLanguagePromptTests: XCTestCase {
+
+    func testKoreanReminderIsKoreanOnly() {
+        let reminder = QuoteChatPrompt.languageReminder(.korean)
+        XCTAssertFalse(reminder.contains("("), "영어 괄호 지시가 다시 들어갔다")
+        XCTAssertFalse(reminder.contains("Korean"))
+    }
+
+    func testStrictReminderDiffersFromNormal() {
+        for language in AppLanguage.allCases {
+            XCTAssertNotEqual(QuoteChatPrompt.strictLanguageReminder(language),
+                              QuoteChatPrompt.languageReminder(language))
+        }
+    }
+
+    func testStrictFlagReachesTheLocalPrompt() {
+        let prompt = QuoteChatPrompt.localPrompt(question: "야", language: .korean, strict: true)
+        XCTAssertTrue(prompt.contains(QuoteChatPrompt.strictLanguageReminder(.korean)))
+        XCTAssertTrue(prompt.contains(QuoteChatPrompt.noThinkSwitch))
+    }
+
+    func testExamplesAreWrittenInTheAppLanguage() {
+        XCTAssertTrue(ReplyLanguageGuard.matches(QuoteChatPrompt.conversationExamples(language: .korean),
+                                                 expected: .korean))
+        XCTAssertTrue(ReplyLanguageGuard.matches(QuoteChatPrompt.conversationExamples(language: .english),
+                                                 expected: .english))
+        XCTAssertTrue(ReplyLanguageGuard.matches(QuoteChatPrompt.conversationExamples(language: .simplifiedChinese),
+                                                 expected: .simplifiedChinese))
+    }
+
+    func testSystemPromptIncludesExamples() {
+        let system = QuoteChatPrompt.system(context: nil, language: .korean)
+        XCTAssertTrue(system.contains(QuoteChatPrompt.conversationExamples(language: .korean)))
     }
 }

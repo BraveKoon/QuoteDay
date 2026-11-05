@@ -20,6 +20,27 @@ struct AIChatSettingsView: View {
                 }
 
                 privacyCard
+
+                // TestFlight 에서만. 실기기에서 모델이 어떻게 답하는지 한 번에 돌려 본다.
+                if QwenDiagnostic.isAvailable, aiSettings.provider == .localQwen {
+                    NavigationLink {
+                        QwenDiagnosticView()
+                    } label: {
+                        HStack {
+                            Text(verbatim: "모델 점검 (TestFlight 전용)")
+                                .font(ClayFont.callout())
+                                .foregroundStyle(ClayTheme.textPrimary)
+                            Spacer(minLength: 0)
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(ClayTheme.textSecondary)
+                        }
+                        .padding(ClayTheme.Spacing.l)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .clayCard()
+                    }
+                    .buttonStyle(.plain)
+                }
             }
             .padding(.horizontal, ClayTheme.Spacing.m)
             .padding(.vertical, ClayTheme.Spacing.m)

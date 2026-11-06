@@ -105,7 +105,7 @@ public struct QuoteChatContext: Hashable, Sendable {
 public enum QuoteChatPrompt {
 
     /// 캐시·표시용 판 번호. 프롬프트를 고치면 올린다.
-    public static let version = 5
+    public static let version = 6
 
     public static func languageName(_ language: AppLanguage) -> String {
         QuoteExplainerPrompt.languageName(language)
@@ -129,6 +129,18 @@ public enum QuoteChatPrompt {
         case .english: "Answer in English only."
         case .simplifiedChinese: "请只用简体中文回答。"
         case .traditionalChinese: "請只用繁體中文回答。"
+        }
+    }
+
+    /// 길이와 모양. **질문 바로 옆에** 둔다 — 지침의 "3~6문장, 목록 기호 남발 금지" 를 4B 도
+    /// 지키지 않았다(1.15.8 점검: "내 상황에 적용" 에 번호 목록 넷과 요약, 16초).
+    /// 짧게 쓰면 기다리는 시간도 그만큼 준다.
+    public static func lengthReminder(_ language: AppLanguage) -> String {
+        switch language {
+        case .korean: "3~5문장으로, 번호나 목록 없이 이어서 쓰세요."
+        case .english: "Write 3 to 5 sentences as one paragraph, no numbered lists."
+        case .simplifiedChinese: "用三到五句话连贯地写，不要编号或列表。"
+        case .traditionalChinese: "用三到五句話連貫地寫，不要編號或列表。"
         }
     }
 
@@ -157,7 +169,7 @@ public enum QuoteChatPrompt {
         recap: [String] = []
     ) -> String {
         let reminder = strict ? strictLanguageReminder(language) : languageReminder(language)
-        let tail = "\(reminder) \(noThinkSwitch)"
+        let tail = "\(reminder) \(lengthReminder(language)) \(noThinkSwitch)"
         var parts: [String] = []
         if let context {
             parts.append("""

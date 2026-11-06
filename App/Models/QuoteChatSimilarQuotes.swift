@@ -1,11 +1,14 @@
 import Foundation
 
-/// "비슷한 뜻의 다른 명언이 있을까?" 는 **앱에 수록된 같은 주제의 명언**으로 답한다.
+/// "비슷한 뜻의 다른 명언이 있을까?" 는 **앱에 수록된 결이 비슷한 명언**으로 답한다.
 ///
 /// 1.15.6·1.15.7 실기기 점검(Qwen3 1.7B): 두 번 다 지금 보고 있는 명언을 그대로 돌려주었다.
 /// 작은 모델은 다른 명언을 떠올리지 못하고, 떠올려도 작가를 틀리게 붙이기 쉽다.
-/// 앱에는 사람이 고른 명언 201편이 주제별로 있다 — 그중에서 보여 주면 정확하고,
-/// 눌러서 찾아볼 수도 있다. 기기 내 Qwen 에만 쓴다.
+/// 앱에는 사람이 고른 명언 201편이 있다 — 그중에서 보여 주면 정확하고, 눌러서 찾아볼 수도 있다.
+///
+/// 고르는 기준은 **기분 꼬리표가 먼저, 주제는 그다음**이다. 1.15.8 은 주제(카테고리)만 보았는데,
+/// "인간관계" 가 넓어서 우정 명언에 리더십·음식 명언이 따라 나왔다. 기분 꼬리표(`MoodLibrary`)는
+/// "어떤 마음일 때 읽히는가" 로 사람이 붙인 것이라 결이 더 가깝다. 기기 내 Qwen 에만 쓴다.
 enum QuoteChatSimilarQuotes {
 
     /// 비슷한 명언을 찾는 질문인지.
@@ -26,7 +29,7 @@ enum QuoteChatSimilarQuotes {
         library: QuoteLibrary = .shared
     ) -> String? {
         guard let context, matches(question) else { return nil }
-        let picks = candidates(for: context.quote, in: library.quotes(in: context.quote.category))
+        let picks = candidates(for: context.quote, in: library.quotes)
         guard !picks.isEmpty else { return nil }
 
         let lines = picks.map { quote -> String in
@@ -34,31 +37,68 @@ enum QuoteChatSimilarQuotes {
             let name = language == .english ? author.name : author.displayName
             return "\u{201C}\(quote.text)\u{201D} — \(name)"
         }
-        let topic = context.quote.category.title
         switch language {
         case .korean:
-            return "같은 주제(\(topic))의 다른 명언이에요.\n\n" + lines.joined(separator: "\n\n")
+            return "이 명언과 결이 비슷한 명언이에요.\n\n" + lines.joined(separator: "\n\n")
                 + "\n\n마음에 드는 명언이 있으면 위쪽 명언을 눌러 바꾼 뒤 이어서 물어볼 수 있어요."
         case .english:
-            return "Here are other quotes on the same theme (\(topic)).\n\n" + lines.joined(separator: "\n\n")
+            return "Here are quotes in a similar spirit.\n\n" + lines.joined(separator: "\n\n")
                 + "\n\nIf one speaks to you, tap the quote at the top to switch to it and keep asking."
         case .simplifiedChinese:
-            return "这些是同一主题（\(topic)）的其他名言。\n\n" + lines.joined(separator: "\n\n")
+            return "这些名言和它意境相近。\n\n" + lines.joined(separator: "\n\n")
                 + "\n\n如果有喜欢的，可以点按上方的名言切换过去，继续提问。"
         case .traditionalChinese:
-            return "這些是同一主題（\(topic)）的其他名言。\n\n" + lines.joined(separator: "\n\n")
+            return "這些名言和它意境相近。\n\n" + lines.joined(separator: "\n\n")
                 + "\n\n如果有喜歡的，可以點按上方的名言切換過去，繼續提問。"
         }
     }
 
-    /// 지금 명언과 작가를 뺀 같은 주제의 명언 중 세 편. 순서는 명언마다 정해져 있다
-    /// (같은 명언에서 물으면 같은 답) — 매번 달라지면 점검 결과를 비교할 수 없다.
-    static func candidates(for quote: Quote, in pool: [Quote], count: Int = 3) -> [Quote] {
-        let others = pool
-            .filter { $0.slug != quote.slug && $0.authorID != quote.authorID }
-            .sorted { $0.slug < $1.slug }
-        guard !others.isEmpty else { return [] }
-        let start = Int(quote.slug.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0x7FFF_FFFF }) % others.count
-        return (0..<min(count, others.count)).map { others[(start + $0) % others.count] }
+    /// 지금 명언과 작가를 뺀 명언 중 결이 가장 가까운 세 편.
+    ///
+    /// 점수: 함께 붙은 기분 하나에 2점, 겹치는 주제(주·보조) 하나에 1점. 0점은 고르지 않는다.
+    /// 같은 점수 안의 순서는 명언마다 정해져 있다(같은 명언에서 물으면 같은 답) — 매번
+    /// 달라지면 점검 결과를 비교할 수 없다.
+    static func candidates(
+        for quote: Quote,
+        in pool: [Quote],
+        moods: [String: [QuoteMood]] = MoodLibrary.bySlug,
+        count: Int = 3
+    ) -> [Quote] {
+        let myMoods: Set<QuoteMood> = Set(moods[quote.slug] ?? [])
+        let myTopics: Set<AppCategory> = Set([quote.category] + quote.secondaryCategories)
+        let seed = Self.hash(quote.slug, seed: 0)
+
+        // 한 줄 사슬로 쓰면 컴파일러가 타입을 제때 풀지 못한다(CI: "unable to type-check").
+        // 단계마다 타입을 적어 둔다.
+        var ranked: [Ranked] = []
+        for other in pool where other.slug != quote.slug && other.authorID != quote.authorID {
+            let otherMoods: Set<QuoteMood> = Set(moods[other.slug] ?? [])
+            let otherTopics: Set<AppCategory> = Set([other.category] + other.secondaryCategories)
+            let moodScore: Int = myMoods.intersection(otherMoods).count * 2
+            let topicScore: Int = myTopics.intersection(otherTopics).count
+            let score: Int = moodScore + topicScore
+            guard score > 0 else { continue }
+            ranked.append(Ranked(quote: other, score: score, order: Self.hash(other.slug, seed: seed)))
+        }
+        ranked.sort { (lhs: Ranked, rhs: Ranked) -> Bool in
+            if lhs.score != rhs.score { return lhs.score > rhs.score }
+            return lhs.order < rhs.order
+        }
+        return ranked.prefix(count).map { $0.quote }
+    }
+
+    private struct Ranked {
+        let quote: Quote
+        let score: Int
+        let order: Int
+    }
+
+    /// 실행마다 같은 값을 내는 간단한 해시(`hashValue` 는 실행마다 달라진다).
+    private static func hash(_ text: String, seed: Int) -> Int {
+        var value = seed
+        for scalar in text.unicodeScalars {
+            value = (value &* 31 &+ Int(scalar.value)) & 0x7FFF_FFFF
+        }
+        return value
     }
 }

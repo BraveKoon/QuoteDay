@@ -260,8 +260,9 @@ public final class LocalQwenService {
                         // 목적이라 더 올리지는 않는다 — 높이면 없는 일화를 만든다.
                         parameters.temperature = 0.7
                         parameters.topP = 0.8
-                        // 짧은 모델이 길게 늘어놓으면 앞의 내용이 흐려진다.
-                        parameters.maxTokens = 700
+                        // 3~5문장이면 한국어로 300토큰 안쪽이다. 700 이던 한도를 줄여, 지시를 어기고
+                        // 늘어놓을 때도 기다리는 시간이 끝없이 길어지지 않게 한다(4B 는 초당 20토큰 남짓).
+                        parameters.maxTokens = 450
                         session = ChatSession(container, instructions: system, generateParameters: parameters)
                         sessionSystem = system
                     }

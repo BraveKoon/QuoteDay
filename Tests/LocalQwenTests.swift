@@ -15,16 +15,21 @@ final class LocalQwenTests: XCTestCase {
         XCTAssertEqual(LocalQwenModel.recommended(physicalMemory: 3 * gb), .small)
         XCTAssertEqual(LocalQwenModel.recommended(physicalMemory: 4 * gb), .small)
         XCTAssertEqual(LocalQwenModel.recommended(physicalMemory: 6 * gb), .large)
-        XCTAssertEqual(LocalQwenModel.recommended(physicalMemory: 12 * gb), .large)
+        XCTAssertEqual(LocalQwenModel.recommended(physicalMemory: 12 * gb), .xlarge)
     }
 
-    /// 4B 는 메모리 한도에 가깝다. 자동 선택이 절대 고르면 안 된다.
-    func testAutomaticNeverPicksTheFourBillionModel() {
+    /// 1.15.8 에서 4B 가 실기기에서 돌았다. 쓸 수 있는 기기(8GB)에서만 자동으로 고른다.
+    func testAutomaticPicksFourBillionOnlyWhereItFits() {
         let gb = UInt64(1024 * 1024 * 1024)
-        for memory in [2, 4, 6, 8, 12, 16, 32] as [UInt64] {
+        for memory in [2, 4, 6] as [UInt64] {
             XCTAssertNotEqual(LocalQwenModel.recommended(physicalMemory: memory * gb), .xlarge)
             XCTAssertNotEqual(LocalQwenChoice.automatic.resolve(physicalMemory: memory * gb), .xlarge)
         }
+        for memory in [8, 12, 16] as [UInt64] {
+            XCTAssertEqual(LocalQwenModel.recommended(physicalMemory: memory * gb), .xlarge)
+        }
+        // 8GB 기기가 보고하는 실제 값(약 7.4GiB)
+        XCTAssertEqual(LocalQwenModel.recommended(physicalMemory: 7_900_000_000), .xlarge)
     }
 
     func testFourBillionIsOnlyOfferedOnEightGigabyteDevices() {
@@ -61,7 +66,8 @@ final class LocalQwenTests: XCTestCase {
     func testChoiceResolves() {
         let gb = UInt64(1024 * 1024 * 1024)
         XCTAssertEqual(LocalQwenChoice.automatic.resolve(physicalMemory: 4 * gb), .small)
-        XCTAssertEqual(LocalQwenChoice.automatic.resolve(physicalMemory: 8 * gb), .large)
+        XCTAssertEqual(LocalQwenChoice.automatic.resolve(physicalMemory: 6 * gb), .large)
+        XCTAssertEqual(LocalQwenChoice.automatic.resolve(physicalMemory: 8 * gb), .xlarge)
         // 직접 고른 것은 기기 메모리와 상관없이 그대로 존중한다.
         XCTAssertEqual(LocalQwenChoice.large.resolve(physicalMemory: 3 * gb), .large)
         XCTAssertEqual(LocalQwenChoice.small.resolve(physicalMemory: 16 * gb), .small)

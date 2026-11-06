@@ -106,12 +106,16 @@ public enum LocalQwenModel: String, CaseIterable, Codable, Identifiable, Sendabl
         available(physicalMemory: ProcessInfo.processInfo.physicalMemory)
     }
 
-    /// 이 기기에 맞는 모델. 1.7B 는 6GB 이상일 때만 권한다. **4B 는 권하지 않는다**
-    /// — 메모리 한도에 가까워서, 직접 고른 사람만 쓴다.
+    /// 이 기기에 맞는 모델. 8GB 기기는 4B, 6GB 이상은 1.7B, 그 아래는 0.6B.
+    ///
+    /// 1.15.8 까지는 4B 를 권하지 않았다(실행하면 iOS 가 앱을 내렸다). 메모리 한도를 늘리는
+    /// 권한과 GPU 캐시 한도를 둔 뒤 실기기에서 4B 가 돌았고, 1.7B 와 같은 점검에서 답의 질이
+    /// 크게 달랐다(1.7B: "이 명언의 술어는…", 4B: 질문에 맞는 설명). 쓸 수 있는 기기에는 4B 를 권한다.
     ///
     /// 물리 메모리를 인자로 받는 이유: 테스트에서 여러 기기를 흉내 낼 수 있어야 한다.
     public static func recommended(physicalMemory: UInt64) -> LocalQwenModel {
-        physicalMemory >= LocalQwenModel.large.requiredMemory ? .large : .small
+        if LocalQwenModel.xlarge.isSupported(physicalMemory: physicalMemory) { return .xlarge }
+        return physicalMemory >= LocalQwenModel.large.requiredMemory ? .large : .small
     }
 
     /// 지금 기기의 권장 모델.

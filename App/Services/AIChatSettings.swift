@@ -59,12 +59,13 @@ public final class AIChatSettings {
 
     /// 기기 내 Qwen 에 실제로 쓸 모델.
     ///
-    /// 고른 크기가 아직 없는데 **다른 크기가 이미 있으면** 있는 쪽을 쓴다.
-    /// 이미 받아 둔 것을 두고 또 1GB 를 받게 하는 것은 무례하다.
+    /// 고른 크기가 아직 없는데 **다른 크기가 이미 있으면** 있는 쪽을 쓴다(여럿이면 가장 큰 것).
+    /// 이미 받아 둔 것을 두고 또 1GB 를 받게 하는 것은 무례하다. 자동 추천이 4B 로 바뀌어도
+    /// 1.7B 를 받아 둔 사람은 그대로 1.7B 로 대화한다 — 4B 는 설정에서 직접 받는다.
     public var localModel: LocalQwenModel {
         let wanted = localChoice.resolve()
         if localService.isDownloaded(wanted) { return wanted }
-        if let ready = LocalQwenModel.allCases.first(where: { localService.isDownloaded($0) }) {
+        if let ready = LocalQwenModel.allCases.last(where: { localService.isDownloaded($0) }) {
             return ready
         }
         return wanted

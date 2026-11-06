@@ -29,8 +29,19 @@ final class QuoteChatSimilarQuotesTests: XCTestCase {
         }
         let context = QuoteChatContext(quote: quote, author: QuoteLibrary.shared.author(for: quote))
         let reply = QuoteChatSimilarQuotes.reply(to: "비슷한 뜻의 다른 명언이 있을까?", language: .korean, context: context) ?? ""
-        XCTAssertTrue(reply.hasPrefix("같은 주제("))
+        XCTAssertTrue(reply.hasPrefix("이 명언과 결이 비슷한 명언이에요."))
         XCTAssertFalse(reply.contains(quote.text), "지금 명언은 다시 보여 주지 않는다")
+    }
+
+    /// 1.15.8 실기기: 우정 명언에 리더십·음식 명언이 따라 나왔다. 기분이 겹치는 쪽이 먼저다.
+    func testSharedMoodOutranksSharedTopicOnly() {
+        let friend = Quote(slug: "friend", text: "친구", authorID: "a", category: .relationship)
+        let warm = Quote(slug: "warm", text: "따뜻함", authorID: "b", category: .daily)
+        let leader = Quote(slug: "leader", text: "리더", authorID: "c", category: .relationship)
+        let unrelated = Quote(slug: "food", text: "음식", authorID: "d", category: .meal)
+        let moods: [String: [QuoteMood]] = ["friend": [.relationships, .joyful], "warm": [.relationships]]
+        let picks = QuoteChatSimilarQuotes.candidates(for: friend, in: [unrelated, leader, warm], moods: moods)
+        XCTAssertEqual(picks.map(\.slug), ["warm", "leader"], "기분이 겹치는 명언이 먼저, 아무것도 안 겹치면 빠진다")
     }
 
     func testBiggerModelsNeedMoreFreeMemory() {

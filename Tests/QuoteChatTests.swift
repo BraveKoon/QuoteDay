@@ -459,6 +459,6 @@ final class QuoteChatLanguagePromptTests: XCTestCase {
 
     func testPromptWithoutContextOrRecapStaysShort() {
         let prompt = QuoteChatPrompt.localPrompt(question: "야", language: .korean)
-        XCTAssertEqual(prompt, "야\n\n\(QuoteChatPrompt.languageReminder(.korean)) \(QuoteChatPrompt.noThinkSwitch)")
+        XCTAssertEqual(prompt, "야\n\n\(QuoteChatPrompt.languageReminder(.korean)) \(QuoteChatPrompt.lengthReminder(.korean)) \(QuoteChatPrompt.noThinkSwitch)")
     }
 }

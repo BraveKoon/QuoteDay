@@ -190,10 +190,11 @@ enum QuoteChatAuthorFacts {
     }
 }
 
-/// 앱이 직접 답하는 질문 전체(일상 말 + 작가 사실). 기기 내 Qwen 통로와 모델 점검이 같이 쓴다.
+/// 앱이 직접 답하는 질문 전체(일상 말 + 작가 사실 + 비슷한 명언). 기기 내 Qwen 통로와 모델 점검이 같이 쓴다.
 enum QuoteChatAppAnswer {
     static func reply(to question: String, language: AppLanguage, context: QuoteChatContext?) -> String? {
         QuoteChatSmallTalk.reply(to: question, language: language, context: context)
             ?? QuoteChatAuthorFacts.reply(to: question, language: language, context: context)
+            ?? QuoteChatSimilarQuotes.reply(to: question, language: language, context: context)
     }
 }

@@ -3,6 +3,10 @@ import Observation
 import Hub
 import MLXLLM
 import MLXLMCommon
+import os
+#if canImport(MLX)
+import MLX
+#endif
 
 /// 기기 안에서 Qwen3 를 **직접** 돌린다. 내려받기·적재·생성까지 이 한 곳에서 맡는다.
 ///
@@ -17,6 +21,9 @@ import MLXLMCommon
 public final class LocalQwenService {
 
     public static let shared = LocalQwenService()
+
+    /// MLX GPU 캐시 한도. 생성 속도에는 거의 차이가 없고 최고 메모리를 크게 줄인다.
+    static let gpuCacheLimit = 20 * 1024 * 1024
 
     /// 화면이 그대로 읽는 상태.
     public private(set) var downloaded: Set<LocalQwenModel> = []
@@ -152,6 +159,22 @@ public final class LocalQwenService {
         // 다른 모델을 쓰고 있었다면 먼저 내린다. 두 모델을 동시에 들고 있으면
         // 1.7B 기준으로 1GB 가까이 더 쓰게 되고, iOS 는 그걸 용납하지 않는다.
         unload()
+
+        #if canImport(MLX)
+        // MLX 는 쓰고 난 GPU 버퍼를 다시 쓰려고 쥐고 있다. 한도가 없으면 그 캐시가 가중치
+        // 옆에서 계속 자라 4B 가 iOS 의 메모리 한도를 넘는다(1.15.7 실기기: 4B 실행 즉시 종료).
+        GPU.set(cacheLimit: Self.gpuCacheLimit)
+        #endif
+
+        // 올리기 **전에** 남은 메모리를 본다. 모자라면 iOS 가 앱을 말없이 내리는 대신
+        // 이유를 말하고 멈춘다. `os_proc_available_memory` 는 이 앱이 더 쓸 수 있는 양이다
+        // (시뮬레이터·맥에서는 0 을 돌려준다 — 그때는 보지 않는다).
+        let available = UInt64(os_proc_available_memory())
+        if available > 0, available < model.minimumFreeMemory {
+            throw QuoteChatError.localModelFailed(
+                L("지금 이 기기에서 쓸 수 있는 메모리가 모자라 이 모델을 올리지 못했어요. 다른 앱을 닫고 다시 시도하거나 더 작은 모델을 골라 주세요.")
+            )
+        }
 
         let configuration = ModelConfiguration(id: model.repository)
         let api = hub

@@ -64,23 +64,41 @@ enum QuoteChatSimilarQuotes {
         moods: [String: [QuoteMood]] = MoodLibrary.bySlug,
         count: Int = 3
     ) -> [Quote] {
-        let myMoods = Set(moods[quote.slug] ?? [])
-        let myTopics = Set([quote.category] + quote.secondaryCategories)
-        func score(_ other: Quote) -> Int {
-            let sharedMoods = myMoods.intersection(moods[other.slug] ?? []).count
-            let sharedTopics = myTopics.intersection([other.category] + other.secondaryCategories).count
-            return sharedMoods * 2 + sharedTopics
+        let myMoods: Set<QuoteMood> = Set(moods[quote.slug] ?? [])
+        let myTopics: Set<AppCategory> = Set([quote.category] + quote.secondaryCategories)
+        let seed = Self.hash(quote.slug, seed: 0)
+
+        // 한 줄 사슬로 쓰면 컴파일러가 타입을 제때 풀지 못한다(CI: "unable to type-check").
+        // 단계마다 타입을 적어 둔다.
+        var ranked: [Ranked] = []
+        for other in pool where other.slug != quote.slug && other.authorID != quote.authorID {
+            let otherMoods: Set<QuoteMood> = Set(moods[other.slug] ?? [])
+            let otherTopics: Set<AppCategory> = Set([other.category] + other.secondaryCategories)
+            let moodScore: Int = myMoods.intersection(otherMoods).count * 2
+            let topicScore: Int = myTopics.intersection(otherTopics).count
+            let score: Int = moodScore + topicScore
+            guard score > 0 else { continue }
+            ranked.append(Ranked(quote: other, score: score, order: Self.hash(other.slug, seed: seed)))
         }
-        let seed = quote.slug.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0x7FFF_FFFF }
-        func tiebreak(_ other: Quote) -> Int {
-            other.slug.unicodeScalars.reduce(seed) { ($0 &* 33 &+ Int($1.value)) & 0x7FFF_FFFF }
+        ranked.sort { (lhs: Ranked, rhs: Ranked) -> Bool in
+            if lhs.score != rhs.score { return lhs.score > rhs.score }
+            return lhs.order < rhs.order
         }
-        return pool
-            .filter { $0.slug != quote.slug && $0.authorID != quote.authorID }
-            .map { (quote: $0, score: score($0), order: tiebreak($0)) }
-            .filter { $0.score > 0 }
-            .sorted { $0.score != $1.score ? $0.score > $1.score : $0.order < $1.order }
-            .prefix(count)
-            .map { $0.quote }
+        return ranked.prefix(count).map { $0.quote }
+    }
+
+    private struct Ranked {
+        let quote: Quote
+        let score: Int
+        let order: Int
+    }
+
+    /// 실행마다 같은 값을 내는 간단한 해시(`hashValue` 는 실행마다 달라진다).
+    private static func hash(_ text: String, seed: Int) -> Int {
+        var value = seed
+        for scalar in text.unicodeScalars {
+            value = (value &* 31 &+ Int(scalar.value)) & 0x7FFF_FFFF
+        }
+        return value
     }
 }

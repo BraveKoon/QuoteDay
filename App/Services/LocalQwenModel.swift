@@ -65,6 +65,16 @@ public enum LocalQwenModel: String, CaseIterable, Codable, Identifiable, Sendabl
         }
     }
 
+    /// 올리기 직전에 이 앱이 **더 쓸 수 있어야 하는** 메모리. 가중치 + KV 캐시·작업 공간.
+    /// 이보다 적으면 올리다가 iOS 에 내려진다.
+    public var minimumFreeMemory: UInt64 {
+        switch self {
+        case .small: 700 * 1024 * 1024
+        case .large: 1_600 * 1024 * 1024
+        case .xlarge: 3_000 * 1024 * 1024
+        }
+    }
+
     /// 이 모델을 무리 없이 돌리려면 필요한 물리 메모리.
     ///
     /// 모델 크기만큼 필요하지는 않다. 4bit 가중치에 KV 캐시·토크나이저·MLX

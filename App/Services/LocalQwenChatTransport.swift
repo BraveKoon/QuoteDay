@@ -63,7 +63,8 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
                         )
                         let rejection = try await self.attempt(
                             system: system, prompt: prompt, question: question,
-                            earlierReplies: earlierReplies, language: language, into: continuation
+                            earlierReplies: earlierReplies, quote: context?.quote.text ?? "",
+                            language: language, into: continuation
                         )
                         guard let rejection else {
                             continuation.finish()
@@ -90,11 +91,16 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
         prompt: String,
         question: String,
         earlierReplies: [String],
+        quote: String,
         language: AppLanguage,
         into continuation: AsyncThrowingStream<String, Error>.Continuation
     ) async throws -> ReplyLanguageGuard.Rejection? {
         var replyGuard = ReplyLanguageGuard(expected: language, question: question, earlierReplies: earlierReplies)
-        for try await chunk in service.stream(model: model, system: system, prompt: prompt) {
+        // 답 머리에 옮겨 적은 명언은 떼고 가드에 넘긴다(`QuotePrefixFilter` 의 설명).
+        var quoteFilter = QuotePrefixFilter(quote: quote)
+        for try await raw in service.stream(model: model, system: system, prompt: prompt) {
+            let chunk = quoteFilter.feed(raw)
+            if chunk.isEmpty { continue }
             switch replyGuard.feed(chunk) {
             case .hold:
                 continue
@@ -102,6 +108,14 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
                 continuation.yield(text)
             case .reject:
                 return replyGuard.rejection ?? .wrongLanguage
+            }
+        }
+        let tail = quoteFilter.finish()
+        if !tail.isEmpty {
+            switch replyGuard.feed(tail) {
+            case .hold: break
+            case .release(let text): continuation.yield(text)
+            case .reject: return replyGuard.rejection ?? .wrongLanguage
             }
         }
         switch replyGuard.finish() {

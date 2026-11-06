@@ -16,6 +16,10 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<!-- 기기 안 AI(Qwen3 4B, 가중치만 2.3GB). 기본 한도로는 적재 중에 iOS 가 앱을 내린다.
+	     8GB 기기에서 앱이 쓸 수 있는 메모리를 늘려 달라고 요청한다. 위젯에는 넣지 않는다. -->
+	<key>com.apple.developer.kernel.increased-memory-limit</key>
+	<true/>
 	<key>com.apple.developer.icloud-services</key>
 	<array>
 		<string>CloudKit</string>

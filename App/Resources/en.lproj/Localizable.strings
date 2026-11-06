@@ -1251,3 +1251,4 @@
 "중지" = "Stop";
 "점검 시작" = "Start check";
 "제대로 된 답을 만들지 못했어요. 조금 더 자세히 물어봐 주세요." = "I couldn't come up with a proper answer. Please ask in a bit more detail.";
+"지금 이 기기에서 쓸 수 있는 메모리가 모자라 이 모델을 올리지 못했어요. 다른 앱을 닫고 다시 시도하거나 더 작은 모델을 골라 주세요." = "There isn't enough free memory on this device to load this model right now. Close other apps and try again, or choose a smaller model.";

@@ -52,10 +52,12 @@ final class QwenDiagnosticTests: XCTestCase {
             for index in [4, 5] {
                 XCTAssertNotNil(QuoteChatAuthorFacts.classify(prompts[index]), "\(language) \(prompts[index])")
             }
-            for index in [2, 3, 6, 7] {
+            XCTAssertTrue(QuoteChatSimilarQuotes.matches(prompts[7]), "\(language) \(prompts[7])")
+            for index in [2, 3, 6] {
                 let prompt = prompts[index]
                 XCTAssertNil(QuoteChatSmallTalk.classify(prompt), "\(language) \(prompt) 는 모델이 답해야 한다")
                 XCTAssertNil(QuoteChatAuthorFacts.classify(prompt), "\(language) \(prompt) 는 모델이 답해야 한다")
+                XCTAssertFalse(QuoteChatSimilarQuotes.matches(prompt), "\(language) \(prompt) 는 모델이 답해야 한다")
             }
         }
     }

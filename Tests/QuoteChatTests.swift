@@ -434,12 +434,12 @@ final class QuoteChatLanguagePromptTests: XCTestCase {
         let messages = [
             user("안녕"), bot("안녕하세요!"),
             user("숨은 뜻 알려줘"), bot("…"),
-            user("작가는 누구야?"), bot("…"),
+            user("작가가 이 말을 한 이유가 궁금해"), bot("…"),
             user("ㅋㅋㅋ"), bot("…"),
             user("어느 나라 사람이야?"), bot("…"),
             user("더 알려 줘")
         ]
-        XCTAssertEqual(LocalQwenChatTransport.recap(of: messages), ["작가는 누구야?", "어느 나라 사람이야?"])
+        XCTAssertEqual(LocalQwenChatTransport.recap(of: messages), ["작가가 이 말을 한 이유가 궁금해", "어느 나라 사람이야?"])
     }
 
     func testRecapTruncatesLongQuestions() {

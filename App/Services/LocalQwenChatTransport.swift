@@ -36,15 +36,18 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
         guard !question.isEmpty else {
             return AsyncThrowingStream { $0.finish() }
         }
-        // 인사·"넌 누구야"·웃음은 앱이 답한다(`QuoteChatSmallTalk` 의 설명).
-        if let canned = QuoteChatSmallTalk.reply(to: question, language: language, context: context) {
+        // 인사·"넌 누구야"·웃음, 작가의 국적·생몰·직업·일생은 앱이 답한다
+        // (`QuoteChatSmallTalk`, `QuoteChatAuthorFacts` 의 설명).
+        if let canned = QuoteChatAppAnswer.reply(to: question, language: language, context: context) {
             return AsyncThrowingStream { continuation in
                 continuation.yield(canned)
                 continuation.finish()
             }
         }
-        let recap = Self.recap(of: messages)
+        let recap = Self.isFollowUp(question) ? Self.recap(of: messages) : []
+        // 명언 본문을 그대로 돌려준 답도 답이 아니다(1.15.6 점검: "비슷한 다른 명언?" 에 명언 그대로).
         let earlierReplies = messages.filter { $0.role == .assistant }.map(\.text)
+            + (context.map { [$0.quote.text] } ?? [])
 
         return AsyncThrowingStream { continuation in
             let task = Task { @MainActor in
@@ -112,6 +115,22 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
         }
     }
 
+    /// 앞 질문을 이어 받는 말인지. **이어 받을 때만** 앞 질문을 적어 준다.
+    ///
+    /// 1.15.6 점검: 앞 질문을 늘 적어 주었더니 `지금 내 상황에 어떻게 적용할까?` 에
+    /// 바로 앞 질문(`작가는 어느 나라 사람이야?`)의 답을 했다. 작은 모델은 목록의 마지막
+    /// 질문에 답해 버린다. `더 쉽게 설명해 줘` 처럼 가리키는 말이 있는 짧은 질문에만 붙인다.
+    nonisolated static func isFollowUp(_ question: String) -> Bool {
+        let text = question.lowercased()
+        guard ReplyLanguageGuard.normalized(text).count <= 25 else { return false }
+        let markers = ["더 ", "더쉽", "다시", "쉽게", "자세히", "자세하게", "그거", "그건", "그게", "그럼", "그래서",
+                       "방금", "위에", "앞에", "예를", "예시", "요약", "무슨 말",
+                       "再", "更", "简单", "簡單", "详细", "詳細", "刚才", "剛才", "例子", "总结", "總結"]
+        if markers.contains(where: { text.contains($0) }) { return true }
+        let words = Set(text.split(whereSeparator: { !$0.isLetter }).map(String.init))
+        return !words.isDisjoint(with: ["more", "again", "simpler", "simply", "that", "it", "example", "summarize", "elaborate"])
+    }
+
     /// 질문 옆에 적어 줄 앞선 **질문**. 최근 두 개, 한 개당 120자까지.
     ///
     /// **모델의 앞 답은 넣지 않는다.** 1.15.5 에서 앞 답까지 적어 주었더니 1.7B 가
@@ -122,7 +141,9 @@ public final class LocalQwenChatTransport: QuoteChatTransport {
     nonisolated static func recap(of messages: [QuoteChatMessage], turns: Int = 2, limit: Int = 120) -> [String] {
         var questions = messages.filter { $0.role == .user }.map { $0.text.trimmed }
         if messages.last?.role == .user, !questions.isEmpty { questions.removeLast() }
-        let meaningful = questions.filter { !$0.isEmpty && QuoteChatSmallTalk.classify($0) == nil }
+        let meaningful = questions.filter {
+            !$0.isEmpty && QuoteChatSmallTalk.classify($0) == nil && QuoteChatAuthorFacts.classify($0) == nil
+        }
         return meaningful.suffix(turns).map { String($0.prefix(limit)) }
     }
 }

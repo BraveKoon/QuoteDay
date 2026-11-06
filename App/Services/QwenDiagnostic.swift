@@ -20,8 +20,8 @@ enum QwenDiagnostic {
     /// 점검에 쓰는 질문. 일상 말·무의미한 입력·실제 질문을 섞는다 — 실기기에서 무너진 곳이
     /// 일상 말이었다(`넌 누구야`, `야` 에 똑같은 영어 문장).
     static func prompts(language: AppLanguage) -> [String] {
-        // 앞 둘은 앱이 정해진 답을 내는 일상 말이다(가로채기가 작동하는지 본다).
-        // 나머지는 모델이 실제로 답하는 질문이고, 4번은 3번을 이어 받는다.
+        // 1·2번은 일상 말, 5·6번은 작가 사실 — 앱이 답한다(가로채기가 작동하는지 본다).
+        // 3·4·7·8번은 모델이 답하고, 4번은 3번을 이어 받는다.
         switch language {
         case .korean:
             return ["안녕", "넌 누구야", "이 명언의 숨은 뜻이 뭐야?", "더 쉽게 설명해 줘",
@@ -43,7 +43,7 @@ enum QwenDiagnostic {
     }
 
     /// 답 하나의 문제점. 비어 있으면 통과.
-    static func evaluate(reply: String, language: AppLanguage, question: String = "") -> [String] {
+    static func evaluate(reply: String, language: AppLanguage, question: String = "", quote: String = "") -> [String] {
         let text = reply.trimmed
         if text.isEmpty { return ["빈 답"] }
 
@@ -51,6 +51,10 @@ enum QwenDiagnostic {
         if !question.isEmpty,
            ReplyLanguageGuard.normalized(text) == ReplyLanguageGuard.normalized(question) {
             problems.append("질문을 되받음")
+        }
+        if !quote.isEmpty,
+           ReplyLanguageGuard.normalized(text) == ReplyLanguageGuard.normalized(quote) {
+            problems.append("명언을 그대로 되풀이함")
         }
         if text.contains("<think") || text.contains("</think") {
             problems.append("생각 구간이 새어 나옴")
@@ -103,7 +107,7 @@ enum QwenDiagnostic {
             "QuoteDay AI 점검",
             "앱 \(AppVersion.display) · 프롬프트 판 \(QuoteChatPrompt.version)",
             "모델 \(model) · 앱 언어 \(language.rawValue)",
-            "통과 \(results.filter(\.passed).count) / \(results.count)",
+            "통과 \(results.filter(\.passed).count) / \(results.count) (형식만 본다 — 내용이 맞는지는 읽어 봐야 한다)",
             ""
         ]
         for (index, result) in results.enumerated() {

@@ -43,14 +43,26 @@ final class QwenDiagnosticTests: XCTestCase {
         XCTAssertTrue(QwenDiagnostic.evaluate(reply: "야", language: .korean, question: "야").contains("질문을 되받음"))
     }
 
-    func testFirstTwoPromptsAreSmallTalkAndTheRestGoToTheModel() {
+    func testWhichPromptsTheAppAnswersAndWhichGoToTheModel() {
         for language in AppLanguage.allCases {
             let prompts = QwenDiagnostic.prompts(language: language)
-            XCTAssertNotNil(QuoteChatSmallTalk.classify(prompts[0]), "\(language) \(prompts[0])")
-            XCTAssertNotNil(QuoteChatSmallTalk.classify(prompts[1]), "\(language) \(prompts[1])")
-            for prompt in prompts.dropFirst(2) {
+            for index in [0, 1] {
+                XCTAssertNotNil(QuoteChatSmallTalk.classify(prompts[index]), "\(language) \(prompts[index])")
+            }
+            for index in [4, 5] {
+                XCTAssertNotNil(QuoteChatAuthorFacts.classify(prompts[index]), "\(language) \(prompts[index])")
+            }
+            for index in [2, 3, 6, 7] {
+                let prompt = prompts[index]
                 XCTAssertNil(QuoteChatSmallTalk.classify(prompt), "\(language) \(prompt) 는 모델이 답해야 한다")
+                XCTAssertNil(QuoteChatAuthorFacts.classify(prompt), "\(language) \(prompt) 는 모델이 답해야 한다")
             }
         }
+    }
+
+    func testRepeatingTheQuoteFails() {
+        let quote = "친구야말로 자연의 걸작이라 할 만하다."
+        XCTAssertTrue(QwenDiagnostic.evaluate(reply: quote, language: .korean, question: "비슷한 명언 있어?", quote: quote)
+            .contains("명언을 그대로 되풀이함"))
     }
 }

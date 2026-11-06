@@ -165,7 +165,7 @@ struct QwenDiagnosticView: View {
                 }
 
                 var problems = failure.map { ["오류: \($0)"] }
-                    ?? QwenDiagnostic.evaluate(reply: reply, language: language, question: prompt)
+                    ?? QwenDiagnostic.evaluate(reply: reply, language: language, question: prompt, quote: context.quote.text)
                 if failure == nil, !previousReply.isEmpty,
                    ReplyLanguageGuard.normalized(reply) == ReplyLanguageGuard.normalized(previousReply) {
                     problems.append("앞 답을 되풀이함")
@@ -177,7 +177,7 @@ struct QwenDiagnosticView: View {
                     reply: reply,
                     seconds: Date().timeIntervalSince(started),
                     problems: problems,
-                    answeredByApp: QuoteChatSmallTalk.classify(prompt) != nil
+                    answeredByApp: QuoteChatAppAnswer.reply(to: prompt, language: language, context: context) != nil
                 ))
             }
             runningPrompt = nil

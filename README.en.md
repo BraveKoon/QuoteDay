@@ -701,14 +701,19 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (S
 
 ## 6. Shipping to TestFlight
 
-`.github/workflows/testflight.yml` archives the app and uploads it to App Store Connect —
-no Xcode, no local runner. A tag starts it automatically.
+Day-to-day TestFlight uploads are done by **Xcode Cloud**. When a change lands on main, Xcode
+Cloud archives and uploads it; the GitHub Release workflow only creates the tag and release.
 
 ```
-merge to main  →  Release workflow (tag + release)  →  TestFlight workflow (archive + upload)
+merge to main  →  Release workflow (tag + release)
+              →  Xcode Cloud (archive + upload)
 ```
 
-To upload by hand: Actions tab → **TestFlight** → *Run workflow*, pick a branch, run.
+`.github/workflows/testflight.yml` is a **manual-only fallback** (Actions tab → **TestFlight** →
+*Run workflow*). It used to run automatically after Release, but GitHub's macOS runners are fresh
+machines every time, so automatic signing created a new development certificate on each run until
+the account hit its certificate limit — and the same version was uploaded twice (once by Xcode
+Cloud). A manual run still adds one certificate.
 
 ### One-time setup (four secrets)
 

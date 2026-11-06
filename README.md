@@ -647,14 +647,18 @@ CHANGELOG.md ──generate_release_history.py──▶ ReleaseHistory.swift  (�
 
 ## 6. TestFlight 로 올리기
 
-App Store Connect 에 빌드를 올리는 워크플로가 `.github/workflows/testflight.yml` 에 있다.
-Xcode 를 열지 않아도, 태그를 달면 자동으로 이어서 올라간다.
+평소의 TestFlight 업로드는 **Xcode Cloud** 가 맡는다. main 에 머지되면 Xcode Cloud 가
+아카이브해 올리고, GitHub 의 Release 워크플로는 태그와 릴리스만 만든다.
 
 ```
-main 에 머지  →  Release 워크플로(태그·릴리스)  →  TestFlight 워크플로(아카이브·업로드)
+main 에 머지  →  Release 워크플로(태그·릴리스)
+            →  Xcode Cloud(아카이브·업로드)
 ```
 
-수동으로 올리고 싶으면 Actions 탭 → **TestFlight** → *Run workflow* 에서 브랜치를 고르고 실행한다.
+`.github/workflows/testflight.yml` 은 **수동 전용 비상구**다(Actions 탭 → **TestFlight** →
+*Run workflow*). 예전에는 Release 뒤에 자동으로 돌았지만, GitHub 의 macOS 러너는 매번 새
+기계라 실행마다 개발 인증서를 하나씩 새로 만들어 계정 한도에 걸렸다. 같은 버전이 Xcode Cloud
+와 두 번 올라가기도 했다. 손으로 돌릴 때도 인증서가 하나 늘어난다는 것을 기억해 둔다.
 
 ### 한 번만 준비하면 되는 것 (시크릿 4개)
 

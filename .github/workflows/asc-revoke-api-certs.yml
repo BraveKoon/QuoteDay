@@ -1,0 +1,58 @@
+name: ASC 쌓인 개발 인증서 정리
+
+# 수동으로만 돈다. 자동 서명이 CI 에서 실행마다 만들어 쌓은 "Created via API" 개발 인증서만
+# 지운다(tools/asc_revoke_api_certs.py 의 설명 참고). 기본은 **목록만** 보여 준다.
+#
+#   1. 먼저 apply 를 끈 채로 돌려 지울 목록을 읽는다.
+#   2. 목록이 맞으면 apply 를 켜고 expect 에 그 개수를 적어 다시 돌린다.
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "실제로 지운다 (끄면 목록만 보여 준다)"
+        required: true
+        default: false
+        type: boolean
+      expect:
+        description: "지울 개수 (이 개수와 다르면 아무것도 지우지 않는다)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  revoke:
+    name: 인증서 정리
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 키 풀기
+        env:
+          APP_STORE_CONNECT_KEY: ${{ secrets.APP_STORE_CONNECT_KEY }}
+        run: python3 tools/prepare_asc_key.py
+
+      - name: 인증서 정리
+        env:
+          RAW_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          RAW_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APPLY: ${{ github.event.inputs.apply }}
+          EXPECT: ${{ github.event.inputs.expect }}
+        run: |
+          KEY_ID=$(printf '%s' "$RAW_KEY_ID" | tr -d '[:space:]')
+          ISSUER_ID=$(printf '%s' "$RAW_ISSUER_ID" | tr -d '[:space:]')
+          ARGS=()
+          if [ "$APPLY" = "true" ]; then
+            ARGS+=(--apply)
+            if [ -n "$EXPECT" ]; then ARGS+=(--expect "$EXPECT"); fi
+          fi
+          python3 tools/asc_revoke_api_certs.py \
+            --key "$PWD/AuthKey.p8" --key-id "$KEY_ID" --issuer "$ISSUER_ID" \
+            "${ARGS[@]}"
+
+      - name: 키 지우기
+        if: always()
+        run: rm -f AuthKey.p8

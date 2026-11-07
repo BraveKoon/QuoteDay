@@ -33,15 +33,35 @@ final class QuoteChatSimilarQuotesTests: XCTestCase {
         XCTAssertFalse(reply.contains(quote.text), "지금 명언은 다시 보여 주지 않는다")
     }
 
-    /// 1.15.8 실기기: 우정 명언에 리더십·음식 명언이 따라 나왔다. 기분이 겹치는 쪽이 먼저다.
-    func testSharedMoodOutranksSharedTopicOnly() {
-        let friend = Quote(slug: "friend", text: "친구", authorID: "a", category: .relationship)
-        let warm = Quote(slug: "warm", text: "따뜻함", authorID: "b", category: .daily)
-        let leader = Quote(slug: "leader", text: "리더", authorID: "c", category: .relationship)
+    /// 1.15.9 실기기: 소설 명언에 "미루기"·"우정" 명언이 나왔다. 둘 다 `joyful` 기분만 겹쳤다.
+    /// 주제가 겹치는 쪽이 기분만 겹치는 쪽보다 앞서야 한다.
+    func testSharedTopicOutranksSharedMoodOnly() {
+        let novel = Quote(slug: "novel", text: "소설", authorID: "a", category: .leisure)
+        let book = Quote(slug: "book", text: "책", authorID: "b", category: .leisure)
+        let procrastination = Quote(slug: "later", text: "미루기", authorID: "c", category: .daily)
         let unrelated = Quote(slug: "food", text: "음식", authorID: "d", category: .meal)
-        let moods: [String: [QuoteMood]] = ["friend": [.relationships, .joyful], "warm": [.relationships]]
-        let picks = QuoteChatSimilarQuotes.candidates(for: friend, in: [unrelated, leader, warm], moods: moods)
-        XCTAssertEqual(picks.map(\.slug), ["warm", "leader"], "기분이 겹치는 명언이 먼저, 아무것도 안 겹치면 빠진다")
+        let moods: [String: [QuoteMood]] = ["novel": [.joyful], "later": [.joyful]]
+        let picks = QuoteChatSimilarQuotes.candidates(for: novel, in: [unrelated, procrastination, book], moods: moods)
+        XCTAssertEqual(picks.map(\.slug), ["book", "later"], "주제가 겹치는 명언이 먼저, 기분만 겹쳐도 뒤에는 온다, 아무것도 안 겹치면 빠진다")
+    }
+
+    /// 같은 주제 안에서는 기분이 겹치는 쪽이 앞선다.
+    func testMoodBreaksTiesWithinTheSameTopic() {
+        let novel = Quote(slug: "novel", text: "소설", authorID: "a", category: .leisure)
+        let plain = Quote(slug: "plain", text: "여가", authorID: "b", category: .leisure)
+        let cheerful = Quote(slug: "cheerful", text: "즐거움", authorID: "c", category: .leisure)
+        let moods: [String: [QuoteMood]] = ["novel": [.joyful], "cheerful": [.joyful]]
+        let picks = QuoteChatSimilarQuotes.candidates(for: novel, in: [plain, cheerful], moods: moods)
+        XCTAssertEqual(picks.map(\.slug), ["cheerful", "plain"])
+    }
+
+    /// 주된 주제가 같은 쪽이 보조 주제만 겹치는 쪽보다 앞선다.
+    func testPrimaryTopicOutranksSecondaryOnlyOverlap() {
+        let novel = Quote(slug: "novel", text: "소설", authorID: "a", category: .leisure)
+        let primary = Quote(slug: "primary", text: "여가", authorID: "b", category: .leisure)
+        let secondary = Quote(slug: "secondary", text: "일상", authorID: "c", category: .daily, secondaryCategories: [.leisure])
+        let picks = QuoteChatSimilarQuotes.candidates(for: novel, in: [secondary, primary], moods: [:])
+        XCTAssertEqual(picks.map(\.slug), ["primary", "secondary"])
     }
 
     func testBiggerModelsNeedMoreFreeMemory() {

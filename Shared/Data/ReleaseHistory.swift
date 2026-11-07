@@ -10,6 +10,19 @@ public extension ReleaseHistory {
     /// 최신 버전이 앞에 온다.
     static let all: [Release] = [
         Release(
+            version: "1.15.10",
+            date: "2026-11-07",
+            summary: nil,
+            sections: [
+                ReleaseSection(
+                    title: "고침",
+                    items: [
+                        "\"비슷한 명언\" 이 엉뚱한 명언을 앞세우던 문제. 소설 명언에 \"미루기\"와 \"우정\" 명언이 나왔다. 기분 꼬리표(즐거움 등)는 붙은 명언이 많아 주제가 달라도 점수가 같아지고, 같은 점수 안에서는 순서가 해시로 정해졌다. 이제 주제가 겹치는 명언을 먼저 보여 주고(주된 주제가 같으면 더), 기분은 같은 주제 안의 순서를 정할 때 쓴다. 독서·여가 명언 곁에는 책 이야기가 먼저 온다.",
+                    ]
+                ),
+            ]
+        ),
+        Release(
             version: "1.15.9",
             date: "2026-11-06",
             summary: nil,

@@ -55,7 +55,13 @@ enum QuoteChatSimilarQuotes {
 
     /// 지금 명언과 작가를 뺀 명언 중 결이 가장 가까운 세 편.
     ///
-    /// 점수: 함께 붙은 기분 하나에 2점, 겹치는 주제(주·보조) 하나에 1점. 0점은 고르지 않는다.
+    /// 점수: 겹치는 주제(주·보조) 하나에 3점, 주된 주제가 같으면 1점 더, 함께 붙은 기분 하나에 1점.
+    /// 0점은 고르지 않는다.
+    ///
+    /// **주제가 먼저, 기분은 보조다.** 처음에는 기분을 2점, 주제를 1점으로 두었는데(1.15.9), 소설
+    /// 명언에 "미루기"(오스카 와일드)와 "우정"(에머슨)이 나왔다. `joyful`(즐거움) 같은 기분은
+    /// 붙은 명언이 많아 주제가 달라도 점수가 같아지고, 같은 점수 안에서는 순서가 해시로 정해져
+    /// 엉뚱한 명언이 앞에 온다. 주제를 앞세우면 독서·여가 명언 곁에는 책 이야기가 먼저 온다.
     /// 같은 점수 안의 순서는 명언마다 정해져 있다(같은 명언에서 물으면 같은 답) — 매번
     /// 달라지면 점검 결과를 비교할 수 없다.
     static func candidates(
@@ -74,9 +80,10 @@ enum QuoteChatSimilarQuotes {
         for other in pool where other.slug != quote.slug && other.authorID != quote.authorID {
             let otherMoods: Set<QuoteMood> = Set(moods[other.slug] ?? [])
             let otherTopics: Set<AppCategory> = Set([other.category] + other.secondaryCategories)
-            let moodScore: Int = myMoods.intersection(otherMoods).count * 2
-            let topicScore: Int = myTopics.intersection(otherTopics).count
-            let score: Int = moodScore + topicScore
+            let topicScore: Int = myTopics.intersection(otherTopics).count * 3
+            let primaryScore: Int = other.category == quote.category ? 1 : 0
+            let moodScore: Int = myMoods.intersection(otherMoods).count
+            let score: Int = topicScore + primaryScore + moodScore
             guard score > 0 else { continue }
             ranked.append(Ranked(quote: other, score: score, order: Self.hash(other.slug, seed: seed)))
         }
